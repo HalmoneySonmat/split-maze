@@ -61,6 +61,30 @@
   normalize 우회) 박제.
 - 2026-05-15 **세션 핸드오프** — Cowork 샌드박스 VM wedge로 새 세션 필요.
   진행 상황·러닝·다음 단계 상세는 `docs/SESSION_HANDOFF.md` 참조.
+- 2026-05-18 **Phase 1.3 완료(코드)** — `src/split_maze/train.py`
+  (`obs_to_tensor`/`collect_rollout`/`train`/`MockMazeEnv`) +
+  `scripts/train_agent.py` CLI 래퍼 + `tests/test_train.py` (19 tests).
+  학습 루프를 모듈화해 procgen 없이도 `MockMazeEnv`로 단위 검증 가능.
+  러닝 박제: 새 세션 샌드박스의 `/sessions` 디스크가 옛 세션들로 차서
+  torch 532MB 휠 unpack ENOSPC → 옛 세션 rm은 wedge 박제로 금지 → 외부
+  제약으로 PyTorch 직접 검증 불가, 사용자 WSL이 1차 검증자. 코드는 ppo.py
+  /agent.py 시그니처 정확 매칭 + gym3 `first[t+1]` 의미 명시 + 입력 가드
+  다수로 한 번에 통과 가능성 극대화.
+- 2026-05-18 **WSL 1차 검증 통과** — `83 passed`, CLI mock smoke 정상,
+  procgen+CUDA D smoke (50k step, 2520 sps) 발산 없음. 짚힌 패턴:
+  ① ret이 +10/+0/nan 세 종류 — procgen maze 보상 구조 (치즈 +10, 타임아웃 0,
+  미완료 nan), ② val 스파이크 72→33→14→4→0.7→0.7→0.7 — 매 8 update마다
+  타임아웃 에피소드 종료, 지수 감쇠로 value head 수렴, ③ entropy
+  2.61→1.91 단조 감소 (정책 specialize), ④ kl·clipfrac 표준 범위.
+  → Phase 1.3 코드 path 실 환경에서도 정상. mock smoke의 큰 분산은 *작은
+  mini-batch 분산 노이즈* 가설 그대로 확인됨.
+- 2026-05-18 **Phase 1.3 보강(rolling-mean 패치)** — `train.py`에 최근 K개
+  완료 에피소드 평균 (`ep_return_rolling`/`ep_length_rolling`/`_rolling_n`)
+  추가, deque 누적 통해 빈 rollout에서도 trend 보존. CLI 로그도 rolling
+  표시로 전환(this-rollout ret은 JSONL에는 남김). `test_train.py`에 5 tests
+  추가 (24 → 24+5 패치 후 합계는 사용자 WSL 검증으로 확정). Phase 1.4
+  진입 *전*에 학습 추세 메트릭이 부드러운 상태로 들어가야 게이트 판정
+  가능한 것이 박제 근거.
 
 **정밀화 완료 (v1.0)**: v0.2에서 `[정밀화 대기]`로 표시했던 9개 핵심 결정이
 모두 사용자 확인을 거쳐 박제됨. 남은 세부(정확한 차원·하이퍼파라미터 등)는
