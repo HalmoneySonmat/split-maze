@@ -1,0 +1,29 @@
+[project]
+name = "split-maze"
+version = "0.0.1"
+description = "SPLIT-MAZE — procgen maze RL agent + from-scratch synthetic-maze-language LM, coupled by an artificial corpus callosum"
+requires-python = ">=3.9,<3.13"
+# NOTE: procgen (OpenAI) ships wheels only up to cp310. The user runs Python
+# 3.12 — procgen install on 3.12 is UNVERIFIED and is exactly what the Phase 0
+# procgen de-risking step resolves. A separate Python 3.10 venv may be
+# required. See requirements.txt and PLAN.md §8.2.
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+# Lint at 3.10 syntax level (most conservative); runtime target 3.9–3.12.
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]

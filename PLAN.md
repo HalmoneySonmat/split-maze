@@ -52,6 +52,15 @@
   (같은 미로, 막대 낮춰 진행 + 한계 명시). A(체크포인트) 기각.
 - 2026-05-15 §9 Deferred 박제. D-1~D-13, 6개 범주, 각 근거 명시.
 - 2026-05-15 **v1.0 통합** — 전체 일관성 검증 완료, v0.2 → v1.0 박제.
+- 2026-05-15 **Phase 0 완료** — procgenAISC WSL 빌드 OK, 합성언어/env 구현,
+  `check_env.py` 동작 (41 tests pass). git tag `v1.0-plan` (사용자 환경).
+- 2026-05-15 **Phase 1.1 완료** — `src/split_maze/agent.py` IMPALA-CNN
+  (d_a=256, ~626k params). 10 tests pass (WSL).
+- 2026-05-15 **Phase 1.2 완료** — `src/split_maze/ppo.py` (RolloutBuffer +
+  GAE + PPO loss + Updater). 13 tests pass (WSL). NaN 가드(1-샘플 mini-batch
+  normalize 우회) 박제.
+- 2026-05-15 **세션 핸드오프** — Cowork 샌드박스 VM wedge로 새 세션 필요.
+  진행 상황·러닝·다음 단계 상세는 `docs/SESSION_HANDOFF.md` 참조.
 
 **정밀화 완료 (v1.0)**: v0.2에서 `[정밀화 대기]`로 표시했던 9개 핵심 결정이
 모두 사용자 확인을 거쳐 박제됨. 남은 세부(정확한 차원·하이퍼파라미터 등)는

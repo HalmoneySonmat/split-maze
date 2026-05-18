@@ -1,0 +1,14 @@
+# --- Core (mirrors split_mnist pinning style) ---
+torch==2.3.1
+numpy==1.26.4
+scipy==1.13.1
+matplotlib==3.9.2
+pytest==8.3.2
+
+# --- procgen environment (Phase 0 de-risking — PLAN §8.2) ---
+# procgen + procgen-tools (Langosco et al. maze / goal-misgeneralization)
+# are NOT pinned here yet. procgen ships wheels only up to cp310; exact
+# versions + Python compatibility are resolved in the Phase 0 procgen
+# de-risking step. A Python 3.10 venv is likely required.
+# procgen==0.10.7
+# procgen-tools  (install from source — repo/commit TBD in Phase 0)
