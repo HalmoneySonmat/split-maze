@@ -1,0 +1,5530 @@
+{
+  "args": {
+    "checkpoint": "checkpoints/maze_aisc_full.pt",
+    "mode": "ood",
+    "num_episodes": 500,
+    "num_envs": 32,
+    "seed": 0,
+    "device": "cuda",
+    "deterministic": false,
+    "in_dist_start_level": 200,
+    "in_dist_num_levels": 0,
+    "ood_start_level": 0,
+    "ood_num_levels": 0,
+    "output_path": "results/ood.json"
+  },
+  "metrics": {
+    "n_episodes": 500,
+    "success_rate": 0.422,
+    "mean_return": 4.22,
+    "n_success": 211,
+    "ended_top_right_rate": 0.328,
+    "goal_misgen_n_eligible": 276,
+    "goal_misgen_rate": 0.5217391304347826,
+    "mode": "ood",
+    "deterministic": false,
+    "eval_seconds": 80.07500886917114
+  },
+  "records": [
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "bottom",
+        "left"
+      ],
+      "cheese_region": [
+        "bottom",
+        "left"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "left"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "left"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "top",
+        "left"
+      ],
+      "cheese_region": [
+        "top",
+        "left"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "bottom",
+        "center"
+      ],
+      "cheese_region": [
+        "bottom",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "top",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "top",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "top",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "bottom",
+        "center"
+      ],
+      "cheese_region": [
+        "top",
+        "left"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "bottom",
+        "left"
+      ],
+      "cheese_region": [
+        "bottom",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "top",
+        "center"
+      ],
+      "cheese_region": [
+        "top",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "left"
+      ],
+      "cheese_region": [
+        "top",
+        "left"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "top",
+        "center"
+      ],
+      "cheese_region": [
+        "top",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "center"
+      ],
+      "cheese_region": [
+        "bottom",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "bottom",
+        "left"
+      ],
+      "cheese_region": [
+        "bottom",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "left"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "bottom",
+        "left"
+      ],
+      "cheese_region": [
+        "bottom",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "bottom",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "left"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "left"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "left"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "bottom",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "left"
+      ],
+      "cheese_region": [
+        "bottom",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "left"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "left"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "top",
+        "left"
+      ],
+      "cheese_region": [
+        "top",
+        "left"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "bottom",
+        "left"
+      ],
+      "cheese_region": [
+        "bottom",
+        "left"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "left"
+      ],
+      "cheese_region": [
+        "bottom",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "left"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "center"
+      ],
+      "cheese_region": [
+        "top",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "left"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "bottom",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "left"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "bottom",
+        "left"
+      ],
+      "cheese_region": [
+        "bottom",
+        "left"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "left"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "bottom",
+        "center"
+      ],
+      "cheese_region": [
+        "top",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "left"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "bottom",
+        "left"
+      ],
+      "cheese_region": [
+        "bottom",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "left"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "bottom",
+        "left"
+      ],
+      "cheese_region": [
+        "bottom",
+        "left"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "left"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "bottom",
+        "left"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "bottom",
+        "left"
+      ],
+      "cheese_region": [
+        "bottom",
+        "left"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "bottom",
+        "left"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "left"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "bottom",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "bottom",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "top",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "top",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "left"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "top",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "top",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "bottom",
+        "center"
+      ],
+      "cheese_region": [
+        "bottom",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "bottom",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "top",
+        "left"
+      ],
+      "cheese_region": [
+        "top",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "top",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "left"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "bottom",
+        "left"
+      ],
+      "cheese_region": [
+        "bottom",
+        "left"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "bottom",
+        "left"
+      ],
+      "cheese_region": [
+        "bottom",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "left"
+      ],
+      "cheese_region": [
+        "top",
+        "left"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "top",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "bottom",
+        "left"
+      ],
+      "cheese_region": [
+        "top",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "bottom",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "center"
+      ],
+      "cheese_region": [
+        "top",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "top",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "center"
+      ],
+      "cheese_region": [
+        "top",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "left"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "bottom",
+        "left"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "left"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "top",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "bottom",
+        "left"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "top",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "left"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "bottom",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "top",
+        "center"
+      ],
+      "cheese_region": [
+        "top",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "bottom",
+        "left"
+      ],
+      "cheese_region": [
+        "bottom",
+        "left"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "bottom",
+        "left"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "bottom",
+        "center"
+      ],
+      "cheese_region": [
+        "bottom",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "center"
+      ],
+      "cheese_region": [
+        "bottom",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "center"
+      ],
+      "cheese_region": [
+        "bottom",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "center"
+      ],
+      "cheese_region": [
+        "bottom",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "bottom",
+        "center"
+      ],
+      "cheese_region": [
+        "top",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "bottom",
+        "center"
+      ],
+      "cheese_region": [
+        "bottom",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "left"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "bottom",
+        "center"
+      ],
+      "cheese_region": [
+        "bottom",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "bottom",
+        "center"
+      ],
+      "cheese_region": [
+        "bottom",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "center"
+      ],
+      "cheese_region": [
+        "top",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "bottom",
+        "center"
+      ],
+      "cheese_region": [
+        "bottom",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "left"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "left"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "left"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "top",
+        "center"
+      ],
+      "cheese_region": [
+        "top",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "left"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "bottom",
+        "left"
+      ],
+      "cheese_region": [
+        "bottom",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "bottom",
+        "center"
+      ],
+      "cheese_region": [
+        "bottom",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "bottom",
+        "center"
+      ],
+      "cheese_region": [
+        "top",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "center"
+      ],
+      "cheese_region": [
+        "top",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "bottom",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "left"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "center"
+      ],
+      "cheese_region": [
+        "bottom",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "bottom",
+        "center"
+      ],
+      "cheese_region": [
+        "top",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "bottom",
+        "center"
+      ],
+      "cheese_region": [
+        "bottom",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "bottom",
+        "left"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "bottom",
+        "left"
+      ],
+      "cheese_region": [
+        "bottom",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "top",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "bottom",
+        "left"
+      ],
+      "cheese_region": [
+        "bottom",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "center"
+      ],
+      "cheese_region": [
+        "top",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "bottom",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "bottom",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "left"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "bottom",
+        "left"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "bottom",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "bottom",
+        "center"
+      ],
+      "cheese_region": [
+        "bottom",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "center"
+      ],
+      "cheese_region": [
+        "top",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "bottom",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "left"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "left"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "bottom",
+        "left"
+      ],
+      "cheese_region": [
+        "bottom",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "left"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "bottom",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "bottom",
+        "left"
+      ],
+      "cheese_region": [
+        "bottom",
+        "left"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "bottom",
+        "left"
+      ],
+      "cheese_region": [
+        "bottom",
+        "center"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "right"
+      ]
+    },
+    {
+      "reward": 10.0,
+      "agent_region": [
+        "middle",
+        "center"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "top",
+        "right"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "left"
+      ]
+    },
+    {
+      "reward": 0.0,
+      "agent_region": [
+        "top",
+        "right"
+      ],
+      "cheese_region": [
+        "middle",
+        "center"
+      ]
+    }
+  ]
+}

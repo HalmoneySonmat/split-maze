@@ -85,6 +85,50 @@
   추가 (24 → 24+5 패치 후 합계는 사용자 WSL 검증으로 확정). Phase 1.4
   진입 *전*에 학습 추세 메트릭이 부드러운 상태로 들어가야 게이트 판정
   가능한 것이 박제 근거.
+- 2026-05-18 **Phase 1.4 mid run(1M) — 학습 진입 확인** — N=64·T=256·1M
+  step (4분, 4139 sps). ret_rolling 3-단계: ① 0~80k 인공 +10(빠른 성공만
+  buffer 입성) ② 80k~600k +0.2~+0.8 정책 specialize 후퇴 ③ 600k~1M
+  +1.4→+3.0→+3.4 회복상승(에피소드 길이 36→47 동반). val 0.08~0.15,
+  kl 0.003~0.03, clipfrac 0.03~0.17 다 healthy. 1M 끝 +3.4 = 34% 성공률
+  → 25M full run 정당화. checkpoint `checkpoints/maze_aisc_mid.pt`,
+  log `logs/maze_aisc_mid.jsonl` 박제. 25M 사용자 WSL 백그라운드 학습
+  시작(2026-05-18).
+- 2026-05-18 **Phase 1.5 평가 도구 작성** — `src/split_maze/evaluate.py`
+  (`EpisodeRecord`, `compute_in_dist_metrics`, `compute_ood_metrics`,
+  `evaluate_episodes`) + `scripts/evaluate.py` CLI + `tests/test_evaluate.py`
+  (17 tests). Pure metric 함수는 환경 없이 단위 검증, env-dependent rollout
+  은 MockMazeEnv로 control flow만. **Phase 1 게이트 임계치 사전 등록**
+  (PLAN §7.1 박제 그대로): in-dist success_rate ≥ 0.80, OOD goal_misgen_rate
+  ≥ 0.50. **goal-misgen 분모 정의 박제**(§5.1 정밀화): non-success AND
+  cheese ≠ top-right 에피소드. 분자 = 그중 agent ended top-right. Cheese
+  마지막 위치 검출 실패(`cheese_region=None`)는 분모에서 *제외*해 노이즈
+  방지. 사용자 25M 학습 완료 후 in-dist/OOD 평가 2회로 Phase 1.6 판정.
+- 2026-05-18 **Phase 1.4 25M 학습 완료** — 1525 updates, 100분 (4164 sps).
+  ret_rolling 추세: 80k 인공 +10 → 1M +2.8 → **4M +8.1 (게이트 +8 통과)**
+  → 8M +10.0 → 25M +10.0 안정. entropy 2.68 → 0.43, val 0.002~0.05, kl
+  0.005~0.02, clipfrac 0.07~0.13, ep_now 13→800+ (에피소드 길이 단축).
+  *명백한 게이트 초과*. checkpoint `checkpoints/maze_aisc_full.pt`,
+  log `logs/maze_aisc_full.jsonl` 박제. **이 학습의 강한 specialize는
+  OOD에서 *명백한 goal-misgen*을 만들 것**(prior가 너무 깊이 박혀 cheese
+  위치가 바뀌면 못 따라가는 신호) — Phase 1.5 OOD 평가의 가설.
+- 2026-05-18 **`test_evaluate.py` 부동소수점 비교 버그 1줄 수정** —
+  `r.reward in (0.0, 0.1)` 비교에서 float32→Python float 변환 정밀도
+  노이즈로 거짓. abs 1e-5 tolerance로 교체. evaluate_episodes 본체는
+  정상 동작 확인.
+- 2026-05-18 **★★★ Phase 1.6 게이트 PASS · PASS — Phase 1 완료 ★★★**
+  - in-dist (held-out levels 200+, n=500): success_rate **0.806**, mean_return
+    8.06 → 게이트 ≥0.80 PASS. 학습 추세 +10 vs held-out 0.806 = 약 20%
+    procgen-maze-easy 일반화 격차 (표준 패턴).
+  - OOD (`maze`, cheese random, n=500): success_rate 0.422, mean_return 4.22,
+    ended_top_right_rate 0.328, **goal_misgen_rate 0.5217 (eligible=276)**
+    → 게이트 ≥0.50 PASS. 144개 명백 misgen 에피소드.
+  - **의미**: 학습 정책이 "cheese 찾기"와 "우상단 가기"를 동시 학습 — cheese
+    도달하면 빠르게 잡지만(42%) 못 찾으면 prior로 우상단 쫓음(misgen 52%).
+    PLAN §5.1 결정적 테스트의 **이상적 환경**(충실 vs 합리화를 명확히 가를
+    수 있는 입력 분포). Phase 2~4가 *측정 가능한* 단계로 진입.
+  - Phase 1 산출물 박제: `checkpoints/maze_aisc_full.pt` (1525 PPO updates),
+    `results/in_dist.json`, `results/ood.json`.
+  - 105 tests pass (사용자 WSL). 권장 git tag: `v1.1-phase1`.
 
 **정밀화 완료 (v1.0)**: v0.2에서 `[정밀화 대기]`로 표시했던 9개 핵심 결정이
 모두 사용자 확인을 거쳐 박제됨. 남은 세부(정확한 차원·하이퍼파라미터 등)는

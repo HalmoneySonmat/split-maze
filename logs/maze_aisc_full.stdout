@@ -1,0 +1,164 @@
+nohup: ignoring input
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+Users of this version of Gym should be able to simply replace 'import gym' with 'import gymnasium as gym' in the vast majority of cases.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+[train_agent] device=cuda  env=maze_aisc  N=64  T=256  total_env_steps=25000000  mock=False
+building procgen...done
+[train_agent] agent params = 626,256
+  [upd     0] steps=    16384  ret(roll= 13)=+10.000  ep_now= 13  pol=+0.0056  val=83.1360  ent=2.675  kl=+0.0305  clip=0.343  sps=2613
+  [upd    10] steps=   180224  ret(roll=100)=+2.200  ep_now= 35  pol=-0.0014  val=1.5126  ent=2.605  kl=+0.0064  clip=0.071  sps=3972
+  [upd    20] steps=   344064  ret(roll=100)=+0.400  ep_now= 31  pol=-0.0004  val=1.4386  ent=2.501  kl=+0.0052  clip=0.058  sps=4075
+  [upd    30] steps=   507904  ret(roll=100)=+0.300  ep_now= 24  pol=-0.0006  val=0.4230  ent=2.327  kl=+0.0076  clip=0.123  sps=4071
+  [upd    40] steps=   671744  ret(roll=100)=+1.200  ep_now= 25  pol=-0.0003  val=0.1922  ent=2.394  kl=+0.0064  clip=0.088  sps=4082
+  [upd    50] steps=   835584  ret(roll=100)=+2.400  ep_now= 35  pol=-0.0034  val=0.0737  ent=2.469  kl=+0.0058  clip=0.063  sps=4093
+  [upd    60] steps=   999424  ret(roll=100)=+2.800  ep_now= 34  pol=-0.0037  val=0.0530  ent=2.578  kl=+0.0037  clip=0.066  sps=4107
+  [upd    70] steps=  1163264  ret(roll=100)=+2.400  ep_now= 40  pol=-0.0025  val=0.0192  ent=2.595  kl=+0.0056  clip=0.082  sps=4116
+  [upd    80] steps=  1327104  ret(roll=100)=+3.700  ep_now= 43  pol=-0.0032  val=0.0155  ent=2.632  kl=+0.0066  clip=0.061  sps=4123
+  [upd    90] steps=  1490944  ret(roll=100)=+3.700  ep_now= 41  pol=-0.0040  val=0.0363  ent=2.628  kl=+0.0042  clip=0.055  sps=4134
+  [upd   100] steps=  1654784  ret(roll=100)=+4.600  ep_now= 50  pol=-0.0058  val=0.0932  ent=2.617  kl=+0.0052  clip=0.049  sps=4138
+  [upd   110] steps=  1818624  ret(roll=100)=+4.400  ep_now= 46  pol=-0.0059  val=0.0596  ent=2.608  kl=+0.0093  clip=0.086  sps=4140
+  [upd   120] steps=  1982464  ret(roll=100)=+4.600  ep_now= 52  pol=-0.0072  val=0.0446  ent=2.610  kl=+0.0065  clip=0.074  sps=4144
+  [upd   130] steps=  2146304  ret(roll=100)=+4.900  ep_now= 70  pol=-0.0087  val=0.0722  ent=2.575  kl=+0.0065  clip=0.078  sps=4141
+  [upd   140] steps=  2310144  ret(roll=100)=+5.700  ep_now= 62  pol=-0.0082  val=0.0562  ent=2.587  kl=+0.0056  clip=0.075  sps=4141
+  [upd   150] steps=  2473984  ret(roll=100)=+5.500  ep_now= 60  pol=-0.0068  val=0.0565  ent=2.571  kl=+0.0085  clip=0.103  sps=4142
+  [upd   160] steps=  2637824  ret(roll=100)=+7.100  ep_now= 89  pol=-0.0057  val=0.0749  ent=2.577  kl=+0.0055  clip=0.080  sps=4145
+  [upd   170] steps=  2801664  ret(roll=100)=+6.500  ep_now= 57  pol=-0.0083  val=0.0718  ent=2.531  kl=+0.0063  clip=0.089  sps=4145
+  [upd   180] steps=  2965504  ret(roll=100)=+6.200  ep_now= 64  pol=-0.0082  val=0.0529  ent=2.501  kl=+0.0108  clip=0.109  sps=4148
+  [upd   190] steps=  3129344  ret(roll=100)=+6.300  ep_now= 60  pol=-0.0081  val=0.0715  ent=2.526  kl=+0.0090  clip=0.096  sps=4149
+  [upd   200] steps=  3293184  ret(roll=100)=+7.300  ep_now=113  pol=-0.0077  val=0.1020  ent=2.467  kl=+0.0095  clip=0.121  sps=4150
+  [upd   210] steps=  3457024  ret(roll=100)=+7.000  ep_now= 88  pol=-0.0100  val=0.0827  ent=2.488  kl=+0.0077  clip=0.101  sps=4150
+  [upd   220] steps=  3620864  ret(roll=100)=+7.500  ep_now=102  pol=-0.0110  val=0.0550  ent=2.452  kl=+0.0092  clip=0.105  sps=4149
+  [upd   230] steps=  3784704  ret(roll=100)=+7.500  ep_now= 85  pol=-0.0083  val=0.0539  ent=2.477  kl=+0.0074  clip=0.096  sps=4149
+  [upd   240] steps=  3948544  ret(roll=100)=+7.100  ep_now= 93  pol=-0.0063  val=0.1106  ent=2.464  kl=+0.0107  clip=0.115  sps=4149
+  [upd   250] steps=  4112384  ret(roll=100)=+6.900  ep_now= 84  pol=-0.0076  val=0.0461  ent=2.478  kl=+0.0095  clip=0.143  sps=4150
+  [upd   260] steps=  4276224  ret(roll=100)=+7.800  ep_now= 92  pol=-0.0078  val=0.0801  ent=2.477  kl=+0.0094  clip=0.097  sps=4151
+  [upd   270] steps=  4440064  ret(roll=100)=+8.000  ep_now=138  pol=-0.0100  val=0.0828  ent=2.381  kl=+0.0115  clip=0.125  sps=4153
+  [upd   280] steps=  4603904  ret(roll=100)=+8.100  ep_now=102  pol=-0.0088  val=0.1092  ent=2.389  kl=+0.0107  clip=0.124  sps=4151
+  [upd   290] steps=  4767744  ret(roll=100)=+8.100  ep_now=146  pol=-0.0068  val=0.0674  ent=2.358  kl=+0.0113  clip=0.113  sps=4153
+  [upd   300] steps=  4931584  ret(roll=100)=+8.900  ep_now=130  pol=-0.0143  val=0.0193  ent=2.372  kl=+0.0100  clip=0.127  sps=4154
+  [upd   310] steps=  5095424  ret(roll=100)=+8.900  ep_now=166  pol=-0.0092  val=0.1159  ent=2.246  kl=+0.0144  clip=0.123  sps=4154
+  [upd   320] steps=  5259264  ret(roll=100)=+8.500  ep_now=139  pol=-0.0075  val=0.0957  ent=2.296  kl=+0.0109  clip=0.120  sps=4154
+  [upd   330] steps=  5423104  ret(roll=100)=+8.900  ep_now=187  pol=-0.0065  val=0.0494  ent=2.260  kl=+0.0099  clip=0.107  sps=4154
+  [upd   340] steps=  5586944  ret(roll=100)=+9.000  ep_now=168  pol=-0.0043  val=0.0490  ent=2.243  kl=+0.0093  clip=0.112  sps=4155
+  [upd   350] steps=  5750784  ret(roll=100)=+9.300  ep_now=176  pol=-0.0087  val=0.0377  ent=2.272  kl=+0.0121  clip=0.113  sps=4156
+  [upd   360] steps=  5914624  ret(roll=100)=+9.300  ep_now=177  pol=-0.0092  val=0.0255  ent=2.220  kl=+0.0082  clip=0.102  sps=4158
+  [upd   370] steps=  6078464  ret(roll=100)=+8.700  ep_now=186  pol=-0.0087  val=0.0378  ent=2.208  kl=+0.0095  clip=0.117  sps=4159
+  [upd   380] steps=  6242304  ret(roll=100)=+9.300  ep_now=235  pol=-0.0074  val=0.0205  ent=2.108  kl=+0.0124  clip=0.124  sps=4160
+  [upd   390] steps=  6406144  ret(roll=100)=+9.000  ep_now=205  pol=-0.0042  val=0.0517  ent=2.200  kl=+0.0130  clip=0.112  sps=4160
+  [upd   400] steps=  6569984  ret(roll=100)=+9.900  ep_now=270  pol=-0.0071  val=0.0771  ent=2.138  kl=+0.0109  clip=0.124  sps=4161
+  [upd   410] steps=  6733824  ret(roll=100)=+9.100  ep_now=237  pol=-0.0057  val=0.0625  ent=2.155  kl=+0.0085  clip=0.103  sps=4161
+  [upd   420] steps=  6897664  ret(roll=100)=+9.700  ep_now=283  pol=-0.0085  val=0.0308  ent=2.080  kl=+0.0097  clip=0.092  sps=4160
+  [upd   430] steps=  7061504  ret(roll=100)=+9.300  ep_now=266  pol=-0.0067  val=0.0240  ent=2.066  kl=+0.0107  clip=0.087  sps=4161
+  [upd   440] steps=  7225344  ret(roll=100)=+9.600  ep_now=301  pol=-0.0034  val=0.0956  ent=2.004  kl=+0.0092  clip=0.097  sps=4162
+  [upd   450] steps=  7389184  ret(roll=100)=+9.600  ep_now=284  pol=-0.0078  val=0.0639  ent=1.966  kl=+0.0109  clip=0.109  sps=4162
+  [upd   460] steps=  7553024  ret(roll=100)=+9.700  ep_now=327  pol=-0.0069  val=0.1131  ent=1.906  kl=+0.0143  clip=0.146  sps=4163
+  [upd   470] steps=  7716864  ret(roll=100)=+9.900  ep_now=335  pol=-0.0065  val=0.0833  ent=1.949  kl=+0.0105  clip=0.126  sps=4164
+  [upd   480] steps=  7880704  ret(roll=100)=+9.200  ep_now=387  pol=-0.0094  val=0.0593  ent=1.762  kl=+0.0123  clip=0.122  sps=4164
+  [upd   490] steps=  8044544  ret(roll=100)=+10.000  ep_now=414  pol=-0.0144  val=0.0109  ent=1.703  kl=+0.0129  clip=0.136  sps=4164
+  [upd   500] steps=  8208384  ret(roll=100)=+9.700  ep_now=439  pol=-0.0058  val=0.0310  ent=1.583  kl=+0.0136  clip=0.137  sps=4163
+  [upd   510] steps=  8372224  ret(roll=100)=+9.900  ep_now=515  pol=-0.0093  val=0.0209  ent=1.444  kl=+0.0147  clip=0.138  sps=4163
+  [upd   520] steps=  8536064  ret(roll=100)=+9.700  ep_now=543  pol=-0.0008  val=0.0448  ent=1.286  kl=+0.0092  clip=0.102  sps=4163
+  [upd   530] steps=  8699904  ret(roll=100)=+9.900  ep_now=555  pol=-0.0105  val=0.0104  ent=1.227  kl=+0.0139  clip=0.129  sps=4164
+  [upd   540] steps=  8863744  ret(roll=100)=+10.000  ep_now=541  pol=-0.0121  val=0.0082  ent=1.262  kl=+0.0146  clip=0.117  sps=4164
+  [upd   550] steps=  9027584  ret(roll=100)=+9.700  ep_now=510  pol=+0.0029  val=0.0241  ent=1.240  kl=+0.0115  clip=0.083  sps=4164
+  [upd   560] steps=  9191424  ret(roll=100)=+9.900  ep_now=525  pol=-0.0036  val=0.0612  ent=1.244  kl=+0.0111  clip=0.116  sps=4164
+  [upd   570] steps=  9355264  ret(roll=100)=+10.000  ep_now=558  pol=-0.0077  val=0.0186  ent=1.144  kl=+0.0116  clip=0.122  sps=4164
+  [upd   580] steps=  9519104  ret(roll=100)=+9.700  ep_now=520  pol=-0.0033  val=0.0423  ent=1.319  kl=+0.0113  clip=0.085  sps=4164
+  [upd   590] steps=  9682944  ret(roll=100)=+10.000  ep_now=565  pol=-0.0157  val=0.0075  ent=1.288  kl=+0.0140  clip=0.140  sps=4163
+  [upd   600] steps=  9846784  ret(roll=100)=+10.000  ep_now=636  pol=-0.0064  val=0.0255  ent=1.115  kl=+0.0090  clip=0.084  sps=4162
+  [upd   610] steps= 10010624  ret(roll=100)=+10.000  ep_now=640  pol=-0.0121  val=0.0068  ent=1.021  kl=+0.0162  clip=0.135  sps=4163
+  [upd   620] steps= 10174464  ret(roll=100)=+10.000  ep_now=573  pol=-0.0108  val=0.0072  ent=1.144  kl=+0.0118  clip=0.124  sps=4163
+  [upd   630] steps= 10338304  ret(roll=100)=+10.000  ep_now=643  pol=-0.0108  val=0.0077  ent=0.968  kl=+0.0161  clip=0.125  sps=4163
+  [upd   640] steps= 10502144  ret(roll=100)=+9.900  ep_now=566  pol=-0.0055  val=0.0294  ent=1.124  kl=+0.0076  clip=0.072  sps=4164
+  [upd   650] steps= 10665984  ret(roll=100)=+9.900  ep_now=627  pol=-0.0006  val=0.0253  ent=1.069  kl=+0.0120  clip=0.102  sps=4164
+  [upd   660] steps= 10829824  ret(roll=100)=+9.900  ep_now=597  pol=-0.0114  val=0.0092  ent=1.060  kl=+0.0131  clip=0.131  sps=4164
+  [upd   670] steps= 10993664  ret(roll=100)=+10.000  ep_now=644  pol=-0.0006  val=0.0405  ent=0.944  kl=+0.0114  clip=0.089  sps=4164
+  [upd   680] steps= 11157504  ret(roll=100)=+10.000  ep_now=650  pol=-0.0134  val=0.0090  ent=1.012  kl=+0.0128  clip=0.118  sps=4163
+  [upd   690] steps= 11321344  ret(roll=100)=+10.000  ep_now=709  pol=-0.0037  val=0.0273  ent=0.932  kl=+0.0160  clip=0.123  sps=4163
+  [upd   700] steps= 11485184  ret(roll=100)=+10.000  ep_now=723  pol=-0.0067  val=0.0207  ent=0.809  kl=+0.0095  clip=0.081  sps=4163
+  [upd   710] steps= 11649024  ret(roll=100)=+10.000  ep_now=688  pol=-0.0094  val=0.0057  ent=0.762  kl=+0.0125  clip=0.111  sps=4163
+  [upd   720] steps= 11812864  ret(roll=100)=+10.000  ep_now=744  pol=-0.0095  val=0.0053  ent=0.723  kl=+0.0115  clip=0.099  sps=4163
+  [upd   730] steps= 11976704  ret(roll=100)=+10.000  ep_now=723  pol=-0.0089  val=0.0078  ent=0.688  kl=+0.0099  clip=0.098  sps=4163
+  [upd   740] steps= 12140544  ret(roll=100)=+10.000  ep_now=785  pol=-0.0099  val=0.0056  ent=0.635  kl=+0.0163  clip=0.105  sps=4163
+  [upd   750] steps= 12304384  ret(roll=100)=+10.000  ep_now=747  pol=-0.0090  val=0.0057  ent=0.731  kl=+0.0158  clip=0.121  sps=4163
+  [upd   760] steps= 12468224  ret(roll=100)=+9.900  ep_now=669  pol=-0.0003  val=0.0310  ent=0.822  kl=+0.0098  clip=0.096  sps=4163
+  [upd   770] steps= 12632064  ret(roll=100)=+9.900  ep_now=720  pol=+0.0009  val=0.0261  ent=0.733  kl=+0.0155  clip=0.123  sps=4163
+  [upd   780] steps= 12795904  ret(roll=100)=+10.000  ep_now=758  pol=-0.0109  val=0.0062  ent=0.668  kl=+0.0133  clip=0.105  sps=4163
+  [upd   790] steps= 12959744  ret(roll=100)=+10.000  ep_now=771  pol=-0.0085  val=0.0106  ent=0.660  kl=+0.0036  clip=0.045  sps=4163
+  [upd   800] steps= 13123584  ret(roll=100)=+10.000  ep_now=722  pol=-0.0161  val=0.0069  ent=0.632  kl=+0.1172  clip=0.137  sps=4163
+  [upd   810] steps= 13287424  ret(roll=100)=+10.000  ep_now=795  pol=-0.0049  val=0.0093  ent=0.598  kl=+0.0111  clip=0.076  sps=4163
+  [upd   820] steps= 13451264  ret(roll=100)=+10.000  ep_now=772  pol=-0.0036  val=0.0178  ent=0.653  kl=+0.0046  clip=0.061  sps=4164
+  [upd   830] steps= 13615104  ret(roll=100)=+9.900  ep_now=692  pol=-0.0035  val=0.0546  ent=0.709  kl=+0.0090  clip=0.087  sps=4163
+  [upd   840] steps= 13778944  ret(roll=100)=+10.000  ep_now=771  pol=-0.0116  val=0.0040  ent=0.632  kl=+0.0219  clip=0.105  sps=4163
+  [upd   850] steps= 13942784  ret(roll=100)=+10.000  ep_now=749  pol=-0.0110  val=0.0050  ent=0.625  kl=+0.0184  clip=0.114  sps=4163
+  [upd   860] steps= 14106624  ret(roll=100)=+10.000  ep_now=743  pol=-0.0060  val=0.0254  ent=0.700  kl=+0.0101  clip=0.070  sps=4163
+  [upd   870] steps= 14270464  ret(roll=100)=+10.000  ep_now=800  pol=-0.0066  val=0.0052  ent=0.558  kl=+0.0098  clip=0.087  sps=4163
+  [upd   880] steps= 14434304  ret(roll=100)=+10.000  ep_now=777  pol=-0.0044  val=0.0201  ent=0.604  kl=+0.0123  clip=0.091  sps=4163
+  [upd   890] steps= 14598144  ret(roll=100)=+10.000  ep_now=793  pol=-0.0036  val=0.0265  ent=0.561  kl=+0.0107  clip=0.083  sps=4163
+  [upd   900] steps= 14761984  ret(roll=100)=+10.000  ep_now=810  pol=-0.0060  val=0.0080  ent=0.474  kl=+0.0095  clip=0.063  sps=4163
+  [upd   910] steps= 14925824  ret(roll=100)=+10.000  ep_now=774  pol=-0.0084  val=0.0047  ent=0.566  kl=+0.0211  clip=0.116  sps=4163
+  [upd   920] steps= 15089664  ret(roll=100)=+10.000  ep_now=759  pol=-0.0098  val=0.0039  ent=0.605  kl=+0.0176  clip=0.125  sps=4164
+  [upd   930] steps= 15253504  ret(roll=100)=+10.000  ep_now=800  pol=-0.0062  val=0.0047  ent=0.636  kl=+0.0140  clip=0.111  sps=4164
+  [upd   940] steps= 15417344  ret(roll=100)=+10.000  ep_now=759  pol=-0.0143  val=0.0048  ent=0.593  kl=+0.1131  clip=0.132  sps=4164
+  [upd   950] steps= 15581184  ret(roll=100)=+10.000  ep_now=803  pol=-0.0027  val=0.0191  ent=0.569  kl=+0.0291  clip=0.094  sps=4164
+  [upd   960] steps= 15745024  ret(roll=100)=+10.000  ep_now=799  pol=-0.0058  val=0.0247  ent=0.562  kl=+0.0124  clip=0.070  sps=4163
+  [upd   970] steps= 15908864  ret(roll=100)=+10.000  ep_now=781  pol=-0.0081  val=0.0037  ent=0.606  kl=+0.0150  clip=0.113  sps=4163
+  [upd   980] steps= 16072704  ret(roll=100)=+10.000  ep_now=737  pol=-0.0116  val=0.0052  ent=0.684  kl=+0.0192  clip=0.125  sps=4164
+  [upd   990] steps= 16236544  ret(roll=100)=+10.000  ep_now=766  pol=-0.0115  val=0.0044  ent=0.671  kl=+0.0150  clip=0.104  sps=4164
+  [upd  1000] steps= 16400384  ret(roll=100)=+10.000  ep_now=736  pol=-0.0010  val=0.0170  ent=0.717  kl=+0.0088  clip=0.104  sps=4164
+  [upd  1010] steps= 16564224  ret(roll=100)=+10.000  ep_now=778  pol=-0.0093  val=0.0042  ent=0.658  kl=+0.0191  clip=0.113  sps=4164
+  [upd  1020] steps= 16728064  ret(roll=100)=+10.000  ep_now=798  pol=-0.0077  val=0.0037  ent=0.530  kl=+0.0097  clip=0.076  sps=4164
+  [upd  1030] steps= 16891904  ret(roll=100)=+10.000  ep_now=757  pol=-0.0088  val=0.0034  ent=0.511  kl=+0.0117  clip=0.080  sps=4164
+  [upd  1040] steps= 17055744  ret(roll=100)=+10.000  ep_now=713  pol=-0.0081  val=0.0048  ent=0.645  kl=+0.0108  clip=0.087  sps=4164
+  [upd  1050] steps= 17219584  ret(roll=100)=+10.000  ep_now=755  pol=-0.0087  val=0.0048  ent=0.564  kl=+0.0067  clip=0.067  sps=4164
+  [upd  1060] steps= 17383424  ret(roll=100)=+10.000  ep_now=772  pol=-0.0091  val=0.0037  ent=0.564  kl=+0.0077  clip=0.076  sps=4163
+  [upd  1070] steps= 17547264  ret(roll=100)=+10.000  ep_now=796  pol=-0.0087  val=0.0058  ent=0.548  kl=+0.0109  clip=0.084  sps=4164
+  [upd  1080] steps= 17711104  ret(roll=100)=+10.000  ep_now=763  pol=-0.0073  val=0.0042  ent=0.523  kl=+0.0087  clip=0.077  sps=4164
+  [upd  1090] steps= 17874944  ret(roll=100)=+10.000  ep_now=800  pol=-0.0003  val=0.0170  ent=0.546  kl=+0.0114  clip=0.090  sps=4164
+  [upd  1100] steps= 18038784  ret(roll=100)=+10.000  ep_now=806  pol=-0.0088  val=0.0031  ent=0.496  kl=+0.0205  clip=0.096  sps=4164
+  [upd  1110] steps= 18202624  ret(roll=100)=+10.000  ep_now=762  pol=-0.0009  val=0.0514  ent=0.553  kl=+0.0063  clip=0.063  sps=4164
+  [upd  1120] steps= 18366464  ret(roll=100)=+9.900  ep_now=778  pol=-0.0022  val=0.0397  ent=0.570  kl=+0.0063  clip=0.066  sps=4164
+  [upd  1130] steps= 18530304  ret(roll=100)=+10.000  ep_now=796  pol=-0.0028  val=0.0322  ent=0.524  kl=+0.0141  clip=0.088  sps=4165
+  [upd  1140] steps= 18694144  ret(roll=100)=+10.000  ep_now=811  pol=-0.0082  val=0.0051  ent=0.487  kl=+0.0093  clip=0.069  sps=4164
+  [upd  1150] steps= 18857984  ret(roll=100)=+10.000  ep_now=789  pol=-0.0091  val=0.0029  ent=0.497  kl=+0.0124  clip=0.089  sps=4164
+  [upd  1160] steps= 19021824  ret(roll=100)=+9.900  ep_now=748  pol=-0.0012  val=0.0302  ent=0.570  kl=+0.0095  clip=0.081  sps=4164
+  [upd  1170] steps= 19185664  ret(roll=100)=+10.000  ep_now=785  pol=-0.0036  val=0.0049  ent=0.523  kl=+0.0096  clip=0.083  sps=4164
+  [upd  1180] steps= 19349504  ret(roll=100)=+9.900  ep_now=801  pol=-0.0004  val=0.0204  ent=0.496  kl=+0.0079  clip=0.071  sps=4164
+  [upd  1190] steps= 19513344  ret(roll=100)=+10.000  ep_now=816  pol=+0.0009  val=0.0271  ent=0.484  kl=+0.0127  clip=0.088  sps=4164
+  [upd  1200] steps= 19677184  ret(roll=100)=+10.000  ep_now=814  pol=-0.0069  val=0.0025  ent=0.432  kl=+0.0161  clip=0.092  sps=4164
+  [upd  1210] steps= 19841024  ret(roll=100)=+10.000  ep_now=813  pol=-0.0081  val=0.0040  ent=0.497  kl=+0.0106  clip=0.073  sps=4164
+  [upd  1220] steps= 20004864  ret(roll=100)=+10.000  ep_now=732  pol=-0.0061  val=0.0038  ent=0.576  kl=+0.0127  clip=0.093  sps=4165
+  [upd  1230] steps= 20168704  ret(roll=100)=+10.000  ep_now=758  pol=-0.0079  val=0.0029  ent=0.560  kl=+0.0136  clip=0.100  sps=4164
+  [upd  1240] steps= 20332544  ret(roll=100)=+10.000  ep_now=800  pol=-0.0071  val=0.0067  ent=0.531  kl=+0.0068  clip=0.060  sps=4164
+  [upd  1250] steps= 20496384  ret(roll=100)=+10.000  ep_now=825  pol=-0.0083  val=0.0023  ent=0.454  kl=+0.0124  clip=0.090  sps=4164
+  [upd  1260] steps= 20660224  ret(roll=100)=+10.000  ep_now=813  pol=-0.0093  val=0.0030  ent=0.506  kl=+0.0097  clip=0.069  sps=4164
+  [upd  1270] steps= 20824064  ret(roll=100)=+9.900  ep_now=803  pol=-0.0022  val=0.0210  ent=0.485  kl=+0.0065  clip=0.053  sps=4164
+  [upd  1280] steps= 20987904  ret(roll=100)=+10.000  ep_now=845  pol=-0.0056  val=0.0051  ent=0.437  kl=+0.0109  clip=0.082  sps=4165
+  [upd  1290] steps= 21151744  ret(roll=100)=+10.000  ep_now=815  pol=-0.0015  val=0.0127  ent=0.439  kl=+0.0134  clip=0.078  sps=4165
+  [upd  1300] steps= 21315584  ret(roll=100)=+9.900  ep_now=809  pol=-0.0010  val=0.0266  ent=0.480  kl=+0.0060  clip=0.067  sps=4164
+  [upd  1310] steps= 21479424  ret(roll=100)=+10.000  ep_now=829  pol=-0.0083  val=0.0024  ent=0.481  kl=+0.0157  clip=0.095  sps=4164
+  [upd  1320] steps= 21643264  ret(roll=100)=+10.000  ep_now=798  pol=-0.0088  val=0.0023  ent=0.439  kl=+0.0132  clip=0.077  sps=4164
+  [upd  1330] steps= 21807104  ret(roll=100)=+10.000  ep_now=832  pol=-0.0077  val=0.0019  ent=0.386  kl=+0.0199  clip=0.090  sps=4164
+  [upd  1340] steps= 21970944  ret(roll=100)=+10.000  ep_now=763  pol=-0.0087  val=0.0027  ent=0.472  kl=+0.0151  clip=0.090  sps=4164
+  [upd  1350] steps= 22134784  ret(roll=100)=+10.000  ep_now=787  pol=-0.0016  val=0.0163  ent=0.495  kl=+0.0056  clip=0.068  sps=4164
+  [upd  1360] steps= 22298624  ret(roll=100)=+10.000  ep_now=795  pol=-0.0087  val=0.0032  ent=0.530  kl=+0.0146  clip=0.095  sps=4164
+  [upd  1370] steps= 22462464  ret(roll=100)=+10.000  ep_now=816  pol=-0.0059  val=0.0023  ent=0.454  kl=+0.0131  clip=0.095  sps=4164
+  [upd  1380] steps= 22626304  ret(roll=100)=+10.000  ep_now=751  pol=-0.0044  val=0.0053  ent=0.613  kl=+0.0200  clip=0.105  sps=4164
+  [upd  1390] steps= 22790144  ret(roll=100)=+10.000  ep_now=779  pol=+0.0018  val=0.0283  ent=0.571  kl=+0.0184  clip=0.093  sps=4164
+  [upd  1400] steps= 22953984  ret(roll=100)=+10.000  ep_now=758  pol=-0.0079  val=0.0095  ent=0.678  kl=+0.0097  clip=0.091  sps=4164
+  [upd  1410] steps= 23117824  ret(roll=100)=+9.900  ep_now=790  pol=-0.0025  val=0.0420  ent=0.616  kl=+0.0086  clip=0.086  sps=4164
+  [upd  1420] steps= 23281664  ret(roll=100)=+9.900  ep_now=757  pol=-0.0022  val=0.0676  ent=0.556  kl=+0.0082  clip=0.087  sps=4164
+  [upd  1430] steps= 23445504  ret(roll=100)=+10.000  ep_now=866  pol=-0.0091  val=0.0019  ent=0.433  kl=+0.0133  clip=0.091  sps=4164
+  [upd  1440] steps= 23609344  ret(roll=100)=+10.000  ep_now=839  pol=-0.0034  val=0.0244  ent=0.528  kl=+0.0106  clip=0.070  sps=4164
+  [upd  1450] steps= 23773184  ret(roll=100)=+10.000  ep_now=803  pol=-0.0040  val=0.0152  ent=0.490  kl=+0.0119  clip=0.083  sps=4164
+  [upd  1460] steps= 23937024  ret(roll=100)=+10.000  ep_now=829  pol=-0.0034  val=0.0174  ent=0.509  kl=+0.0100  clip=0.078  sps=4164
+  [upd  1470] steps= 24100864  ret(roll=100)=+10.000  ep_now=796  pol=-0.0072  val=0.0036  ent=0.569  kl=+0.0172  clip=0.109  sps=4165
+  [upd  1480] steps= 24264704  ret(roll=100)=+10.000  ep_now=840  pol=-0.0072  val=0.0019  ent=0.471  kl=+0.0123  clip=0.085  sps=4165
+  [upd  1490] steps= 24428544  ret(roll=100)=+9.900  ep_now=795  pol=+0.0006  val=0.0260  ent=0.527  kl=+0.0074  clip=0.067  sps=4165
+  [upd  1500] steps= 24592384  ret(roll=100)=+10.000  ep_now=774  pol=+0.0010  val=0.0022  ent=0.502  kl=+0.0212  clip=0.102  sps=4165
+  [upd  1510] steps= 24756224  ret(roll=100)=+10.000  ep_now=787  pol=-0.0064  val=0.0019  ent=0.458  kl=+0.0134  clip=0.088  sps=4164
+  [upd  1520] steps= 24920064  ret(roll=100)=+9.900  ep_now=783  pol=+0.0038  val=0.0470  ent=0.546  kl=+0.0107  clip=0.090  sps=4164
+[train_agent] 1525 updates done in 5999.8s  (4164 sps avg)
+[train_agent] log → logs/maze_aisc_full.jsonl
+[train_agent] checkpoint → checkpoints/maze_aisc_full.pt

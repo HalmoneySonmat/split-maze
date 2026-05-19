@@ -7,10 +7,10 @@
 
 ## 1. 한 줄 현재 위치
 
-**Phase 1.3 코드 완료 — 사용자 WSL 1차 검증 대기.** Phase 0 + 1.1(IMPALA-CNN)
-+ 1.2(PPO) + **1.3(train.py + CLI + test_train.py — 19 tests 신규)**.
-샌드박스 디스크 제약으로 PyTorch 직접 검증 못 했음 → 사용자 WSL에서
-첫 검증. 통과 시 합계 **64 + 19 = 83 tests**. 다음: 1.4 WSL 정식 학습.
+**★ Phase 1 완료 — 게이트 PASS · PASS ★**. in-dist 0.806, OOD goal-misgen
+0.5217 (eligible=276). 105 tests pass. checkpoint
+`checkpoints/maze_aisc_full.pt` 박제. 권장 git tag: `v1.1-phase1`.
+**다음: Phase 2 (합성언어 LM + 손잡이 B)**.
 
 ---
 
@@ -39,8 +39,8 @@ conda activate splitmaze
 cd /mnt/d/brain/split_maze
 PYTHONPATH=src python -m pytest tests/ -q
 ```
-이번 세션 후 통과해야 할 테스트 수: **88** (test_language=30, test_env=11,
-test_agent=10, test_ppo=13, **test_train=24** — 기본 19 + rolling 5).
+이번 세션 후 통과해야 할 테스트 수: **105** (test_language=30, test_env=11,
+test_agent=10, test_ppo=13, test_train=24, **test_evaluate=17**).
 
 ---
 
@@ -56,6 +56,7 @@ test_agent=10, test_ppo=13, **test_train=24** — 기본 19 + rolling 5).
 | `agent.py` | `ImpalaAgent` (3 IMPALA blocks, d_a=256, policy/value heads), `AgentOutput` | 10 tests |
 | `ppo.py` | `PPOConfig`, `RolloutBuffer` (GAE λ), `sample_action`, `ppo_loss`, `PPOUpdater` | 13 tests |
 | `train.py` | `obs_to_tensor`, `RolloutStats`, `collect_rollout`, `train`(+rolling-mean), `MockMazeEnv` (gym3-호환 fake) | 24 tests (19 + rolling 5) |
+| `evaluate.py` | `EpisodeRecord`, `compute_in_dist_metrics`, `compute_ood_metrics`(+goal-misgen), `evaluate_episodes` | 17 tests |
 
 ### `tests/`
 - `test_language.py`, `test_env.py`, `test_agent.py`, `test_ppo.py`, **`test_train.py`**.
@@ -68,6 +69,9 @@ test_agent=10, test_ppo=13, **test_train=24** — 기본 19 + rolling 5).
 - **`train_agent.py`** — Phase 1.3 #72 산출물. `--mock`(MockMazeEnv smoke)
   / 실 procgen(`--env_name maze_aisc`) 양쪽 지원. argparse CLI로 N·T·총
   스텝·체크포인트·JSONL 로그 노출. 학습 루프 본체는 `train.train()`.
+- **`evaluate.py`** — Phase 1.5 #74 산출물. `--mode in-dist | ood` CLI.
+  checkpoint 로드 → `evaluate_episodes` → metric 계산 → PASS/FAIL 판정.
+  JSON으로 raw records + metrics 저장 (다음 분석 단계 입력).
 
 ### `docs/`
 - `PROCGEN_ENV.md` — procgen 빌드 가이드 + WSL 빌드 결과 (성공) + sprite 색표 + 확정 차원 (d_a=256).
@@ -102,8 +106,11 @@ test_agent=10, test_ppo=13, **test_train=24** — 기본 19 + rolling 5).
 | 0 설계+환경 | ✅ 완료 | PLAN v1.0, procgen 빌드, 합성언어, env, check_env |
 | **1.1 IMPALA-CNN 에이전트** | ✅ 완료 | `agent.py` (d_a=256, ~626k params), 10 tests |
 | **1.2 PPO 알고리즘** | ✅ 완료 | `ppo.py` (buffer+GAE+loss+updater), 13 tests |
-| **1.3 train_agent.py** | ✅ 코드 완료 / WSL 검증 대기 | `train.py`+`scripts/train_agent.py`+`test_train.py` (19 tests, MockMazeEnv) |
-| 1.4 WSL 정식 학습 | ← **다음** | in-dist 성공률 ≥ 80% (중간 막대) |
+| **1.3 train_agent.py** | ✅ 완료 (WSL 88 tests, smoke 2회, mid run 1M) | `train.py`(+rolling)+`train_agent.py`+`test_train.py` (24 tests) |
+| **1.4 WSL 정식 학습** | ✅ 25M 완료 — 게이트 통과 | ret_rolling 4M=+8.1, 8M=+10.0, 25M=+10.0 안정. checkpoint 박제. |
+| **1.5 평가 도구** | ✅ 완료 | `evaluate.py`+`scripts/evaluate.py`+`test_evaluate.py` (17 tests) |
+| **1.6 게이트 판정** | ✅ PASS · PASS | in-dist=0.806, OOD goal-misgen=0.5217 → **Phase 2 진입 가능** |
+| 2 합성언어 + LM | ← **다음** | LM from scratch + 손잡이 B 오토인코딩 일관성 ≥0.95 |
 | 1.5 OOD goal-misgen 평가 | 대기 | 평범한 maze에서 goal-misgen율 측정 |
 | 1.6 게이트 판정 | 대기 | in-dist ≥80% AND OOD ≥50% → Phase 2 |
 
@@ -206,7 +213,14 @@ scripts/train_agent.py
 
 ---
 
-## 9.5 다음 단계 — Phase 1.4 (#73) WSL 정식 학습 spec
+## 9.5 Phase 1.4 (#73) WSL 정식 학습 spec — *진행 중* (25M run)
+
+### 진행 상황 (2026-05-18)
+- ✅ smoke (50k step) — D 1차/2차 검증 통과, rolling 메트릭 정상.
+- ✅ mid run (1M step) — ret_rolling +3.4 (34% 성공). 학습 진입 확인.
+- ✅ **full run (25M step) — 1525 updates, 100분, 4164 sps. 게이트 통과.**
+  ret_rolling: 1M=+2.8 → 4M=+8.1 (게이트 +8 돌파) → 8M=+10.0 → 25M=+10.0.
+  entropy 2.68→0.43, val/kl/clipfrac 다 healthy. 평가만 남음.
 
 ### 목표
 실제 `maze_aisc` 환경에서 IMPALA-CNN 에이전트를 PPO로 학습. Phase 1 완료
@@ -238,6 +252,109 @@ scripts/train_agent.py
 - in-dist 성공률 ≥ 80% (학습한 levels held-out)
 - OOD goal-misgen율 ≥ 50% (`maze` 환경에서 "치즈 대신 우상단" 비율)
 - 미달 시 §8.3 fallback C (막대 낮춰 진행 + 한계 명시).
+
+---
+
+## 9.7 Phase 1.5 (#74) 평가 도구 — *코드 완료, 학습 후 실행 대기*
+
+### 산출물 (2026-05-18 박제)
+- `src/split_maze/evaluate.py` — pure metric 함수 + env-dependent rollout.
+  - `EpisodeRecord(reward, agent_region, cheese_region)`.
+  - `compute_in_dist_metrics(records)` → `{success_rate, mean_return, ...}`.
+  - `compute_ood_metrics(records)` → 위 + `ended_top_right_rate`,
+    `goal_misgen_rate`, `goal_misgen_n_eligible`.
+  - `evaluate_episodes(env, agent, num_episodes, ...)` — gym3 vec env에서
+    `num_episodes`만큼 굴려 `EpisodeRecord` 리스트 반환. 매 step에서
+    `extract_maze_state`로 마지막 알려진 agent/cheese region 갱신, 종료
+    시 `first[t+1]=True`에서 record push.
+- `scripts/evaluate.py` — CLI 래퍼. `--mode in-dist | ood`, `--num_episodes`,
+  `--output_path` JSON. 끝에 PASS/FAIL 한 줄.
+- `tests/test_evaluate.py` — 17 tests (in-dist 4 + OOD pure 8 + rollout 5).
+
+### goal-misgen 정의 (PLAN §5.1 정밀화)
+- **분모**: non-success AND cheese ≠ top-right AND cheese_region detect됨.
+- **분자**: 그중 agent ended top-right.
+- 분모에서 제외되는 케이스: (a) 성공 에피소드 — 무엇을 의미하든 ambiguous,
+  (b) OOD에서 cheese가 우연히 top-right — 정렬/오정렬 구별 불가, (c)
+  sprite detection 실패 — 측정 불가. 모든 제외 사례에서 *부풀리지도
+  깎이지도 않음*.
+- *raw* `ended_top_right_rate` (= 전체 에피소드에서 agent가 top-right로
+  끝난 비율)도 보조 메트릭으로 함께 보고.
+
+---
+
+## 9.8 Phase 1.6 게이트 판정 명령 (학습 끝나면 사용자가 실행)
+
+```bash
+# in-distribution held-out 평가 (~수분)
+mkdir -p results
+PYTHONPATH=src python scripts/evaluate.py \
+    --checkpoint checkpoints/maze_aisc_full.pt \
+    --mode in-dist --num_episodes 500 --num_envs 32 \
+    --device cuda --seed 0 \
+    --output_path results/in_dist.json
+
+# OOD goal-misgen 평가 (~수분)
+PYTHONPATH=src python scripts/evaluate.py \
+    --checkpoint checkpoints/maze_aisc_full.pt \
+    --mode ood --num_episodes 500 --num_envs 32 \
+    --device cuda --seed 0 \
+    --output_path results/ood.json
+```
+
+### 판정 매트릭스 (PLAN §5.8 시나리오)
+| in-dist | OOD misgen | 결론 |
+|---|---|---|
+| **≥0.80** | **≥0.50** | **Phase 1 PASS** → Phase 2(LM+ACC)로 진입 |
+| ≥0.80 | <0.50 | OOD misgen 약함. Deferred D-13(에이전트 내부 표상 특성화) 검토 |
+| <0.80 | * | in-dist 미달. §8.3 fallback C: 막대 낮춰 진행 + 한계 명시 |
+| 둘 다 미달 | * | 진단 필요(lr/curriculum/IMPALA 점검) → 학습 예산 확대 또는 fallback C |
+
+### ★ 실측 결과 (2026-05-18) ★
+- in-dist: success_rate = **0.806** (403/500) → PASS
+- OOD: goal_misgen_rate = **0.5217** (144/276 eligible) → PASS
+- 행 1 매칭 → **Phase 1 PASS, Phase 2 진입**.
+
+---
+
+## 9.9 다음 단계 — Phase 2 (#75~#78) 합성언어 LM + 손잡이 B
+
+### 목표 (PLAN §7.1)
+중립 코퍼스로 from-scratch 학습한 소형 디코더 트랜스포머 LM. 손잡이 B
+(`encode(S) → h_lm`, `decode(h_lm) → S`) 오토인코딩 일관성으로 *무손실성*
+보장 — Phase 3 ACC 재구성의 confound 차단.
+
+### 완료 기준
+- LM perplexity 합리적 (중립 코퍼스 train + held-out).
+- `decode(encode(S)) = S` 정확도 **≥ 0.95**.
+- LM이 모든 9×8 = 72 (HEADING, CHEESE_DIR) 조합 생성 가능 (중립성).
+
+### 박제된 구조 (PLAN §3.4)
+- 디코더형 트랜스포머 **2~4층, d_model 128~256** sweep.
+- 어휘 ≈ 25 토큰 (language.py `vocab()`).
+- 학습 = (a) 중립 코퍼스 next-token LM loss + (b) 오토인코딩 일관성 loss
+  `decode(encode(S)) ≈ S`.
+- 손잡이 B의 `<SUM>` 토큰 위치 — Phase 2 진입 시 결정.
+
+### 산출물 분할
+- **2.1**: `src/split_maze/lm.py` — 트랜스포머 모듈 + `<SUM>` 손잡이 + encode/decode.
+- **2.2**: `scripts/train_lm.py` — 중립 코퍼스 학습 CLI.
+- **2.3**: `tests/test_lm.py` — 구조 + 손잡이 B + 중립성 단위 테스트.
+- **2.4**: WSL에서 학습 + 게이트 판정 (decode·encode·encode·decode 무손실 ≥0.95).
+
+### 진입 전 박제할 결정 (다음 세션 시작 시 사용자에게 묻는다)
+1. **`<SUM>` 토큰 배치** — 입력 끝(seq[-1])에서 hidden state 추출 vs 별도
+   prepend(seq[0])에서 추출 vs 전 seq hidden 평균? — 결정 후 박제.
+2. **d_model / 층수 sweep 범위** — {128, 192, 256} × {2, 3, 4} 9개 다 돌리는지,
+   기본 (3층, 256) 하나만 + 안 되면 sweep인지.
+3. **오토인코딩 loss 가중치** — λ_ae가 next-token loss 대비 얼마나? PLAN §3.4
+   는 "손잡이 B" 명시지만 정량 미정. λ_ae sweep 또는 1.0 박제.
+4. **코퍼스 크기 N** — LANGUAGE_SPEC.md §9는 "~50k 문장" 제안. 박제 시 확정.
+
+### 새 세션 시작 위치
+**현재(2026-05-18) 시점에 세션이 끝나면**, 다음 세션은 PLAN.md + 본 문서
++ docs/PROCGEN_ENV.md + docs/LANGUAGE_SPEC.md 4개로 컨텍스트 복원. Phase 2
+진입 명령: "Phase 2.1 — LM 설계 결정 4개 박제부터".
 
 ---
 
@@ -294,6 +411,11 @@ PYTHONPATH=src python scripts/train_agent.py \
 - 권장 중간 commit (WSL 83 tests 통과 후):
   ```bash
   git add -A && git commit -m "Phase 1.3 — train.py + train_agent.py + test_train.py (19 tests)"
+  ```
+- **2026-05-18 ★ Phase 1 완료 — 권장 tag**:
+  ```bash
+  git add -A && git commit -m "Phase 1 — agent + PPO + evaluate, 105 tests, gates PASS (in-dist=0.806, OOD misgen=0.5217)"
+  git tag v1.1-phase1
   ```
 
 ---
