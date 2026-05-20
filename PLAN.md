@@ -1058,6 +1058,45 @@ git tag 계획 (사용자 환경에서 실행):
 
 ---
 
+### 10.2 Pre-Phase-3 박제 (P3-1 ~ P3-5) — 2026-05-20
+
+> Phase 3 진입 *전* AskUserQuestion으로 옵션·추천·이유 검토 후 박제한 5개
+> 결정. SPLIT-MNIST PLAN의 P3 박제 패턴 계승. *결과 본 후 변경 금지* — 잘못된
+> 박제 발견 시 §10.1 형식으로 *왜* 바꾸는지 기록.
+
+| # | 항목 | 결정 (박제) | 이유 |
+|---|---|---|---|
+| **P3-1** | RL agent 재사용 방식 | **α**: 새 RL run, B3/B4/V2 해석자 step 0부터 동행. Phase 1 checkpoint(maze_aisc_full.pt)는 아카이브 보관·재사용 X. | PLAN §5.0 ("RL seed당 에이전트 한 번만 학습, 해석자 동시 부착") + §6 ("해석자는 *동시간* 공동 학습 — post-hoc 부착 아님") 박제 충실. β=명시적 SPLIT-9 실패 양식, γ=동시간 co-development 약화. 비용: 25M step × seed(3~5)만큼 새 RL run 필요 (~5~8시간 GPU). |
+| **P3-2** | (C-thin) 인터페이스 경계 | **A**: `interface_proj` (단일 Linear d_model→d_model)만 ACC grad 통과. 모든 transformer block + tok_embed + pos_embed + ln_f + lm_head는 stop-grad. | PLAN §4.3 의 "**최소한** 손잡이 head" 적용 (디폴트, 보수). LM 중립성을 최강하게 유지 — in-dist heading≈cheese 상관이 LM core로 새는 경로 차단. P3-2-B(+상위 1 트랜스포머 블록 blocks[-1])는 V2 충실도 부족 시 **fallback ablation**으로 예약. |
+| **P3-3** | ACC hyperparam | **A**: orthogonal W (d_lm=256 × d_a=256) + lr=3e-4 + warmup=500 step + weight_decay=0.01 + batch=128. β1=0.9, β2=0.95 (AdamW). | orthogonal = SPLIT-MNIST V2 계승 + signal propagation 안정 + §5.5 측정 #4 Procrustes random baseline에 의미. 나머지 = POST-HOC-4에서 *검증된* LM 학습 protocol 그대로 (warmup 500, wd=0.01). ACC optimizer는 LM·RL optimizer와 *분리*. |
+| **P3-4** | (h_agent, h_lm) 페어 수집 | **A**: on-the-fly during RL rollout. stride=4 subsample (HEADING K=4 윈도우 정합) → N=64 env × T=256/stride=4 = **4096 페어/rollout**. 1525 update 기준 누적 ~6.25M 페어. **Replay buffer ~256k** (최근 64 rollout). ACC update = 매 RL update마다 mini-batch=128로 4~8 step. | P3-1 α 동시 학습과 정합. 인접 step 정보량 중복 회피. ~6.25M = 표준 small-LM co-train scale. RL ahead-of-ACC drift 회피 (B,C 옵션의 위험). |
+| **P3-5** | 3 빌드(B3/B4/V2) 학습 순서 | **A**: 동시. 1 RL run + B3·B4·V2 해석자 3개를 *같은* 에이전트에 부착. 해석자끼리는 grad 공유 X (각자 h_agent.detach() 자기 loss). | PLAN §5.0 (C-thin) 부수효과 — V2 vs B4 비교가 *문자 그대로 동일한 에이전트*로 통제됨. 비용 ~1.5× (forward 3개 분, GPU 여유 있음). seed 변동 confound 차단 — Scenario A/B/C 판정의 통계 검정력 최대. |
+
+### Phase 3 sub-단계 (P3 박제 반영, 산출물 매핑)
+
+- **3.1 ✅** `src/split_maze/acc.py` — ACC W (orthogonal init) + LayerNorm + 양방향 MSE + (C-thin) detach 정책 + 단위 테스트. `tests/test_acc.py` 42 tests PASS (WSL 2026-05-20).
+- **3.2 🟡 spec** `src/split_maze/paired_collect.py` — RL rollout에서 stride=4로 (h_agent, ids) 페어 추출 + FIFO 256k replay buffer. P3-2-1~P3-2-4 박제 (§10.3).
+- **3.3** `src/split_maze/builds.py` — B3 (probe MLP), B4 (Perceiver Resampler + cross-attn 어댑터), V2 (ACC) wrapper. interface_proj만 trainable on LM side.
+- **3.4** 공동 학습 루프 — RL update + ACC update K=32 mini-batch 인터리브. ACC optimizer 분리, warmup 500.
+- **3.5** 안정성 + 게이트 — V2 RL 성능 = B1 (sanity), 재구성 loss 감소, 발산 없음.
+
+### 10.3 Pre-Phase-3.2 박제 (P3-2-1 ~ P3-2-4) — 2026-05-21
+
+> Phase 3.2 (paired_collect 데이터 파이프라인) 진입 *전* 박제한 4개 결정.
+> 사전 등록 원칙대로 *코딩·실행 결과 보기 전*에 정함. Phase 3.1 acc.py
+> WSL 42/42 PASS 직후 박제.
+
+| # | 항목 | 결정 | 이유 |
+|---|---|---|---|
+| **P3-2-1** | `paired_collect` 모듈 위치 | **A**: 별도 `src/split_maze/paired_collect.py` (PairBuffer + PairedCollector). | Phase 1 검증된 `train.py` 침범 X (POST-HOC 러닝: 검증된 코드 의심 1순위 아님). 단위 테스트 격리 (Mock LM/oracle). 3 해석자(B3/B4/V2) 부착 시 PairedCollector 1회 호출로 공유 페어 전달. 속도 차이 수 ms / 25M run 수시간 — 무시. |
+| **P3-2-2** | replay buffer 정책 | **A**: FIFO 256k buffer + uniform random sampling batch=128. | 표준 RL replay 패턴. 옛 페어 catastrophic forgetting 방지 → Phase 4 OOD eval 강함. ACC가 stationary 데이터 선호. 256k 평균 페어 나이 ~64 update (warmup 500 지난 뒤 표상 drift 작음). |
+| **P3-2-3** | h_lm 저장 전략 | **A**: ids만 저장, ACC update 시 `lm.encode(ids)` 매번 재계산. | (C-thin) boundary 2 의도 정확 — ACC grad가 *현재* interface_proj로 흘러야 학습됨. 캐싱하면 h_lm이 *옛* interface_proj 결과 → grad가 옛 함수로 흘러 학습 깨짐. 재계산 비용 = LM forward 수 ms/mini-batch (무시). |
+| **P3-2-4** | RL : ACC update 비율 | **A**: 매 RL update당 ACC K=32 mini-batch. | 4096 새 페어/batch=128 = 32 mini-batch = 1 epoch 등가. 1 페어 평균 학습 ~1회. ACC가 RL을 적당히 따라잡으면서 과학습 알차 안 함. K=64는 ACC overfitting 위험, K=8은 측정 #2/#3 noisy. |
+
+→ SESSION_HANDOFF.md §9.12에 paired_collect.py 클래스 시그니처 + 통합 지점 + 테스트 전략 상세 박제. 다음 세션 코딩 진입 시 spec 그대로 적용.
+
+---
+
 ## 11. 다음 행동 — Phase 0 진입
 
 v1.0 = 설계 완결. 9개 핵심 결정이 모두 박제됨 (정밀화 로그 / 아래 요약).
