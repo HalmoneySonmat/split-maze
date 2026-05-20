@@ -1092,8 +1092,32 @@ git tag 계획 (사용자 환경에서 실행):
 | **P3-2-2** | replay buffer 정책 | **A**: FIFO 256k buffer + uniform random sampling batch=128. | 표준 RL replay 패턴. 옛 페어 catastrophic forgetting 방지 → Phase 4 OOD eval 강함. ACC가 stationary 데이터 선호. 256k 평균 페어 나이 ~64 update (warmup 500 지난 뒤 표상 drift 작음). |
 | **P3-2-3** | h_lm 저장 전략 | **A**: ids만 저장, ACC update 시 `lm.encode(ids)` 매번 재계산. | (C-thin) boundary 2 의도 정확 — ACC grad가 *현재* interface_proj로 흘러야 학습됨. 캐싱하면 h_lm이 *옛* interface_proj 결과 → grad가 옛 함수로 흘러 학습 깨짐. 재계산 비용 = LM forward 수 ms/mini-batch (무시). |
 | **P3-2-4** | RL : ACC update 비율 | **A**: 매 RL update당 ACC K=32 mini-batch. | 4096 새 페어/batch=128 = 32 mini-batch = 1 epoch 등가. 1 페어 평균 학습 ~1회. ACC가 RL을 적당히 따라잡으면서 과학습 알차 안 함. K=64는 ACC overfitting 위험, K=8은 측정 #2/#3 noisy. |
+| **P3-2-5** | Phase 3 학습 루프 진입점 | **A**: `scripts/train_phase3.py` + `src/split_maze/train_phase3.py` **신규**. train.py / collect_rollout / RolloutBuffer 일체 변경 X. | Phase 1 검증판 100% 보존 (POST-HOC 러닝). 새 모듈이 RL rollout + PairedCollector + ACC update + 3 builds wrapper를 한 곳에서 묶음. 작은 중복 코드(~100줄) 발생하지만 책임 격리 가치 더 큼. test_train.py 24 tests 종속성 안 깨짐. |
 
-→ SESSION_HANDOFF.md §9.12에 paired_collect.py 클래스 시그니처 + 통합 지점 + 테스트 전략 상세 박제. 다음 세션 코딩 진입 시 spec 그대로 적용.
+→ SESSION_HANDOFF.md §9.12에 paired_collect.py 클래스 시그니처 + 통합 지점 + 테스트 전략 상세 박제. Phase 3.2 코드 산출물(2026-05-21): `src/split_maze/paired_collect.py` (~280줄) + `tests/test_paired_collect.py` (43 tests, WSL PASS) — 전체 회귀 251 tests PASS.
+
+### 10.4 Pre-Phase-3.3 박제 (P3-3-1 ~ P3-3-5) — 2026-05-21
+
+> Phase 3.3 (`builds.py` — B3/B4/V2 wrapper) 진입 *전* 박제. acc.py 42 +
+> paired_collect.py 43 WSL PASS 직후. B4 = SPLIT-9 패턴 충실 재현이 핵심.
+
+| # | 항목 | 결정 | 이유 |
+|---|---|---|---|
+| **P3-3-1** | B3 probe 구조 | **A**: 1-hidden MLP (256 → 256 ReLU → slot) + **4 별개 head** (row=3, col=3, heading=9, cheese=8 class). probe CE = 4 슬롯 CE 평균. | PLAN §6 "작은 MLP probe" 박제 그대로. SPLIT-MNIST B3 계승. linear는 PLAN과 불일치(약함), 2-hidden은 과함(B3 advantage 부풀음). |
+| **P3-3-2** | B4 어댑터 구조 | **A**: Flamingo cross-attn 재사용 (split_brain_go `adapter/xattn.py` GatedCrossAttentionBlock + `adapter/projection.py` PerceiverResampler). h_agent → K=16 latents → LM blocks 사이마다 gated cross-attn. **next-token only**. | PLAN §6 "**B4 = SPLIT-9 패턴 ★**" 충실 재현 — V2 vs B4 head-to-head가 "ACC vs Flamingo 어댑터"로 정확. prefix-prepend(B)는 양식 다름(비교 의미 약화), light(C)는 어중간. lm.py 자체 불변, builds.py B4LMWrapper가 lm 내부 모듈 직접 호출하며 xattn 끼움. |
+| **P3-3-3** | LM 인스턴스 정책 | **A**: 빌드별 LM 사본 (B3은 LM 없음; B4·V2 각각 별개 사본, Phase 2 `checkpoints/lm.pt`로 같은 가중치 init). | 공유 LM이면 B4 어댑터 학습과 V2 ACC 학습이 같은 interface_proj를 동시에 적응 → 학습 신호 충돌. 빌드별 사본이 (C-thin) LM core 보호 + 독립 학습 보장. |
+| **P3-3-4** | 공통 인터페이스 | **A**: `Build` abstract base class — `update(h_agent, ids, lengths) -> loss_dict` + `interpreter_parameters()`. B3Probe/B4Adapter/V2ACC 상속. | train_phase3.py가 polymorphic 호출. P3-5 "1 RL run + 3 해석자 동시 부착" 균일 처리. |
+| **P3-3-5** | loss 형태 | **A**: B3 = probe CE (h_agent.detach() 입력, 4 슬롯 평균). B4 = next-token CE on describer 문장 (LM core stop-grad). V2 = ACC.recon_loss (양방향 MSE, 이미 acc.py). 셋 다 RL 보상과 무관 (agent는 별개 RL 신호). | PLAN §6 박제표 그대로. "양쪽 다 LM 코어 보호" — B4·V2 모두 interface 적응만. |
+
+### Phase 3.3 sub-단계 분할 (다음 세션 코딩)
+
+- **3.3.0** split_brain_go `adapter/xattn.py` + `adapter/projection.py` → split_maze로 copy + adapt (IMPALA single 256-d vector input; split_brain_go는 9×9 spatial이었음 — 우리는 (B, d_a) → Resampler KV 단순화).
+- **3.3.1** `Build` base + `B3Probe` + 단위 테스트.
+- **3.3.2** `B4Adapter` (B4LMWrapper로 LM blocks 사이 xattn) + 단위 테스트.
+- **3.3.3** `V2ACC` (interface_proj 학습 + ACC.recon_loss, P3-2-3 재계산) + 단위 테스트.
+- → SESSION_HANDOFF.md §9.13에 클래스 시그니처 상세.
+
+→ 추정 코드량: builds.py ~450~500줄 + test_builds.py ~60~80 tests. 한 세션에 다 못 끝낼 수 있어 sub-단계 게이팅.
 
 ---
 
