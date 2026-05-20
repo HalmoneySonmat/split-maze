@@ -114,10 +114,11 @@ test_agent=10, test_ppo=13, test_train=24, **test_evaluate=17**).
 | **1.3 train_agent.py** | ✅ 완료 (WSL 88 tests, smoke 2회, mid run 1M) | `train.py`(+rolling)+`train_agent.py`+`test_train.py` (24 tests) |
 | **1.4 WSL 정식 학습** | ✅ 25M 완료 — 게이트 통과 | ret_rolling 4M=+8.1, 8M=+10.0, 25M=+10.0 안정. checkpoint 박제. |
 | **1.5 평가 도구** | ✅ 완료 | `evaluate.py`+`scripts/evaluate.py`+`test_evaluate.py` (17 tests) |
-| **1.6 게이트 판정** | ✅ PASS · PASS | in-dist=0.806, OOD goal-misgen=0.5217 → **Phase 2 진입 가능** |
-| 2 합성언어 + LM | ← **다음** | LM from scratch + 손잡이 B 오토인코딩 일관성 ≥0.95 |
-| 1.5 OOD goal-misgen 평가 | 대기 | 평범한 maze에서 goal-misgen율 측정 |
-| 1.6 게이트 판정 | 대기 | in-dist ≥80% AND OOD ≥50% → Phase 2 |
+| **1.6 게이트 판정** | ✅ PASS · PASS | in-dist=0.806, OOD goal-misgen=0.5217 |
+| **2.1 LM 모듈** | ✅ 완료 | `lm.py` MazeTokenizer/LMConfig/MazeLM (decoder transformer + 손잡이 B autoencoding + interface/core split), 27 tests |
+| **2.2 LM 학습 + 게이트** | ✅ **PASS** (POST-HOC-4 적용 후) | `lm_train.py` + `scripts/train_lm.py` + 30 tests. slot_match=0.994 / agent_region=0.989 (row=0.993, col=0.996) / heading=0.995 / cheese_dir=0.998 / combo_72=1.0 / rt_exact=0.987. checkpoint `checkpoints/lm.pt`. POST-HOC-1~4 박제. |
+| 3 ACC + 공동 학습 | ← **다음** | acc.py + B3/B4/V2 빌드 + co-training. PLAN §4 / §7.1 Phase 3 |
+| 4 측정 + 결정적 테스트 | 대기 | V2 vs B4 충실성 (cosine + 슬롯) + 활성 스왑 + Procrustes |
 
 ---
 
@@ -139,6 +140,8 @@ test_agent=10, test_ppo=13, test_train=24, **test_evaluate=17**).
 | 2026-05-18 sandbox | `pip install torch` ENOSPC unpack | `/sessions` 디스크 9.8G 중 8.4G가 옛 세션. 옛 세션 rm은 명시 금지 (이전 wedge 원인). torch 휠 532MB는 다운로드되지만 unpack 못 함 | 외부 제약 — 회피 불가. 사용자 WSL을 1차 검증자로 전환. 코드 품질로 보완(가드·dtype 명시·시그니처 정확 매칭). WSL에서 83 passed로 통과 확인 — 보완 전략 유효. |
 | 2026-05-18 mock smoke | 첫 update `val=50` → 두 번째 `val=0.26` | N=4, T=16 → mb 크기 8. advantage normalize std가 8 샘플에서 노이즈 큼 → advantage 부풀려짐 → 24 SGD step에서 value head 한 번 튐, 자기 손실로 회복. clipfrac=0.73, approx_kl=0.15도 동일 시그니처 | *코드 버그 아닌 작은 mini-batch 분산 노이즈*. 진짜 procgen N=64·T=256에선 mb=2048로 통계 안정. Phase 1.4 smoke에서 재확인. |
 | 2026-05-19 test_lm.py 1줄 | `test_cross_entropy_ignore_index_excludes_pad` 첫판: `(N=3, target=[t,t,pad], ignore=pad)` 평균이 `(N=2, target=[t,t])` 평균과 *같다*고 가정 → 실측 4.37 ≠ 4.91 (~8/9 비율) | PyTorch `F.cross_entropy` reduction='mean'에서 weight·ignore_index 분모 계산 디테일이 머릿속 시뮬레이션과 미묘하게 다름. docs는 "averaged over non-ignored"라 하지만 정확한 분모 규칙은 검증 필요 | 우리 코드가 *진짜로* 의존하는 사실은 **"ignored 위치의 logits를 어떻게 바꿔도 loss 불변"** (perturbation 사실). 분모 동작에 대한 *가정*을 단언하지 말고, 실제 의존 사실만 직접 검증. 27 passed after 교체. |
+| 2026-05-19/20 Phase 2.2 mode collapse saga | 4번 학습: 1차 (vocab 25, slot 3.5/4=1.0, agent_row=0.336 mode) → POST-HOC-2 (vocab 34 compound) 전체 collapse → 검증실험 (lr↑·epoch↑) 동일 → POST-HOC-3 (vocab 26 4슬롯) 또 collapse → POST-HOC-4 (warmup 500 step) **모든 슬롯 ≥0.99 PASS**. | 진짜 원인 = *LR warm-up 누락*. flat lr=3e-4가 학습 초기 attention 발산 → 그 좁은 학습 dynamics window에서 vocab 25는 *우연히* OK였고 vocab 변경 시마다 *매번 collapse*. POST-HOC-2/3 의 vocab 변경 *자체는 잘못 아니었음*. | **러닝 4개**: ① 표준 *small transformer best practice* (warm-up, weight decay, μParam)을 누락하면 작은 모델도 collapse — *flat lr 절대 금지*. ② 학습 *결과가 안 좋을 때* 가장 의심해야 할 것은 *우리 변경*이 아니라 *학습 protocol 빠진 게 없나*. ③ 사용자 의문 제기("이거 *정말* X 때문이야?")를 *실험으로 검증*하는 패턴이 *내 단정적 추론보다 정확*. ④ *외부 문헌 조사*가 *내가 갇혀 있던 추론*을 깨는 데 결정적 — *posterior collapse* / *attention entropy collapse* / *small-LM warmup*은 *알려진 issue*고 *알려진 해법*이 있었음. 검색 안 했으면 못 풀었음. |
+| 2026-05-19 mount stale snapshot | 샌드박스 bash가 *최근 작성한 파일*을 truncate된 형태로 보여줌 (`{` was never closed 등). Read tool은 Windows view라 정상 | WSL/Windows 마운트 sync delay. 우리 file tool Edit/Write는 Windows 직접, bash는 sandbox snapshot. 한 박자 늦게 sync | bash로 ast/py_compile 검증할 때 *실패해도* 즉시 패닉 X. Read로 Windows 파일 직접 확인 후 *실제로 깨졌는지* 확인. WSL이 1차 검증자라 어차피 사용자가 확정. |
 
 → 원칙: 새 세션에서 sandbox에 torch 깔자마자 **모든 PyTorch 변경을 직접
 돌려본 뒤** 사용자한테 넘긴다. AST·산수만으론 PyTorch 버그를 못 잡는다.
@@ -387,6 +390,81 @@ PROCGEN_ENV.md + LANGUAGE_SPEC.md 4개로 컨텍스트 복원. WSL 검증 결과
 
 ---
 
+## 9.10 Phase 2.2 최종 결과 + POST-HOC saga (2026-05-19/20) ★
+
+### 학습 4번의 saga
+
+| # | 변경 | slot_match | agent_row | agent_col | combo_72 | 판정 |
+|---|---|---|---|---|---|---|
+| 1 | vocab 25 (POST-HOC-1만, P2-7=slot_match로 변경) | 0.779 | 0.336 | 1.000 | 1.000 | 부분 |
+| 2 | POST-HOC-2 (vocab 34 compound) | 0.120 | 0.345 | 0.331 | 0.014 | 시도-실패 |
+| 3 | POST-HOC-2 + lr=1e-3 epoch=30 (검증실험) | 0.120 | 0.339 | 0.318 | 0.014 | X 확정 |
+| 4 | POST-HOC-3 (vocab 26 4슬롯) | 0.114 | 0.339 | 0.337 | 0.014 | 시도-실패 |
+| **5** | **POST-HOC-3 + POST-HOC-4 (warmup 500)** | **0.994** | **0.993** | **0.996** | **1.000** | **★ PASS ★** |
+
+### 핵심 진단 (POST-HOC-4 박제)
+**진짜 원인 = LR warm-up 누락**. flat lr=3e-4가 학습 초기 attention 발산 →
+좁은 학습 dynamics window. vocab 25는 *우연히* 그 좁은 window에 적합했고
+(lucky), vocab 변경 시마다 *예측 불가하게 collapse*. POST-HOC-2/3의 *vocab/
+구조 변경 자체*는 잘못 아니었음 — 표준 *small-transformer best practice*
+누락이 진짜 issue. 외부 문헌 (posterior collapse, attention entropy
+collapse, μParam) 모두 같은 진단.
+
+### 학습 곡선 (POST-HOC-4 성공판)
+- epoch 1~6: 천천히 학습 (rt_slot 0.19→0.81), mode 잔류.
+- **epoch 7: rt_exact 0.430 → 0.990 *점프*** (mode collapse 탈출 순간).
+- epoch 7~10: 안정 수렴 ~0.99.
+
+### Phase 2 산출물 박제
+- `src/split_maze/lm.py` — MazeLM + 손잡이 B autoencoding.
+- `src/split_maze/lm_train.py` — train_lm + 평가 (per-slot breakdown 포함) + gate_pass + warmup scheduler.
+- `scripts/train_lm.py` — CLI (--warmup_steps 노출).
+- `tests/test_lm.py` (27) + `tests/test_lm_train.py` (30).
+- `tests/test_language.py` — vocab 26 + POST-HOC-3 4슬롯 (32 tests).
+- `checkpoints/lm.pt` — vocab 26, slot_match=0.994 학습된 LM.
+- `logs/lm.jsonl`, `results/lm_gate.json` — 학습 로그 + 게이트 결과.
+- 총 ~158 tests (정확한 수는 사용자 WSL 마지막 출력 확인).
+- 권장 git tag: `v1.2-phase2`.
+
+### 박제된 POST-HOC들 (PLAN §10.1)
+- **POST-HOC-1**: P2-7 시퀀스 전체 일치 → slot_match (의미 무손실 해석).
+- **POST-HOC-2**: AGENT_REGION compound 토큰 9개. 시도-실패-접기 (학습 collapse).
+- **POST-HOC-3**: AGENT_REGION 4슬롯 분할 (column 마커 추가). 시도-단독으론-실패 — but **POST-HOC-4와 함께 유지** (POST-HOC-3 구조 + warmup 둘 다 필요).
+- **POST-HOC-4**: LR warm-up 500 step. ★ 진짜 fix. PASS의 결정적 원인.
+
+---
+
+## 9.11 다음 단계 — Phase 3 진입 spec
+
+### 목표 (PLAN §4 / §7.1 Phase 3)
+RL 에이전트 (Phase 1) + LM (Phase 2) 사이에 **인공 뇌량 ACC** (W 행렬, 256×256)
+를 *분리된 재구성 loss*로 학습. (C-thin) 이중 grad 경계 (h_agent detach +
+LM 코어 stop-grad). B3 (probe), B4 (어댑터+next-token), V2 (ACC+분리 재구성)
+3 빌드 별개. 같은 RL 에이전트 공유 (PLAN §5.0 "(C-thin) 부수 효과").
+
+### 진입 *전* 박제할 결정 (새 세션 시작 시 AskUserQuestion)
+| # | 항목 | 옵션 |
+|---|---|---|
+| P3-1 | RL agent 재사용 방식 | (α) re-train + co-train / (β) frozen + post-hoc / (γ) fine-tune + co-train. PLAN §6는 β를 "SPLIT-9 실패 양식"이라 경고. |
+| P3-2 | (C-thin) 인터페이스 경계 | `interface_proj`만 / + 상위 1 트랜스포머 층 |
+| P3-3 | ACC hyperparam | W 초기화 (orthogonal vs xavier), lr, batch, weight_decay |
+| P3-4 | 데이터 수집 분량 | (h_agent, h_lm) 페어 N개 (in-dist 수집, ~수십만~수백만) |
+| P3-5 | 3 빌드 학습 순서 | 동시 / 순차 / V2만 먼저 |
+
+### Phase 3 sub-단계
+- **3.1**: `src/split_maze/acc.py` — W + LayerNorm + 양방향 MSE + (C-thin) detach + 단위 테스트.
+- **3.2**: 데이터 파이프라인 — RL env step → (h_agent, h_lm) 페어 (env.py 또는 paired_collect.py).
+- **3.3**: `src/split_maze/builds.py` — B3, B4, V2 wrapper.
+- **3.4**: 공동 학습 루프 (P3-1 결정 의존).
+- **3.5**: 안정성 리포트 + 게이트 (V2 RL 성능 = B1, 재구성 loss 감소).
+
+### Phase 3 완료 기준 (PLAN §7.1)
+- 공동 학습 발산 없이 수렴.
+- (C-thin) 경계 sanity: V2 빌드의 RL 성능 = B1.
+- 재구성 loss 의미 있게 감소.
+
+---
+
 ## 9.6 사용자 WSL 1차 검증 명령 (2026-05-18 신규)
 
 > 이 세션 끝나면 사용자는 WSL에서 아래를 돌리면 됨.
@@ -479,6 +557,11 @@ PYTHONPATH=src python scripts/train_agent.py \
   ```bash
   git add -A && git commit -m "Phase 1 — agent + PPO + evaluate, 105 tests, gates PASS (in-dist=0.806, OOD misgen=0.5217)"
   git tag v1.1-phase1
+  ```
+- **2026-05-20 ★ Phase 2 완료 — 권장 tag**:
+  ```bash
+  git add -A && git commit -m "Phase 2 — LM + ACC handle B + POST-HOC-4 warmup, ~158 tests, slot_match=0.994 combo_72=1.0"
+  git tag v1.2-phase2
   ```
 
 ---
