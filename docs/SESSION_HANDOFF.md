@@ -1,4 +1,4 @@
-# SPLIT-MAZE — 세션 핸드오프 (2026-05-18)
+# SPLIT-MAZE — 세션 핸드오프 (2026-05-19)
 
 > 새 세션 시작 시 본 문서 + PLAN.md + docs/PROCGEN_ENV.md + docs/LANGUAGE_SPEC.md
 > 4개 읽으면 컨텍스트 95% 복원.
@@ -7,10 +7,13 @@
 
 ## 1. 한 줄 현재 위치
 
-**★ Phase 1 완료 — 게이트 PASS · PASS ★**. in-dist 0.806, OOD goal-misgen
-0.5217 (eligible=276). 105 tests pass. checkpoint
-`checkpoints/maze_aisc_full.pt` 박제. 권장 git tag: `v1.1-phase1`.
-**다음: Phase 2 (합성언어 LM + 손잡이 B)**.
+**★ Phase 2 PASS — 모든 슬롯 ≥0.99, combo_72=1.0 ★** (2026-05-20).
+**POST-HOC-4 가설 확정** — LR warm-up 누락이 진짜 mode-collapse 원인이었음.
+구조: POST-HOC-3 (vocab 26, 4 슬롯: agent·column·heading·cheese) + warmup
+500 step. 결과: slot_match=0.994 / agent_region=0.989(row=0.993, col=0.996) /
+heading=0.995 / cheese_dir=0.998 / combo_72=1.0 / rt_exact=0.987. 학습
+epoch 7에 mode collapse 탈출 점프 명확. 권장 git tag `v1.2-phase2`.
+**다음: Phase 3** — ACC (Artificial Corpus Callosum) + 공동 학습.
 
 ---
 
@@ -57,6 +60,8 @@ test_agent=10, test_ppo=13, test_train=24, **test_evaluate=17**).
 | `ppo.py` | `PPOConfig`, `RolloutBuffer` (GAE λ), `sample_action`, `ppo_loss`, `PPOUpdater` | 13 tests |
 | `train.py` | `obs_to_tensor`, `RolloutStats`, `collect_rollout`, `train`(+rolling-mean), `MockMazeEnv` (gym3-호환 fake) | 24 tests (19 + rolling 5) |
 | `evaluate.py` | `EpisodeRecord`, `compute_in_dist_metrics`, `compute_ood_metrics`(+goal-misgen), `evaluate_episodes` | 17 tests |
+| **`lm.py`** | **`MazeTokenizer`, `LMConfig`, `CausalSelfAttention`, `TransformerBlock`, `MazeLM` (encode→<SUM>·decode_logits·next_token_loss·autoencode_loss·combined_loss·generate, interface/core 파라미터 split). PLAN P2-1..P2-4 박제값 default.** | **27 tests ✓ (WSL 2026-05-19)** |
+| **`lm_train.py`** | **`LMTrainConfig` (P2-5/P2-6 default), `build_corpus_ids`/`split_train_held`/`iter_batches`, `evaluate_roundtrip` (P2-7 exact+slot), `evaluate_72_combinations` (P2-8), `gate_pass`, `train_lm` (AdamW+grad_clip, 매 epoch held-out + roundtrip eval, JSONL+ckpt).** | **24 tests (WSL 검증 대기)** |
 
 ### `tests/`
 - `test_language.py`, `test_env.py`, `test_agent.py`, `test_ppo.py`, **`test_train.py`**.
@@ -133,6 +138,7 @@ test_agent=10, test_ppo=13, test_train=24, **test_evaluate=17**).
 | `ppo.py` 정규화 | `Categorical(logits=NaN)` | 1-샘플 mini-batch에서 `std()=NaN` 전파 (단일 샘플로 unbiased std 정의 불가) | NaN 가드 (`numel()>1`) 박제. 작은 mini-batch 발생 가능한 경계조건 항상 체크. |
 | 2026-05-18 sandbox | `pip install torch` ENOSPC unpack | `/sessions` 디스크 9.8G 중 8.4G가 옛 세션. 옛 세션 rm은 명시 금지 (이전 wedge 원인). torch 휠 532MB는 다운로드되지만 unpack 못 함 | 외부 제약 — 회피 불가. 사용자 WSL을 1차 검증자로 전환. 코드 품질로 보완(가드·dtype 명시·시그니처 정확 매칭). WSL에서 83 passed로 통과 확인 — 보완 전략 유효. |
 | 2026-05-18 mock smoke | 첫 update `val=50` → 두 번째 `val=0.26` | N=4, T=16 → mb 크기 8. advantage normalize std가 8 샘플에서 노이즈 큼 → advantage 부풀려짐 → 24 SGD step에서 value head 한 번 튐, 자기 손실로 회복. clipfrac=0.73, approx_kl=0.15도 동일 시그니처 | *코드 버그 아닌 작은 mini-batch 분산 노이즈*. 진짜 procgen N=64·T=256에선 mb=2048로 통계 안정. Phase 1.4 smoke에서 재확인. |
+| 2026-05-19 test_lm.py 1줄 | `test_cross_entropy_ignore_index_excludes_pad` 첫판: `(N=3, target=[t,t,pad], ignore=pad)` 평균이 `(N=2, target=[t,t])` 평균과 *같다*고 가정 → 실측 4.37 ≠ 4.91 (~8/9 비율) | PyTorch `F.cross_entropy` reduction='mean'에서 weight·ignore_index 분모 계산 디테일이 머릿속 시뮬레이션과 미묘하게 다름. docs는 "averaged over non-ignored"라 하지만 정확한 분모 규칙은 검증 필요 | 우리 코드가 *진짜로* 의존하는 사실은 **"ignored 위치의 logits를 어떻게 바꿔도 loss 불변"** (perturbation 사실). 분모 동작에 대한 *가정*을 단언하지 말고, 실제 의존 사실만 직접 검증. 27 passed after 교체. |
 
 → 원칙: 새 세션에서 sandbox에 torch 깔자마자 **모든 PyTorch 변경을 직접
 돌려본 뒤** 사용자한테 넘긴다. AST·산수만으론 PyTorch 버그를 못 잡는다.
@@ -342,19 +348,42 @@ PYTHONPATH=src python scripts/evaluate.py \
 - **2.3**: `tests/test_lm.py` — 구조 + 손잡이 B + 중립성 단위 테스트.
 - **2.4**: WSL에서 학습 + 게이트 판정 (decode·encode·encode·decode 무손실 ≥0.95).
 
-### 진입 전 박제할 결정 (다음 세션 시작 시 사용자에게 묻는다)
-1. **`<SUM>` 토큰 배치** — 입력 끝(seq[-1])에서 hidden state 추출 vs 별도
-   prepend(seq[0])에서 추출 vs 전 seq hidden 평균? — 결정 후 박제.
-2. **d_model / 층수 sweep 범위** — {128, 192, 256} × {2, 3, 4} 9개 다 돌리는지,
-   기본 (3층, 256) 하나만 + 안 되면 sweep인지.
-3. **오토인코딩 loss 가중치** — λ_ae가 next-token loss 대비 얼마나? PLAN §3.4
-   는 "손잡이 B" 명시지만 정량 미정. λ_ae sweep 또는 1.0 박제.
-4. **코퍼스 크기 N** — LANGUAGE_SPEC.md §9는 "~50k 문장" 제안. 박제 시 확정.
+### 진입 전 박제 결정 — ✅ 박제 완료 (2026-05-19)
+| # | 항목 | 결정 |
+|---|---|---|
+| P2-1 | `<SUM>` 토큰 배치 | **시퀀스 끝에 명시 추가** (`<BOS> ... <SUM>`). causal mask 안에서 전 시퀀스를 본 유일한 위치 → 정보 누락 없이 압축. decode는 `<SUM>` hidden을 condition으로 받아 `<BOS>`부터 자기회귀 생성. |
+| P2-2 | LM 크기 | **기본 (3층, d_model=256, n_head=4, FFN=1024) 단일 모델**. sweep는 게이트 미달 시 fallback. |
+| P2-3 | λ_ae | **1.0 고정** (L = L_nexttoken + 1.0·L_ae). 합격선이 ae ≥0.95에 걸려 동등 가중 안전. |
+| P2-4 | 코퍼스 N | **50,000 문장**. triple당 평균 ~77회, 90/10 분할 시 held-out 5k. |
+
+→ PLAN.md 정밀화 로그 2026-05-19 항목 + LANGUAGE_SPEC.md §9 표에 박제.
+
+### Phase 2.1 코드 산출물 (2026-05-19 박제, WSL 검증 대기)
+- `src/split_maze/lm.py` (~330줄). 구조:
+  - `MazeTokenizer` — language.vocab() 기반 id 매핑 + `collate()` 패딩.
+  - `LMConfig` — Phase 2 박제값 default. `from_tokenizer()` factory.
+  - `CausalSelfAttention` — `F.scaled_dot_product_attention(is_causal=True)`.
+  - `TransformerBlock` — pre-norm (LN → attn → +; LN → MLP → +).
+  - `MazeLM`:
+    - `forward(ids)` → `(logits (B,T+1,V), h_lm (B,d_model))`, `<SUM>` 자동 append.
+    - `encode(ids)` → h_lm만.
+    - `decode_logits(h_lm, prefix_ids)` → teacher-forcing logits (B, 1+T_p, V).
+    - `next_token_loss(ids)`, `autoencode_loss(ids)` → 각각 scalar.
+    - `combined_loss(ids, lambda_ae=1.0)` → dict.
+    - `generate(h_lm, max_len)` → greedy, EOS 후 PAD.
+    - `interface_parameters()` / `core_parameters()` — Phase 3 stop-grad 분할.
+  - Weight tying: `lm_head.weight = tok_embed.weight` (init 후 tie).
+- `tests/test_lm.py` (27 tests):
+  - 토큰화이저 (6), LMConfig (2), 구조·forward·decode shape (4),
+    weight tying·SUM 응답·causal mask (3), losses (4), generation (3),
+    파라미터 split (3), 통합 (2).
+- 검증 상태: 샌드박스 디스크 95% (508MB 남음) → torch 설치 불가, 박제된 패턴 그대로.
+  Python compile + import AST 통과. **사용자 WSL 1차 검증자**.
 
 ### 새 세션 시작 위치
-**현재(2026-05-18) 시점에 세션이 끝나면**, 다음 세션은 PLAN.md + 본 문서
-+ docs/PROCGEN_ENV.md + docs/LANGUAGE_SPEC.md 4개로 컨텍스트 복원. Phase 2
-진입 명령: "Phase 2.1 — LM 설계 결정 4개 박제부터".
+**현재(2026-05-19) 세션 종료 시**, 다음 세션 시작은 본 문서 + PLAN.md +
+PROCGEN_ENV.md + LANGUAGE_SPEC.md 4개로 컨텍스트 복원. WSL 검증 결과(통과/실패)
+를 받아 Phase 2.2 (`scripts/train_lm.py` 중립 코퍼스 학습 CLI) 진입.
 
 ---
 
@@ -362,13 +391,47 @@ PYTHONPATH=src python scripts/evaluate.py \
 
 > 이 세션 끝나면 사용자는 WSL에서 아래를 돌리면 됨.
 
-### A. 전체 단위 테스트 (88 tests 기대 — 83 + rolling 5)
+### A. 전체 단위 테스트 (156 tests 기대 — 105 + 27 lm + 24 lm_train)
 ```bash
 conda activate splitmaze
 cd /mnt/d/brain/split_maze
 PYTHONPATH=src python -m pytest tests/ -q
 ```
-기대 출력 마지막 줄: `88 passed in X.Xs`.
+기대 출력 마지막 줄: `156 passed in X.Xs`.
+
+### A2. ★ 신규 lm_train 테스트만 단독 (Phase 2.2 1차 검증)
+```bash
+PYTHONPATH=src python -m pytest tests/test_lm_train.py -v
+```
+기대: 24 tests pass. 핵심:
+- `test_train_lm_loss_decreases_across_epochs` — 학습 루프가 실제로 손실 감소시키나.
+- `test_evaluate_roundtrip_exact_match_with_mocked_echo` — 평가 산수 올바른가.
+- `test_evaluate_72_combinations_returns_72_total` — 72조합 게이트 카운팅.
+- `test_gate_pass_*` — 임계치 동작.
+- `test_train_lm_saves_checkpoint` — 체크포인트 저장 + 로드 가능.
+
+### C. ★ Phase 2.2 짧은 CPU smoke (~10초)
+```bash
+PYTHONPATH=src python scripts/train_lm.py \
+    --corpus_size 200 --epochs 2 --batch 16 --device cpu --seed 0
+```
+기대: 2 epoch 학습 로그 + Phase 2 gate 출력 (FAIL 정상 — 데이터 작아).
+
+### D. ★ Phase 2.2 정식 학습 + 게이트 판정
+```bash
+mkdir -p checkpoints logs results
+PYTHONPATH=src python scripts/train_lm.py \
+    --corpus_size 50000 --epochs 10 --batch 64 \
+    --device cuda --seed 0 \
+    --save_path checkpoints/lm.pt \
+    --log_path  logs/lm.jsonl \
+    --gate_path results/lm_gate.json
+```
+기대: 10 epoch (수분~10분, CUDA) → 마지막에 `Phase 2 verdict: PASS` 출력.
+PASS 조건 (사전 등록): `roundtrip_exact ≥ 0.95 AND combo_72_pass = 1.0`.
+
+깨지면 보고: 어느 step(A/A2/C/D)에서, 마지막 출력 ~10줄 + traceback,
+`torch.__version__`.
 
 ### B. test_train.py만 단독 (Phase 1.3 직접 점검)
 ```bash

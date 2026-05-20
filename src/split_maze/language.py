@@ -29,8 +29,18 @@ CHEESE_DIR_VALUES: tuple[str, ...] = DIRECTIONS_8
 REGION_ROWS: tuple[str, ...] = ("top", "middle", "bottom")
 REGION_COLS: tuple[str, ...] = ("left", "center", "right")
 
+# NOTE: POST-HOC-2 (2026-05-19) introduced a compound REGION_TOKENS table here,
+# folding (row, col) into single tokens. Decision experiment (lr=1e-3, 30ep)
+# confirmed POST-HOC-2 broke training (slot_match 0.12, mode collapse across
+# all slots — see PLAN §10.1). Reverted. POST-HOC-3 (2026-05-19) instead
+# splits agent_region into two *independent* slots: AGENT (row) + COLUMN (col),
+# each with its own marker. Both then have the same `<marker> <single-token>`
+# shape as HEADING and CHEESE_DIR, which already train to 1.0.
+
 # Slot markers (synonyms drive surface variation; spec §6).
+# POST-HOC-3 (2026-05-19): COLUMN marker added for the col sub-slot.
 MARKER_AGENT: tuple[str, ...] = ("agent", "it")
+MARKER_COLUMN: tuple[str, ...] = ("column",)
 MARKER_HEADING: tuple[str, ...] = ("heading", "going", "moving")
 MARKER_CHEESE: tuple[str, ...] = ("cheese",)
 
@@ -47,13 +57,19 @@ SPECIAL_TOKENS: tuple[str, ...] = (BOS, EOS, PAD, SUM)
 
 
 def vocab() -> list[str]:
-    """Return the sorted, deduplicated full token vocabulary."""
+    """Return the sorted, deduplicated full token vocabulary.
+
+    POST-HOC-3 (2026-05-19): vocabulary = 25 (pre-POST-HOC-2) + 1 new marker
+    `column` = 26 tokens total. The 9 compound REGION_TOKENS from POST-HOC-2
+    are gone (they broke training).
+    """
     toks: set[str] = set()
     toks.update(DIRECTIONS_8)
     toks.add("still")
     toks.update(REGION_ROWS)
     toks.update(REGION_COLS)  # 'left' / 'right' overlap with DIRECTIONS_8 — fine
     toks.update(MARKER_AGENT)
+    toks.update(MARKER_COLUMN)  # POST-HOC-3
     toks.update(MARKER_HEADING)
     toks.update(MARKER_CHEESE)
     toks.update(c for c in CONNECTIVES if c)  # exclude empty
@@ -192,11 +208,17 @@ def render(slots: Slots, *, rng: Optional[random.Random] = None,
     if rng is None:
         rng = random.Random()
 
-    agent_phrase = [rng.choice(MARKER_AGENT), slots.agent_row, slots.agent_col]
+    # POST-HOC-3 (2026-05-19): four independent slot phrases. Each follows the
+    # same `<marker> <single-token>` shape that HEADING/CHEESE_DIR use and
+    # learn to 1.0, so row/col should match. POST-HOC-2 (compound region
+    # token) was tried and reverted because vocab 25→34 broke training; see
+    # PLAN §10.1.
+    agent_phrase = [rng.choice(MARKER_AGENT), slots.agent_row]
+    column_phrase = [rng.choice(MARKER_COLUMN), slots.agent_col]
     heading_phrase = [rng.choice(MARKER_HEADING), slots.heading]
     cheese_phrase = [rng.choice(MARKER_CHEESE), slots.cheese_dir]
 
-    phrases = [agent_phrase, heading_phrase, cheese_phrase]
+    phrases = [agent_phrase, column_phrase, heading_phrase, cheese_phrase]
     rng.shuffle(phrases)
 
     out: list[str] = []
@@ -220,21 +242,32 @@ _FILTER_OUT: frozenset[str] = frozenset({BOS, EOS, PAD, SUM, "and", ","})
 def parse(tokens: list[str]) -> ParsedSlots:
     """Parse tokens → ParsedSlots, robust to slot order, synonyms, connectives.
 
+    POST-HOC-3 (2026-05-19): four independent sub-slots — agent (row),
+    column (col), heading, cheese. Each marker is followed by a single token.
+    agent_region is reassembled into a (row, col) tuple at the end if both
+    halves were found.
+
     Each slot is extracted independently. Invalid or missing values yield
     None for that slot (which scores 0 in slot-match — LANGUAGE_SPEC §8).
     """
     content = [t for t in tokens if t not in _FILTER_OUT]
 
-    agent_region: Optional[tuple[str, str]] = None
+    agent_row: Optional[str] = None
+    agent_col: Optional[str] = None
     heading: Optional[str] = None
     cheese_dir: Optional[str] = None
 
     for i, tok in enumerate(content):
-        if tok in MARKER_AGENT and agent_region is None:
-            if i + 2 < len(content):
-                row, col = content[i + 1], content[i + 2]
-                if row in REGION_ROWS and col in REGION_COLS:
-                    agent_region = (row, col)
+        if tok in MARKER_AGENT and agent_row is None:
+            if i + 1 < len(content):
+                v = content[i + 1]
+                if v in REGION_ROWS:
+                    agent_row = v
+        elif tok in MARKER_COLUMN and agent_col is None:
+            if i + 1 < len(content):
+                v = content[i + 1]
+                if v in REGION_COLS:
+                    agent_col = v
         elif tok in MARKER_HEADING and heading is None:
             if i + 1 < len(content):
                 v = content[i + 1]
@@ -245,6 +278,10 @@ def parse(tokens: list[str]) -> ParsedSlots:
                 v = content[i + 1]
                 if v in CHEESE_DIR_VALUES:
                     cheese_dir = v
+
+    agent_region: Optional[tuple[str, str]] = None
+    if agent_row is not None and agent_col is not None:
+        agent_region = (agent_row, agent_col)
 
     return ParsedSlots(agent_region, heading, cheese_dir)
 

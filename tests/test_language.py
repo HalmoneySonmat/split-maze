@@ -22,7 +22,8 @@ from split_maze.language import (
 
 def test_vocab_size_and_uniqueness():
     v = vocab()
-    assert len(v) == 25, f"expected 25 unique tokens, got {len(v)}: {v}"
+    # POST-HOC-3 (2026-05-19): 25 (pre-POST-HOC-2) + 1 new marker `column` = 26.
+    assert len(v) == 26, f"expected 26 unique tokens, got {len(v)}: {v}"
     assert len(set(v)) == len(v)
 
 
@@ -30,6 +31,12 @@ def test_vocab_contains_specials():
     v = set(vocab())
     for t in (BOS, EOS, PAD, SUM):
         assert t in v
+
+
+def test_vocab_contains_column_marker():
+    """POST-HOC-3 (2026-05-19): the new `column` marker exists in vocab."""
+    v = set(vocab())
+    assert "column" in v
 
 
 def test_directions_8_count():
@@ -154,17 +161,40 @@ def test_render_parse_roundtrip_random():
 
 
 def test_parse_robust_to_connectives():
-    toks = [BOS, "agent", "top", "right", "and", "heading", "up-right",
-            ",", "cheese", "down-left", EOS]
+    # POST-HOC-3: four-slot form with separate agent/column markers.
+    toks = [BOS, "agent", "top", "and", "column", "right", ",",
+            "heading", "up-right", "cheese", "down-left", EOS]
     p = parse(toks)
     assert p.agent_region == ("top", "right")
     assert p.heading == "up-right"
     assert p.cheese_dir == "down-left"
 
 
+def test_render_uses_four_slot_form():
+    """POST-HOC-3: render emits separate `agent <row>` and `column <col>`."""
+    slots = Slots("top", "right", "up-right", "down-left")
+    toks = render(slots, rng=random.Random(0), include_bos_eos=False)
+    # Every slot's marker AND value must appear.
+    assert "agent" in toks or "it" in toks
+    assert "column" in toks
+    assert "top" in toks
+    assert "right" in toks  # might be region col OR direction — both fine
+    assert "up-right" in toks
+    assert "down-left" in toks
+
+
+def test_parse_missing_column_gives_none_agent_region():
+    """If only the row half is present, agent_region must be None."""
+    toks = [BOS, "agent", "top", "heading", "up", "cheese", "down", EOS]
+    p = parse(toks)
+    assert p.agent_region is None
+    assert p.heading == "up"
+    assert p.cheese_dir == "down"
+
+
 def test_parse_missing_slot_returns_none_for_that_slot():
     """If a marker is absent, only that slot becomes None."""
-    toks = [BOS, "agent", "top", "right", "cheese", "down-left", EOS]
+    toks = [BOS, "agent", "top", "column", "right", "cheese", "down-left", EOS]
     p = parse(toks)
     assert p.agent_region == ("top", "right")
     assert p.heading is None

@@ -4,7 +4,10 @@
 > 이 문서가 정하는 것: 정확한 어휘, 문장 문법, describer oracle 함수,
 > 표면 다양성 규칙, 중립 코퍼스 생성, 파싱 규칙.
 
-**상태**: v0.1 박제 ✔ (2026-05-15, 사용자 확인). `[Phase-time]` 표시는 구현 착수 시 확정.
+**상태**: v0.1 박제 ✔ (2026-05-15, 사용자 확인). v0.3 패치 ✔ (2026-05-19,
+PLAN §10.1 POST-HOC-3 — AGENT_REGION을 4 슬롯으로 분할, vocab 25→26).
+*v0.2 (POST-HOC-2 단일 토큰화)는 학습 실패로 시도-접기*. `[Phase-time]`
+표시는 구현 착수 시 확정.
 
 ---
 
@@ -22,13 +25,17 @@
 
 ## 2. 슬롯과 값
 
-| 슬롯 | 의미 | 값 (개수) |
-|---|---|---|
-| `AGENT_REGION` | 에이전트 위치 (3×3 격자) | row{top, middle, bottom} × col{left, center, right} = 9 |
-| `HEADING` | 에이전트의 실제 이동 방향 | 8방위 + `still` = 9 |
-| `CHEESE_DIR` | 에이전트 기준 치즈 방향 | 8방위 = 8 |
+| 슬롯 | 의미 | 값 (개수) | 토큰화 |
+|---|---|---|---|
+| `AGENT_REGION` | 에이전트 위치 (3×3 격자) | row{top,middle,bottom} × col{left,center,right} = 9 | **단일 compound 토큰 9개** (v0.2 POST-HOC-2): `top-left`, `top-center`, ..., `bottom-right` |
+| `HEADING` | 에이전트의 실제 이동 방향 | 8방위 + `still` = 9 | 단일 토큰 |
+| `CHEESE_DIR` | 에이전트 기준 치즈 방향 | 8방위 = 8 | 단일 토큰 |
 
 전체 상태 공간 = 9 × 9 × 8 = **648 triple**.
+
+**v0.2 POST-HOC-2 변경**: AGENT_REGION을 *2 토큰 (`<row> <col>`)에서 단일
+compound 토큰 (`<row>-<col>`)으로* 표현 변경. 의미 구조(슬롯, 값 개수)는
+동일. 이유는 PLAN §10.1 POST-HOC-2.
 
 8방위 토큰: `up, up-right, right, down-right, down, down-left, left, up-left`
 (하이픈 복합어는 *단일 토큰*).
@@ -41,13 +48,17 @@
 |---|---|---|
 | 8방위 | `up up-right right down-right down down-left left up-left` | 8 |
 | 정지 | `still` | 1 |
-| 격자 행 | `top middle bottom` | 3 |
-| 격자 열 | `center` (`left`/`right`는 8방위와 공유) | 1 |
-| 슬롯 마커 | `agent heading cheese` | 3 |
+| 격자 행 (AGENT row 값) | `top middle bottom` | 3 |
+| 격자 열 (AGENT col 값) | `center` (`left`/`right`는 8방위와 공유) | 1 |
+| 슬롯 마커 | `agent column heading cheese` | 4 |
 | 마커 동의어 (표면 다양성, §6) | `it going moving` | 3 |
 | 연결어 (선택적, §6) | `and ,` | 2 |
 | 특수 토큰 | `<BOS> <EOS> <PAD> <SUM>` | 4 |
-| **합계** | | **~25** |
+| **합계** | | **26** (v0.3 POST-HOC-3; v0.1=25, v0.2=34 시도-접기) |
+
+> v0.3 POST-HOC-3 변경: AGENT_REGION 슬롯을 *2 sub-slot* (`agent <row>` +
+> `column <col>`)로 토큰화 — 각 sub-slot이 HEADING/CHEESE_DIR과 동일한
+> `<marker> <단일 토큰>` 모양. 새 마커 `column` 1개 추가. 의미 구조는 그대로.
 
 - `left`/`right`는 8방위와 격자 열에서 *공유* — 슬롯 마커가 문맥을 완전히
   disambiguate (자연어처럼 토큰 재사용, 작은 트랜스포머가 쉽게 처리).
@@ -58,14 +69,17 @@
 
 ## 4. 문장 문법
 
-**정규형 (canonical form)**:
+**정규형 (canonical form, v0.3 POST-HOC-3)**:
 
 ```
-agent <row> <col>  heading <dir|still>  cheese <dir>
+agent <row>  column <col>  heading <dir|still>  cheese <dir>
 ```
 
-예: `agent top right heading up-right cheese down-left`
+예: `agent top column right heading up-right cheese down-left`
 ← 목표 오일반화 시그니처 (heading ≠ cheese 방향).
+
+> 4 슬롯 셔플 가능 (4! = 24 순서). 각 슬롯이 `<marker> <단일 토큰>` 모양으로
+> 통일 — Phase 2.2 학습 비대칭 fix (PLAN §10.1 POST-HOC-3).
 
 - 각 슬롯은 *자기 마커*(`agent`/`heading`/`cheese`)로 시작 → 슬롯 순서가
   바뀌어도 파싱 가능 (§6 표면 다양성의 근거).
@@ -156,14 +170,16 @@ parse(sentence) -> {AGENT_REGION, HEADING, CHEESE_DIR} or partial:
 
 ## 9. `[Phase-time]` 미정 항목 정리
 
-| 항목 | 제안값 | 확정 시점 |
+| 항목 | 값 | 상태 |
 |---|---|---|
 | HEADING 윈도우 K | 4 스텝 | Phase 2 |
 | `move_threshold` | — | Phase 2 (에이전트 행동 스케일 보고) |
 | 동의어 집합 크기 | §3 기준 | Phase 2 |
-| 코퍼스 크기 N | ~50k | Phase 2 |
-| train/held-out 분할 | 표면 형태 기준 | Phase 2 |
-| `<SUM>` 손잡이 배치 | — | Phase 2 (§3.4 손잡이 B 구현) |
+| **코퍼스 크기 N** | **50,000** | **박제 ✔ 2026-05-19 (PLAN P2-4)** |
+| train/held-out 분할 | 90/10, 표면 형태 기준 | Phase 2 (lm 학습 시) |
+| **`<SUM>` 손잡이 배치** | **시퀀스 끝에 명시 추가 (`<BOS> ... <SUM>`)** | **박제 ✔ 2026-05-19 (PLAN P2-1)** |
+| **LM 크기** | **3층, d_model=256, n_head=4, FFN 1024** | **박제 ✔ 2026-05-19 (PLAN P2-2)** |
+| **λ_ae (오토인코딩 가중치)** | **1.0 (L_nexttoken + 1.0·L_ae)** | **박제 ✔ 2026-05-19 (PLAN P2-3)** |
 | 3×3 격자 ↔ 연속 좌표 매핑 | — | Phase 0 (procgen 미로 dims) |
 | `reached` (치즈 도달) | 제외 → D-1 | ③ 문법형 확장 시 |
 
