@@ -1119,6 +1119,36 @@ git tag 계획 (사용자 환경에서 실행):
 
 → 추정 코드량: builds.py 전체 ~450~500줄 + test ~60~80 tests. sub-단계 게이팅 — 3.3.0/3.3.1 먼저 박제, 3.3.2/3.3.3 다음.
 
+### 10.5 Pre-Phase-3.4 박제 (P3-4-1 ~ P3-4-4) — 2026-05-21
+
+> Phase 3.4 (`train_phase3.py` 공동 학습 루프) 진입 전 박제. builds.py 3 빌드
+> WSL PASS (v1.3-phase3.3) 직후.
+
+| # | 항목 | 결정 | 이유 |
+|---|---|---|---|
+| **P3-4-1** | RL rollout 루프 | **A**: train_phase3 자체 augmented 루프 (collect_rollout 본떠, out.h_agent 보존 + 매 step extract_maze_state). | HEADING은 per-env 연속 trajectory(TrajectoryTracker) 필요 → 단일 루프가 자연. h_agent 재-forward 낭비 회피. P3-2-5 (train.py 침범 X)와 정합. |
+| **P3-4-2** | optimizer 구성 | **A**: 빌드별 독립 AdamW 3개 (B3/B4/V2, interpreter_parameters) + agent PPOUpdater 별개. | (C-thin) 신호 분리 — RL 보상 / probe CE / next-token CE / recon이 서로 lr·스케줄 안 섞임. V2 vs B4 통제 깨끗. 빌드끼리 grad 공유 X. |
+| **P3-4-3** | 학습 예산 | **A**: 1 seed, smoke(MockEnv)→mid(1M)→full(25M), Phase 1.4 사다리 동일. | Phase 3 완료 게이트(수렴 + V2 성능=B1 + recon 감소)는 1 seed로 충분. Phase 4가 3~5 seed 통계. K=32 공동학습이라 Phase 1보다 step당 느림. |
+| **P3-4-4** | maze_state 추출 + 로깅 | **A**: env.extract_maze_state(rgb, tracker) (procgen get_state는 opaque). 빌드별 loss + B4 gate(tanh) + recon a2l/l2a + RL ret_rolling JSONL + 빌드별 checkpoint. | extract_maze_state는 사실상 강제 경로 (rgb sprite 검출, Phase 0 박제). |
+
+### Phase 3.4 sub-단계
+- **3.4.1 ✅**: `train_phase3.py` 골격 — Phase3Config + augmented rollout + co-train step + MockEnv smoke (8 tests).
+- **3.4.2 ✅**: `scripts/train_phase3.py` CLI + 로깅/체크포인트 (CLIHelpers 2 tests + CPU smoke 실작동). 전체 314 PASS.
+- **3.4.3 (WSL 실학습)**: 정식 공동학습 smoke→mid→full 25M + Phase 3 완료 게이트 판정.
+
+### Phase 3 완료 게이트 — 사전 등록 ✔ (2026-05-21, 정식 학습 *전* 박제)
+
+> PLAN §7.1 의 3 기준을 구체 수치로. **결과 본 뒤 변경 금지** (잘못 발견 시 §10.1 형식 이유 명시). P3-1=α (새 RL run)이라 에이전트도 새로 학습됨.
+
+| # | 기준 | 임계치 (사전 등록) | 측정 |
+|---|---|---|---|
+| **G1** | 공동학습 수렴 / 발산 없음 | full 25M에서 NaN 0 + entropy 조기붕괴 없음 AND agent `ret_rolling ≥ +8` | logs/phase3.jsonl |
+| **G2** | (C-thin) sanity (V2 성능 = B1) | 공동학습 agent in-dist 성공률 **≥ 0.80** (Phase 1 게이트 동급 — 인터프리터 미오염 확인) | `scripts/evaluate.py --mode in-dist` on phase3 agent ckpt |
+| **G3** | 인터프리터 학습 | B3/B4/V2 각 loss 최종 25%구간 평균 < 첫 25%구간 평균 (의미있는 감소) | logs/phase3.jsonl per-build loss |
+
+- goal-misgen(OOD)율은 **Phase 4 측정**으로 분리 (PLAN §5 결정적 테스트). Phase 3 게이트엔 미포함 (옵션 B 기각).
+- 미달 시: G1 미달 → §8.4 fallback (ACC lr/warmup·β sweep·인터페이스 경계 조정). G2 미달 → (C-thin) grad 누수 진단 (V2ACC interpreter_parameters 점검). G3 미달 → 학습 protocol 점검 (warmup·lr).
+
 ---
 
 ## 11. 다음 행동 — Phase 0 진입
