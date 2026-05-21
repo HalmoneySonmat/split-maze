@@ -1113,8 +1113,8 @@ git tag 계획 (사용자 환경에서 실행):
 
 - **3.3.0 ✅ 코드 박제 (2026-05-21)**: `src/split_maze/adapter.py` (~250줄) — PerceiverBlock + GatedCrossAttentionBlock (split_brain_go copy, d_model=256) + AgentResampler (IMPALA single-vector adapt: h_agent→n_kv=8 KV→n_latents=16 query cross-attn). `tests/test_adapter.py`.
 - **3.3.1 ✅ 코드 박제 (2026-05-21)**: `src/split_maze/builds.py` (~230줄) — `Build` ABC + `B3Probe` (1-hidden MLP, 4 head, probe CE, h_agent.detach()). `tests/test_builds.py`. **WSL 검증 대기**.
-- **3.3.2 🟡 다음**: `B4Adapter` (B4LMWrapper로 LM blocks 사이 xattn) + 단위 테스트.
-- **3.3.3 🟡 다음**: `V2ACC` (interface_proj 학습 + ACC.recon_loss, P3-2-3 재계산) + 단위 테스트.
+- **3.3.2 🟡 코드 박제 (2026-05-21)**: `B4Adapter` — AgentResampler + LM blocks 사이 GatedCrossAttention, next-token CE, LM frozen+eval. gate init=0 → adapter inert (Flamingo identity). (C-thin) agent·LM core 둘 다 보호. test +13. WSL 검증 대기.
+- **3.3.3 🟡 코드 박제 (2026-05-21)**: `V2ACC` — lm.encode(ids) 재계산(P3-2-3) + ACC.recon_loss. LM core frozen, interface_proj만 trainable (P3-2-A). (C-thin) boundary 1(ACC detach)+2(interface만). test +9. WSL 검증 대기. → builds.py 3 빌드(B3/B4/V2) 전부 완성.
 - → SESSION_HANDOFF.md §9.13에 클래스 시그니처 상세.
 
 → 추정 코드량: builds.py 전체 ~450~500줄 + test ~60~80 tests. sub-단계 게이팅 — 3.3.0/3.3.1 먼저 박제, 3.3.2/3.3.3 다음.

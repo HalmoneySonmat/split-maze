@@ -29,6 +29,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from .adapter import AgentResampler, GatedCrossAttentionBlock
 from .language import (
     CHEESE_DIR_VALUES,
     HEADING_VALUES,
@@ -36,7 +37,7 @@ from .language import (
     REGION_ROWS,
     parse,
 )
-from .lm import MazeTokenizer
+from .lm import MazeLM, MazeTokenizer
 
 
 # Slot class counts (B3 head dims) — LANGUAGE_SPEC v0.3.
@@ -212,9 +213,200 @@ class B3Probe(Build):
         yield from self.parameters()
 
 
+# ---- B4: SPLIT-9-pattern adapter ----------------------------------------
+
+
+class B4Adapter(Build):
+    """Flamingo-style adapter build (PLAN §6 B4 ★; P3-3-2 / P3-3-5 박제).
+
+    The faithful re-creation of the SPLIT-9 failure pattern — the build
+    whose head-to-head defeat (or not) by V2 is the project's decisive
+    test (PLAN §5.1, §5.6 합리화율).
+
+    Pipeline:
+        h_agent --AgentResampler--> adapter_tokens (B, n_latents, d_model)
+        ids --tok_embed(+pos)--> x
+        for each LM block:  x = block(x);  x = gated_xattn(x, adapter_tokens)
+        x --ln_f--> --lm_head--> logits
+        loss = next-token CE on the describer sentence (next-token only).
+
+    (C-thin) boundaries:
+    - **Agent** insulated: ``update`` feeds ``h_agent.detach()`` → only the
+      resampler + xattn learn from h_agent, never the agent core.
+    - **LM core** protected: the Phase-2 LM is frozen
+      (``requires_grad_(False)``) and kept in eval (``train`` override) — a
+      deterministic feature extractor, the Flamingo convention. Only the
+      resampler + gated xattn blocks are trainable.
+
+    The describer sentence is fed as a *plain* ``[<BOS> ... <EOS>]`` (no
+    ``<SUM>``) — B4 uses standard next-token LM, not handle-B encode.
+
+    Args:
+        lm:        a Phase-2 :class:`MazeLM` (weights loaded from lm.pt).
+        d_agent:   IMPALA-CNN embedding width (256).
+        n_latents: adapter tokens emitted by the resampler (P3-3-2 → 16).
+        n_kv:      resampler pseudo-token KV slots (≥2).
+        n_heads:   attention heads (resampler + xattn).
+        resampler_blocks: PerceiverBlock depth inside the resampler.
+    """
+
+    def __init__(
+        self,
+        lm: MazeLM,
+        *,
+        d_agent: int = 256,
+        n_latents: int = 16,
+        n_kv: int = 8,
+        n_heads: int = 4,
+        resampler_blocks: int = 2,
+    ):
+        super().__init__()
+        self.lm = lm
+        d_model = lm.config.d_model
+
+        # Freeze the LM core (P3-3-3 + (C-thin) LM 코어 보호).
+        for p in self.lm.parameters():
+            p.requires_grad_(False)
+        self.lm.eval()
+
+        self.resampler = AgentResampler(
+            d_agent=d_agent,
+            d_model=d_model,
+            n_latents=n_latents,
+            n_kv=n_kv,
+            n_heads=n_heads,
+            n_blocks=resampler_blocks,
+        )
+        # One gated cross-attention block after each LM transformer block.
+        self.xattn = nn.ModuleList(
+            [GatedCrossAttentionBlock(d_model, n_heads) for _ in self.lm.blocks]
+        )
+        self.pad_id = lm.config.pad_id
+
+    def train(self, mode: bool = True) -> "B4Adapter":
+        """Set train mode for the adapter but keep the frozen base LM in
+        eval (deterministic feature extractor — Flamingo convention)."""
+        super().train(mode)
+        self.lm.eval()
+        return self
+
+    # ---- forward ----
+
+    def forward(self, ids: torch.Tensor, h_agent: torch.Tensor) -> torch.Tensor:
+        """Standard next-token logits with adapter injection.
+
+        Args:
+            ids:     (B, T) plain ``[<BOS> ... <EOS>]`` token ids.
+            h_agent: (B, d_agent).
+
+        Returns:
+            logits: (B, T, vocab) — logit at position t predicts token t+1.
+        """
+        T = ids.size(1)
+        if T > self.lm.config.max_len:
+            raise ValueError(
+                f"sequence length {T} exceeds LMConfig.max_len "
+                f"{self.lm.config.max_len}"
+            )
+        adapter_tokens = self.resampler(h_agent)             # (B, N, d_model)
+        # Replicate MazeLM._transform but inject xattn between blocks, and
+        # skip embed_dropout (frozen deterministic base).
+        x = self.lm.tok_embed(ids) + self.lm.pos_embed[:, :T]
+        for block, xblock in zip(self.lm.blocks, self.xattn):
+            x = block(x)
+            x = xblock(x, adapter_tokens)
+        x = self.lm.ln_f(x)
+        return self.lm.lm_head(x)
+
+    # ---- update ----
+
+    def update(
+        self,
+        h_agent: torch.Tensor,
+        ids: torch.Tensor,
+        lengths: torch.Tensor,
+    ) -> dict:
+        # Boundary 1 — agent insulated.
+        logits = self.forward(ids, h_agent.detach())          # (B, T, vocab)
+        # Next-token CE: logit at t predicts token t+1. pad ignored.
+        pred = logits[:, :-1].reshape(-1, logits.size(-1))
+        target = ids[:, 1:].reshape(-1)
+        loss = F.cross_entropy(pred, target, ignore_index=self.pad_id)
+        return {"loss": loss}
+
+    def interpreter_parameters(self) -> Iterator[nn.Parameter]:
+        yield from self.resampler.parameters()
+        yield from self.xattn.parameters()
+
+
+# ---- V2: ACC (the main model) -------------------------------------------
+
+
+class V2ACC(Build):
+    """ACC build — the project's main model (PLAN §4; P3-3-5 박제).
+
+    The reconstruction-only interpreter. Pipeline:
+
+        h_lm = lm.encode(ids)              # re-computed every step (P3-2-3)
+        loss = acc.recon_loss(h_agent, h_lm)   # bidirectional MSE (C-thin)
+
+    (C-thin) boundaries:
+    - **Agent** insulated: ``ACC.recon_loss`` detaches ``h_agent`` internally
+      (boundary 1).
+    - **LM core** protected: every LM parameter is frozen *except*
+      ``interface_proj`` (P3-2-A 박제). The reconstruction gradient reaches
+      only ``interface_proj`` (via the re-computed ``h_lm``) + the ACC
+      params (W + LayerNorms). The LM is kept in eval (``train`` override)
+      so the encode path is deterministic.
+
+    Because ``h_lm`` is re-computed from ``ids`` on every ``update`` (rather
+    than cached), the gradient always flows through the *current*
+    ``interface_proj`` — see PLAN §10.3 P3-2-3.
+
+    Args:
+        lm:  a Phase-2 :class:`MazeLM`.
+        acc: an :class:`split_maze.acc.ACC` with matching ``d_lm`` /
+             ``d_agent``.
+    """
+
+    def __init__(self, lm: MazeLM, acc: nn.Module):
+        super().__init__()
+        self.lm = lm
+        self.acc = acc
+
+        # Freeze the LM core; leave only interface_proj trainable (P3-2-A).
+        for name, p in self.lm.named_parameters():
+            p.requires_grad_(name.startswith("interface_proj"))
+        self.lm.eval()
+
+    def train(self, mode: bool = True) -> "V2ACC":
+        """Keep the LM in eval (deterministic encode); interface_proj still
+        trains because eval only affects dropout, not grad."""
+        super().train(mode)
+        self.lm.eval()
+        return self
+
+    def update(
+        self,
+        h_agent: torch.Tensor,
+        ids: torch.Tensor,
+        lengths: torch.Tensor,
+    ) -> dict:
+        # P3-2-3: re-compute h_lm so grad reaches the *current* interface_proj.
+        h_lm = self.lm.encode(ids)
+        # ACC.recon_loss handles boundary 1 (h_agent.detach()) internally.
+        return self.acc.recon_loss(h_agent, h_lm)
+
+    def interpreter_parameters(self) -> Iterator[nn.Parameter]:
+        yield from self.acc.parameters()
+        yield from self.lm.interface_parameters()
+
+
 __all__ = [
     "Build",
     "B3Probe",
+    "B4Adapter",
+    "V2ACC",
     "N_ROW",
     "N_COL",
     "N_HEADING",
