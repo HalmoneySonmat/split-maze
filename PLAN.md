@@ -1109,15 +1109,15 @@ git tag 계획 (사용자 환경에서 실행):
 | **P3-3-4** | 공통 인터페이스 | **A**: `Build` abstract base class — `update(h_agent, ids, lengths) -> loss_dict` + `interpreter_parameters()`. B3Probe/B4Adapter/V2ACC 상속. | train_phase3.py가 polymorphic 호출. P3-5 "1 RL run + 3 해석자 동시 부착" 균일 처리. |
 | **P3-3-5** | loss 형태 | **A**: B3 = probe CE (h_agent.detach() 입력, 4 슬롯 평균). B4 = next-token CE on describer 문장 (LM core stop-grad). V2 = ACC.recon_loss (양방향 MSE, 이미 acc.py). 셋 다 RL 보상과 무관 (agent는 별개 RL 신호). | PLAN §6 박제표 그대로. "양쪽 다 LM 코어 보호" — B4·V2 모두 interface 적응만. |
 
-### Phase 3.3 sub-단계 분할 (다음 세션 코딩)
+### Phase 3.3 sub-단계 분할
 
-- **3.3.0** split_brain_go `adapter/xattn.py` + `adapter/projection.py` → split_maze로 copy + adapt (IMPALA single 256-d vector input; split_brain_go는 9×9 spatial이었음 — 우리는 (B, d_a) → Resampler KV 단순화).
-- **3.3.1** `Build` base + `B3Probe` + 단위 테스트.
-- **3.3.2** `B4Adapter` (B4LMWrapper로 LM blocks 사이 xattn) + 단위 테스트.
-- **3.3.3** `V2ACC` (interface_proj 학습 + ACC.recon_loss, P3-2-3 재계산) + 단위 테스트.
+- **3.3.0 ✅ 코드 박제 (2026-05-21)**: `src/split_maze/adapter.py` (~250줄) — PerceiverBlock + GatedCrossAttentionBlock (split_brain_go copy, d_model=256) + AgentResampler (IMPALA single-vector adapt: h_agent→n_kv=8 KV→n_latents=16 query cross-attn). `tests/test_adapter.py`.
+- **3.3.1 ✅ 코드 박제 (2026-05-21)**: `src/split_maze/builds.py` (~230줄) — `Build` ABC + `B3Probe` (1-hidden MLP, 4 head, probe CE, h_agent.detach()). `tests/test_builds.py`. **WSL 검증 대기**.
+- **3.3.2 🟡 다음**: `B4Adapter` (B4LMWrapper로 LM blocks 사이 xattn) + 단위 테스트.
+- **3.3.3 🟡 다음**: `V2ACC` (interface_proj 학습 + ACC.recon_loss, P3-2-3 재계산) + 단위 테스트.
 - → SESSION_HANDOFF.md §9.13에 클래스 시그니처 상세.
 
-→ 추정 코드량: builds.py ~450~500줄 + test_builds.py ~60~80 tests. 한 세션에 다 못 끝낼 수 있어 sub-단계 게이팅.
+→ 추정 코드량: builds.py 전체 ~450~500줄 + test ~60~80 tests. sub-단계 게이팅 — 3.3.0/3.3.1 먼저 박제, 3.3.2/3.3.3 다음.
 
 ---
 
