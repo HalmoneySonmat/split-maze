@@ -1058,6 +1058,51 @@ git tag 계획 (사용자 환경에서 실행):
 
 ---
 
+#### POST-HOC-5 (2026-05-21) — Phase 3 게이트 G2: 절대 0.80 → 노이즈 floor 인정
+
+- **상황**: Phase 3.4 full 25M 공동학습 완료 (1525 update, ~4.9h). 게이트
+  실측: **G1 PASS** (ret_rolling +10 안정, 발산 0), **G3 PASS** (B3
+  3.67→0.18, B4 1.33→0.79, V2 3.86→0.000 — 셋 다 하강), **G2 = 0.792**
+  (396/500) vs 사전등록 임계 **0.80 → 미달 0.008**.
+
+- **사전등록 임계 (변경 불가 원칙)**: §10.5 P3-4 진입 시 G2 = "공동학습
+  agent in-dist 성공률 ≥ 0.80 (Phase 1 게이트 동급 — 인터프리터 미오염
+  확인)". 결과 본 후 *임계 자체는 안 낮춤*. 대신 *왜 이 proxy가
+  miscalibrated였는지* 본 Post-hoc에 사유 명시 (SPLIT-MNIST PLAN 동명 섹션 양식).
+
+- **진단 (왜 노이즈인가)**:
+  1. **검정력 부족**: n=500, p̂=0.792 → SE≈0.018, 95% CI **[0.756, 0.828]**.
+     0.80이 CI 한가운데 → 500 에피소드로는 "진짜 성공률 ≥0.80" 판별 불가.
+  2. **Phase 1 동일 eval = 0.806 (403/500)**: 이번 α 새 에이전트 0.792
+     (396/500)와 **7 에피소드 차이** — 같은 노이즈 밴드. 0.80 선이 "유능한
+     maze 에이전트"의 노이즈 floor 한가운데를 가름.
+  3. **(C-thin) 구조적 미오염**: 에이전트는 순수 PPO, 인터프리터 grad
+     차단 (test_acc/test_builds `h_agent.grad is None` 검증). G1 ret=+10
+     완벽 수렴 = 오염 시 불가능한 결과. → G2의 *진짜 의도* ("=B1, 미오염")는
+     충족.
+  4. **0.80은 Phase 1에서 빌려온 proxy**: G2 의도는 절대 성능이 아니라
+     "공동학습이 에이전트를 안 망쳤나(=B1)". 절대 0.80은 그 proxy였고
+     노이즈 floor에 걸린 미세 미달.
+
+- **판정**: **G2 PASS-via-Post-hoc** (사유: 위 1~4). 즉 Phase 3 완료 기준
+  G1·G2·G3 모두 충족으로 간주. 단 *임의 하향이 아니라 사유 박제*임을 명시.
+  (사용자 결정 2026-05-21: 옵션 C — 노이즈 인정 + Post-hoc + Phase 4 진입.
+  더 엄밀히는 옵션 A[2000 eps 재측정]/B[B1 직접 비교]도 가능했으나, noise
+  진단이 충분히 명확 + Phase 4 OOD가 진짜 신호라 즉시 진입 택함.)
+
+- **★ V2 recon=0.000 플래그 (Phase 4로 이월)**: V2 ACC 재구성 loss가
+  ~0까지 수렴. 에이전트가 결정론적으로 수렴(ret=10)하면 in-dist h_agent
+  분산이 작아져 *재구성이 trivial*해질 수 있음. → **Phase 4 측정 #2
+  (cosine·슬롯 충실도)에서 in-dist는 V2≈B4로 안 갈라질 위험**. *진짜 갈림은
+  OOD* (PLAN §5.1 결정적 테스트)란 설계와 정합. Phase 4에서 in-dist vs OOD
+  분리 보고 + V2 recon이 *의미있는 정렬*인지 *degenerate collapse*인지
+  진단 필요 (mean-ablation 대조, §5.3).
+
+- **산출물**: `checkpoints/phase3/{agent,B3,B4,V2}.pt`, `logs/phase3.jsonl`,
+  `results/phase3_in_dist.json`. 권장 git tag `v1.3-phase3`.
+
+---
+
 ### 10.2 Pre-Phase-3 박제 (P3-1 ~ P3-5) — 2026-05-20
 
 > Phase 3 진입 *전* AskUserQuestion으로 옵션·추천·이유 검토 후 박제한 5개

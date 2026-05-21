@@ -26,9 +26,13 @@ stride=4 페어 6.25M + 1 RL run 동시 3 해석자.
   3.4.1 `train_phase3.py` co-train 루프 (8) / 3.4.2 `scripts/train_phase3.py` CLI (2).
 - **전체 회귀 314 PASS (회귀 0).** git tag 권장 `v1.3-phase3.4` (직전 `v1.3-phase3.3`).
 - 박제 결정 전부: P3-1~5 / P3-2-1~5 / P3-3-1~5 / P3-4-1~4 (§10.2~§10.5).
-- **Phase 3 완료 게이트 사전 등록 ✔**: G1 수렴(ret≥+8) / G2 in-dist≥0.80 / G3 3빌드 loss 감소 (§9.15 / §10.5).
-- **다음: Phase 3.4.3 = WSL 정식 공동학습** (사용자 실행, procgen GPU 수시간) —
-  smoke→mid→full 25M + 게이트 판정. 명령 사다리 §9.15. 그 후 Phase 4 (측정).
+- **★ Phase 3 완료 (2026-05-21) ★**: full 25M 공동학습 PASS. G1✅(ret+10) /
+  G3✅(B3·B4·V2 loss 하강) / G2 0.792→POST-HOC-5 노이즈 인정 PASS. git tag
+  `v1.3-phase3`. 산출물 checkpoints/phase3/{agent,B3,B4,V2}.pt.
+- **다음: Phase 4 (측정 — 이 프로젝트의 심장)** — V2 vs B4 충실도 (cosine +
+  슬롯 일치율, in-dist + **OOD 결정적 테스트**), 활성 스왑(#3), Procrustes(#4),
+  합리화율. ★ V2 recon=0이라 in-dist 충실도 trivial 위험 → OOD가 진짜 신호.
+  PLAN §5 측정 spec + §5.8 Scenario A/B/C.
 
 ---
 
@@ -135,9 +139,9 @@ test_agent=10, test_ppo=13, test_train=24, **test_evaluate=17**).
 | **3.1 ACC 모듈** | ✅ WSL PASS | `acc.py` 42 tests. |
 | **3.2 paired_collect** | ✅ WSL PASS | `paired_collect.py` (PairBuffer FIFO + PairedCollector) 43 tests. |
 | **3.3 builds (B3/B4/V2)** | ✅ WSL PASS | `adapter.py` + `builds.py` (Build/B3Probe/B4Adapter/V2ACC) + `test_adapter`(19)+`test_builds`(40). git tag v1.3-phase3.3. |
-| **3.4 공동 학습** | 🟡 3.4.1 골격 코드 박제 | `train_phase3.py` (Phase3Config + augmented rollout + co-train 루프) + `test_train_phase3`. WSL 검증 중. 다음: 3.4.2 CLI, 3.4.3 정식 학습+게이트. |
-| 3.5 안정성 리포트 + 게이트 | 대기 | V2 RL성능=B1, recon 감소, 발산 없음 |
-| 4 측정 + 결정적 테스트 | 대기 | V2 vs B4 충실성 (cosine + 슬롯) + 활성 스왑 + Procrustes |
+| **3.4 공동 학습** | ✅ **PASS (2026-05-21)** | `train_phase3.py` + `scripts/train_phase3.py`. full 25M 공동학습 (1525 upd, 4.9h). G1✅ G3✅ G2(0.792)→POST-HOC-5 PASS. git tag `v1.3-phase3`. |
+| 3.5 / Phase 3 게이트 | ✅ PASS | G1 ret+10 / G2 in-dist 0.792 (노이즈 인정) / G3 3빌드 loss 하강. V2 recon=0 → Phase 4 OOD 주목. |
+| **4 측정 + 결정적 테스트** | ← **다음** | V2 vs B4 충실성 (cosine + 슬롯) + 활성 스왑 + Procrustes + OOD 합리화율. PLAN §5 / §5.8 Scenario. |
 
 ---
 
@@ -695,7 +699,7 @@ AskUserQuestion (옵션·추천·이유). 그 다음 sub-단계 코딩."
 ### Phase 3.4 sub-단계
 - **3.4.1 ✅ WSL PASS (2026-05-21)**: `src/split_maze/train_phase3.py` (~290줄) — `Phase3Config` + `collect_rollout_with_pairs` (augmented: h_agent + maze_state per step, 정렬=에이전트가 본 상태) + `train_phase3` co-train 루프 (PPO + paired_collect + 빌드별 K=32 update, warmup, 빌드별 독립 optimizer). `state_extractor` 주입 가능. `tests/test_train_phase3.py` 8 tests. 전체 회귀 312 PASS (회귀 0). (test 1개 fail→정정: extract_maze_state가 노이즈에 false-positive — §8 buglog.)
 - **3.4.2 ✅ WSL PASS (2026-05-21)**: `scripts/train_phase3.py` CLI (--mock / procgen, --lm_checkpoint 로드→B4/V2 각 사본, --builds 선택, 빌드별 JSONL+ckpt). CLIHelpers 2 tests + CPU smoke 실작동 (B3 5.28→3.89, 3빌드 동시 학습 확인). 전체 회귀 **314 PASS** (회귀 0). → **Phase 3.4 코드(라이브러리+CLI) 전부 완성·검증**. git tag 권장 `v1.3-phase3.4`.
-- **3.4.3 🟡 다음 (WSL 실학습 — 사용자 실행)**: 정식 공동학습 smoke→mid→full 25M (procgen GPU, 수시간) + Phase 3 완료 게이트 판정 (§9.15 사전등록).
+- **3.4.3 ✅ 완료 (2026-05-21) — Phase 3 PASS**: full 25M 공동학습 (1525 upd, ~4.9h). **G1 PASS** (ret +10 안정), **G3 PASS** (B3 3.67→0.18 / B4 1.33→0.79 / V2 3.86→0.000), **G2 0.792 → POST-HOC-5로 노이즈 인정 PASS** (CI[0.756,0.828]∋0.80, ≈Phase1 0.806, C-thin 구조적 미오염). 산출물 `checkpoints/phase3/*.pt` + `logs/phase3.jsonl` + `results/phase3_in_dist.json`. git tag `v1.3-phase3`. ★ V2 recon=0 → Phase 4 in-dist 충실도 trivial 위험 (OOD가 진짜 신호).
 
 ### ⚠ 주의 (다음 세션)
 - maze_state 추출은 procgen rgb 의존 → train_phase3.py의 paired_collect 통합은
@@ -730,6 +734,15 @@ PYTHONPATH=src python scripts/train_phase3.py \
     --lm_checkpoint checkpoints/lm.pt --builds B3,B4,V2 \
     --log_path logs/phase3_smoke.jsonl
 # 기대: pol/val healthy, pairs>0 (실제 sprite 검출), B3/B4/V2 loss 출력, NaN 없음.
+# ★ 실측 smoke (2026-05-21, 50k, 48 upd, 77s, ~638 sps) — PASS:
+#   - pairs=256/update 일정 (실 maze 프레임 sprite 검출 정상).
+#   - 인터프리터 loss 전부 하강: B3 3.50→0.24, V2 3.89→0.09, B4 1.33→0.85.
+#   - val 스파이크 점점 축소 (72→36→19→7→2.7…), NaN 없음 — 발산 아님.
+#   - ret_rolling +10→+0.7 하강은 *divergence 아님*: 초기 완료 에피소드 1~2개
+#     (운 좋은 +10)가 window 채워지며 랜덤정책 평균(~+0.7)으로 회귀한 small-sample
+#     artifact. 50k는 미로풀이 학습엔 너무 짧음 (Phase 1도 50k smoke 낮음, 1M부터 상승).
+#   - ★ 다음 확인: (C-thin)이라 에이전트=순수 PPO → mid(1M)에서 ret이 Phase 1처럼
+#     +3 부근까지 올라가야 정상. 안 오르면 조사 (co-train 간섭 의심).
 
 # 2) mid (~30분~1h) — co-train 추세
 PYTHONPATH=src python scripts/train_phase3.py \
@@ -738,6 +751,15 @@ PYTHONPATH=src python scripts/train_phase3.py \
     --lm_checkpoint checkpoints/lm.pt --builds B3,B4,V2 \
     --save_dir checkpoints/phase3_mid --log_path logs/phase3_mid.jsonl
 # 기대: ret_rolling 상승 추세, recon/probe/next-token loss 하강.
+# ★ 실측 mid (2026-05-21, 1M, 61 upd, 708s, ~1410 sps) — PASS, on track:
+#   - ret_rolling: upd1~21 ~+2-3 → upd22~49 저점 ~+0.2 (U자) → upd50~60 상승
+#     +1.2→+4.4, 끝 +4.0 상승 중. Phase 1 mid(1M)=+3.4 동급+ → (C-thin) 검증
+#     (에이전트=순수 PPO, Phase 1처럼 학습). G1(ret≥+8) 진로 양호.
+#   - U자 저점은 정상 PPO exploration→exploitation (value head 보정기 정책 흔들림
+#     → val loss 83→0.3 수렴 후 정책 개선 폭발). 발산 아님.
+#   - 인터프리터: V2 3.86→0.11(강), B3 3.67→0.53, B4 1.33→0.92(plateau, frozen
+#     LM+어댑터 제한 용량 — 설계상 약한 해석자). G3 셋 다 하강.
+#   - 체크포인트 checkpoints/phase3_mid/{agent,B3,B4,V2}.pt 저장 확인.
 
 # 3) full 25M (~수시간) — Phase 3 게이트 목표
 PYTHONPATH=src python scripts/train_phase3.py \
