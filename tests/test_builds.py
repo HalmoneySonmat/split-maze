@@ -33,8 +33,10 @@ from split_maze.builds import (  # noqa: E402
     N_ROW,
     B3Probe,
     B4Adapter,
+    B4Thin,
     Build,
     V2ACC,
+    V2Rich,
 )
 from split_maze.language import (  # noqa: E402
     CHEESE_DIR_VALUES,
@@ -396,6 +398,22 @@ class TestB4AdapterForward:
         out_b = b4(ids, torch.randn(3, 16))
         assert not torch.allclose(out_a, out_b)
 
+    def test_generate_shape_and_bos(self):
+        tok = MazeTokenizer()
+        lm = _small_lm(tok)
+        b4 = B4Adapter(lm, d_agent=16)
+        gen = b4.generate(torch.randn(3, 16), max_len=12)
+        assert gen.shape[0] == 3 and gen.shape[1] <= 12
+        assert (gen[:, 0] == lm.config.bos_id).all()   # starts at <BOS>
+
+    # NOTE: a "different h_agent → different generation" assertion was tried
+    # here but removed — greedy argmax decode from an *untrained* small LM is
+    # degenerate (repeats one token regardless of the adapter), so h_agent
+    # sensitivity is invisible at the token level without a trained LM. That
+    # behavioural property is an *integration* check (eval_builds.py on the
+    # real lm.pt); the forward-logit sensitivity is already covered by
+    # test_open_gates_make_h_agent_matter.
+
     def test_forward_too_long_raises(self):
         tok = MazeTokenizer()
         lm = _small_lm(tok)
@@ -494,28 +512,24 @@ class TestV2ACCConstruction:
         v2, _, _ = _v2(tok)
         assert isinstance(v2, Build)
 
-    def test_only_interface_proj_trainable_in_lm(self):
+    def test_entire_lm_frozen(self):
+        # POST-HOC-6: the *whole* LM is frozen, interface_proj included.
         tok = MazeTokenizer()
         v2, lm, _ = _v2(tok)
         for name, p in lm.named_parameters():
-            if name.startswith("interface_proj"):
-                assert p.requires_grad, name
-            else:
-                assert not p.requires_grad, name
+            assert not p.requires_grad, name
 
-    def test_interpreter_params_are_acc_plus_interface(self):
+    def test_interpreter_params_are_acc_only(self):
+        # POST-HOC-6: only ACC W learns (LN affine=False → no LN params;
+        # interface_proj frozen).
         tok = MazeTokenizer()
         v2, lm, acc = _v2(tok)
         interp = list(v2.interpreter_parameters())
-        expected = list(acc.parameters()) + list(lm.interface_parameters())
-        assert len(interp) == len(expected)
+        expected = list(acc.parameters())          # = [W]
+        assert len(interp) == len(expected) == 1
         interp_ids = set(id(p) for p in interp)
-        # Frozen core params must NOT be in the interpreter set.
-        core_ids = set(
-            id(p) for n, p in lm.named_parameters()
-            if not n.startswith("interface_proj")
-        )
-        assert interp_ids.isdisjoint(core_ids)
+        lm_ids = set(id(p) for p in lm.parameters())
+        assert interp_ids.isdisjoint(lm_ids)        # no LM param trains
 
     def test_train_keeps_lm_in_eval(self):
         tok = MazeTokenizer()
@@ -544,17 +558,20 @@ class TestV2ACCUpdate:
         v2.update(h, ids, lengths)["loss"].backward()
         assert h.grad is None
 
-    def test_lm_core_receives_no_grad_but_interface_does(self):
-        """(C-thin) boundary 2 — only interface_proj learns on the LM side."""
+    def test_lm_receives_no_grad(self):
+        """POST-HOC-6 (C-thin) boundary 2 — the entire LM is frozen,
+        interface_proj included. Only ACC W learns."""
         tok = MazeTokenizer()
-        v2, lm, _ = _v2(tok)
+        v2, lm, acc = _v2(tok)
         ids, lengths = _sentence_batch(tok, B=5)
         v2.update(torch.randn(5, 16), ids, lengths)["loss"].backward()
-        # interface_proj gets grad.
-        assert lm.interface_proj.weight.grad is not None
-        assert lm.interface_proj.weight.grad.abs().sum().item() > 0.0
-        # A core block param gets no grad (frozen → grad stays None).
+        # interface_proj frozen → no grad.
+        assert lm.interface_proj.weight.grad is None
+        # A core block param: no grad.
         assert lm.blocks[0].ln1.weight.grad is None
+        # ACC W is the thing that learns.
+        assert acc.W.grad is not None
+        assert acc.W.grad.abs().sum().item() > 0.0
 
     def test_acc_W_receives_grad(self):
         tok = MazeTokenizer()
@@ -578,3 +595,246 @@ class TestV2ACCUpdate:
             opt.step()
         loss1 = v2.update(h, ids, lengths)["loss"].item()
         assert loss1 < loss0
+
+
+# ====================================================== B4Thin (CTRL-2x2 cell)
+
+
+def _b4thin(tok: MazeTokenizer, d_agent: int = 16):
+    """B4Thin over a small LM (d_model=32)."""
+    lm = _small_lm(tok)
+    return B4Thin(lm, d_agent=d_agent), lm
+
+
+class TestB4ThinConstruction:
+    def test_is_a_build(self):
+        tok = MazeTokenizer()
+        b, _ = _b4thin(tok)
+        assert isinstance(b, Build)
+
+    def test_W_shape_is_dlm_by_dagent(self):
+        tok = MazeTokenizer()
+        b, lm = _b4thin(tok, d_agent=16)
+        assert tuple(b.W.shape) == (lm.config.d_model, 16)
+
+    def test_entire_lm_frozen(self):
+        tok = MazeTokenizer()
+        b, lm = _b4thin(tok)
+        for name, p in lm.named_parameters():
+            assert not p.requires_grad, name
+
+    def test_train_keeps_lm_in_eval(self):
+        tok = MazeTokenizer()
+        b, lm = _b4thin(tok)
+        b.train()
+        assert not lm.training
+
+    def test_bad_init_raises(self):
+        tok = MazeTokenizer()
+        with pytest.raises(ValueError):
+            B4Thin(_small_lm(tok), d_agent=16, init="nope")
+
+
+class TestB4ThinInterface:
+    def test_bridge_shape(self):
+        tok = MazeTokenizer()
+        b, lm = _b4thin(tok, d_agent=16)
+        out = b.bridge(torch.randn(5, 16))
+        assert tuple(out.shape) == (5, lm.config.d_model)
+
+    def test_interpreter_params_are_W_only(self):
+        # layernorm_affine=False default → only W trains; LM excluded.
+        tok = MazeTokenizer()
+        b, lm = _b4thin(tok)
+        interp = list(b.interpreter_parameters())
+        assert len(interp) == 1
+        assert interp[0] is b.W
+        lm_ids = set(id(p) for p in lm.parameters())
+        assert id(interp[0]) not in lm_ids
+        for p in interp:
+            assert p.requires_grad
+
+    def test_affine_adds_ln_params(self):
+        tok = MazeTokenizer()
+        b = B4Thin(_small_lm(tok), d_agent=16, layernorm_affine=True)
+        # W + ln_agent.weight + ln_agent.bias.
+        assert len(list(b.interpreter_parameters())) == 3
+
+
+class TestB4ThinUpdate:
+    def test_update_returns_loss(self):
+        tok = MazeTokenizer()
+        b, _ = _b4thin(tok)
+        ids, lengths = _sentence_batch(tok, B=5)
+        out = b.update(torch.randn(5, 16), ids, lengths)
+        assert out["loss"].ndim == 0
+        assert torch.isfinite(out["loss"])
+
+    def test_h_agent_receives_no_grad(self):
+        """(C-thin) boundary 1."""
+        tok = MazeTokenizer()
+        b, _ = _b4thin(tok)
+        ids, lengths = _sentence_batch(tok, B=5)
+        h = torch.randn(5, 16, requires_grad=True)
+        b.update(h, ids, lengths)["loss"].backward()
+        assert h.grad is None
+
+    def test_lm_no_grad_only_W(self):
+        """LM frozen (boundary 2); only W learns."""
+        tok = MazeTokenizer()
+        b, lm = _b4thin(tok)
+        ids, lengths = _sentence_batch(tok, B=5)
+        b.update(torch.randn(5, 16), ids, lengths)["loss"].backward()
+        assert lm.interface_proj.weight.grad is None
+        assert lm.blocks[0].ln1.weight.grad is None
+        assert b.W.grad is not None
+        assert b.W.grad.abs().sum().item() > 0.0
+
+    def test_optim_reduces_loss(self):
+        torch.manual_seed(0)
+        tok = MazeTokenizer()
+        b, _ = _b4thin(tok)
+        ids, lengths = _sentence_batch(tok, B=8)
+        h = torch.randn(8, 16)
+        opt = torch.optim.AdamW(b.interpreter_parameters(), lr=1e-2)
+        loss0 = b.update(h, ids, lengths)["loss"].item()
+        for _ in range(40):
+            opt.zero_grad()
+            b.update(h, ids, lengths)["loss"].backward()
+            opt.step()
+        loss1 = b.update(h, ids, lengths)["loss"].item()
+        assert loss1 < loss0
+
+
+class TestB4ThinGenerate:
+    def test_generate_runs_shape(self):
+        tok = MazeTokenizer()
+        b, _ = _b4thin(tok)
+        gen = b.generate(torch.randn(3, 16), max_len=12)
+        # Same path as lm.generate(ĥ_lm); just assert sane shape + dtype.
+        assert gen.dim() == 2 and gen.shape[0] == 3 and gen.shape[1] >= 1
+        assert gen.dtype == torch.long
+
+
+# ====================================================== V2Rich (CTRL-2x2 cell)
+
+
+def _v2rich(tok: MazeTokenizer, d_agent: int = 16):
+    """V2Rich over a small LM (d_model=32, max_len=32), small bridge."""
+    lm = _small_lm(tok)
+    return V2Rich(lm, d_agent=d_agent, n_latents=8, n_kv=4, n_heads=4), lm
+
+
+class TestV2RichConstruction:
+    def test_is_a_build(self):
+        tok = MazeTokenizer()
+        v, _ = _v2rich(tok)
+        assert isinstance(v, Build)
+
+    def test_entire_lm_frozen(self):
+        tok = MazeTokenizer()
+        v, lm = _v2rich(tok)
+        for name, p in lm.named_parameters():
+            assert not p.requires_grad, name
+
+    def test_train_keeps_lm_in_eval(self):
+        tok = MazeTokenizer()
+        v, lm = _v2rich(tok)
+        v.train()
+        assert not lm.training
+
+    def test_pos_queries_cover_max_len(self):
+        tok = MazeTokenizer()
+        v, lm = _v2rich(tok)
+        assert v.pos_queries.shape[0] == lm.config.max_len
+
+
+class TestV2RichInternals:
+    def test_teacher_hidden_shape_and_detached(self):
+        tok = MazeTokenizer()
+        v, lm = _v2rich(tok)
+        ids, lengths = _sentence_batch(tok, B=5)
+        Z = v._teacher_hidden(ids)
+        assert Z.shape[0] == 5
+        assert Z.shape[1] == ids.shape[1] + 1     # <SUM> appended
+        assert Z.shape[2] == lm.config.d_model
+        assert not Z.requires_grad                 # frozen target
+
+    def test_student_shape(self):
+        tok = MazeTokenizer()
+        v, lm = _v2rich(tok)
+        Zhat = v._student(torch.randn(5, 16), 7)
+        assert tuple(Zhat.shape) == (5, 7, lm.config.d_model)
+
+
+class TestV2RichUpdate:
+    def test_update_returns_loss(self):
+        tok = MazeTokenizer()
+        v, _ = _v2rich(tok)
+        ids, lengths = _sentence_batch(tok, B=5)
+        out = v.update(torch.randn(5, 16), ids, lengths)
+        assert out["loss"].ndim == 0
+        assert torch.isfinite(out["loss"])
+
+    def test_h_agent_receives_no_grad(self):
+        """(C-thin) boundary 1."""
+        tok = MazeTokenizer()
+        v, _ = _v2rich(tok)
+        ids, lengths = _sentence_batch(tok, B=5)
+        h = torch.randn(5, 16, requires_grad=True)
+        v.update(h, ids, lengths)["loss"].backward()
+        assert h.grad is None
+
+    def test_lm_receives_no_grad(self):
+        """LM is a frozen target only (boundary 2)."""
+        tok = MazeTokenizer()
+        v, lm = _v2rich(tok)
+        ids, lengths = _sentence_batch(tok, B=5)
+        v.update(torch.randn(5, 16), ids, lengths)["loss"].backward()
+        assert lm.interface_proj.weight.grad is None
+        assert lm.blocks[0].ln1.weight.grad is None
+
+    def test_interpreter_params_train_and_exclude_lm(self):
+        tok = MazeTokenizer()
+        v, lm = _v2rich(tok)
+        interp = list(v.interpreter_parameters())
+        assert len(interp) > 0
+        lm_ids = set(id(p) for p in lm.parameters())
+        for p in interp:
+            assert p.requires_grad
+            assert id(p) not in lm_ids
+
+    def test_optim_reduces_loss(self):
+        torch.manual_seed(0)
+        tok = MazeTokenizer()
+        v, _ = _v2rich(tok)
+        ids, lengths = _sentence_batch(tok, B=8)
+        h = torch.randn(8, 16)
+        opt = torch.optim.AdamW(v.interpreter_parameters(), lr=1e-2)
+        loss0 = v.update(h, ids, lengths)["loss"].item()
+        for _ in range(60):
+            opt.zero_grad()
+            v.update(h, ids, lengths)["loss"].backward()
+            opt.step()
+        loss1 = v.update(h, ids, lengths)["loss"].item()
+        assert loss1 < loss0
+
+
+class TestV2RichGenerate:
+    def test_generate_bos_and_shape(self):
+        tok = MazeTokenizer()
+        v, _ = _v2rich(tok)
+        gen = v.generate(torch.randn(3, 16), max_len=12)
+        assert gen.dim() == 2 and gen.shape[0] == 3
+        assert (gen[:, 0] == v.bos_id).all()       # we prepend <BOS>
+        assert gen.dtype == torch.long
+
+    def test_generate_pads_after_eos(self):
+        tok = MazeTokenizer()
+        v, _ = _v2rich(tok)
+        gen = v.generate(torch.randn(4, 16), max_len=12)
+        for row in gen:
+            toks = row.tolist()
+            if v.eos_id in toks:
+                k = toks.index(v.eos_id)
+                assert all(t == v.pad_id for t in toks[k + 1:])

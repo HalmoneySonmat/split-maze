@@ -61,6 +61,23 @@ class ACCConfig:
     d_lm: int = 256
     init: str = "orthogonal"
     layernorm_eps: float = 1e-5
+    # POST-HOC-6 (2026-05-21): LayerNorm is non-learnable by default. A
+    # learnable affine (γ,β) is a representational-collapse path — γ→0 makes
+    # ñ a constant, enabling the trivial recon=0 solution that sank the
+    # Phase-3 V2 (diagnose_v2). With affine=False, ñ is forced to zero-mean
+    # unit-variance, so the constant-collapse minimum disappears and only W
+    # carries the alignment (= SPLIT-MNIST V2 본형). The scale-alignment
+    # purpose (PLAN §4.2) is kept by the normalization itself.
+    layernorm_affine: bool = False
+    # POST-HOC-7 (2026-05-22): when False, untie the bridge into two
+    # asymmetric matrices — W_a2l (agent→lm, generation) and W_l2a
+    # (lm→agent) — instead of one tied W + Wᵀ. The ceiling diagnostic
+    # showed the tied-bidirectional constraint capped the *generation*
+    # direction (cosine 0.27) far below the one-directional linear ceiling
+    # (~0.47). Untying lets each direction reach its own ceiling. This is
+    # PLAN §9 Deferred's "비대칭 W" ablation, adopted on the ceiling data.
+    # PLAN §4.2 default was tied=True; V2/Phase-4 use tied=False.
+    tied: bool = True
 
 
 # ---- Module -------------------------------------------------------------
@@ -94,28 +111,45 @@ class ACC(nn.Module):
 
         # LayerNorm pre-projection — scale alignment for the two domains
         # (PLAN §4.2). Both have learnable affine params; both are ACC-side.
-        self.ln_agent = nn.LayerNorm(cfg.d_agent, eps=cfg.layernorm_eps)
-        self.ln_lm = nn.LayerNorm(cfg.d_lm, eps=cfg.layernorm_eps)
+        self.ln_agent = nn.LayerNorm(cfg.d_agent, eps=cfg.layernorm_eps,
+                                     elementwise_affine=cfg.layernorm_affine)
+        self.ln_lm = nn.LayerNorm(cfg.d_lm, eps=cfg.layernorm_eps,
+                                  elementwise_affine=cfg.layernorm_affine)
 
-        # Single tied projection. Shape (d_lm, d_a) so ``F.linear(x_agent, W)``
-        # maps (B, d_a) → (B, d_lm), and ``F.linear(x_lm, W.t())`` maps
-        # (B, d_lm) → (B, d_a).
+        # Agent→lm projection (generation direction). Shape (d_lm, d_a) so
+        # ``F.linear(x_agent, W)`` maps (B, d_a) → (B, d_lm).
         self.W = nn.Parameter(torch.empty(cfg.d_lm, cfg.d_agent))
+        # POST-HOC-7: lm→agent direction. tied → reuse W.t(); untied → its
+        # own matrix (d_a, d_lm). Untying frees the generation direction
+        # from the tied compromise (ceiling 0.27 → ~0.47).
+        if cfg.tied:
+            self.W_l2a: Optional[nn.Parameter] = None
+        else:
+            self.W_l2a = nn.Parameter(torch.empty(cfg.d_agent, cfg.d_lm))
         self._init_W(cfg.init)
 
     # ---- init / reset ----
 
-    def _init_W(self, kind: str) -> None:
+    def _init_one(self, t: torch.Tensor, kind: str) -> None:
         if kind == "orthogonal":
-            nn.init.orthogonal_(self.W)
+            nn.init.orthogonal_(t)
         elif kind == "xavier":
-            nn.init.xavier_uniform_(self.W)
+            nn.init.xavier_uniform_(t)
         else:
             raise ValueError(f"unknown W init: {kind!r}")
 
+    def _init_W(self, kind: str) -> None:
+        self._init_one(self.W, kind)
+        if self.W_l2a is not None:
+            self._init_one(self.W_l2a, kind)
+
+    def _l2a_weight(self) -> torch.Tensor:
+        """The lm→agent weight: W.t() if tied, else the untied W_l2a."""
+        return self.W.t() if self.W_l2a is None else self.W_l2a
+
     @torch.no_grad()
     def reset_W(self, kind: Optional[str] = None) -> None:
-        """Re-initialise W in place (used by §5.5 random-baseline sweep)."""
+        """Re-initialise W (and W_l2a if untied) in place (§5.5 baseline)."""
         self._init_W(kind or self.config.init)
 
     # ---- forward helpers ----
@@ -142,9 +176,10 @@ class ACC(nn.Module):
     def predict_agent_from_lm(self, n_lm: torch.Tensor) -> torch.Tensor:
         """ĥ_agent = Wᵀ · ñ_lm.
 
-        ``n_lm``: (B, d_lm). Returns (B, d_a).
+        ``n_lm``: (B, d_lm). Returns (B, d_a). Uses ``W.t()`` (tied) or the
+        untied ``W_l2a`` (POST-HOC-7).
         """
-        return F.linear(n_lm, self.W.t())
+        return F.linear(n_lm, self._l2a_weight())
 
     # ---- the (C-thin) loss ----
 

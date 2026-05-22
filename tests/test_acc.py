@@ -25,6 +25,7 @@ import pytest
 torch = pytest.importorskip("torch")
 
 import torch.nn as nn  # noqa: E402
+import torch.nn.functional as F  # noqa: E402
 
 from split_maze.acc import ACC, ACCConfig  # noqa: E402
 
@@ -77,20 +78,65 @@ class TestACCConstruction:
         assert acc.ln_agent.normalized_shape == (128,)
         assert acc.ln_lm.normalized_shape == (64,)
 
-    def test_param_count_matches_W_plus_two_layernorms(self):
-        # Expected = d_lm·d_a + 2·(d_a + d_a) + 2·(d_lm + d_lm)
-        #          = W + ln_agent(weight,bias) + ln_lm(weight,bias)
+    def test_layernorm_non_affine_by_default(self):
+        # POST-HOC-6: LN is non-learnable by default → no affine params.
         acc = ACC(ACCConfig(d_agent=128, d_lm=64))
-        expected = 64 * 128 + 2 * 128 + 2 * 64
-        actual = sum(p.numel() for p in acc.parameters())
-        assert actual == expected
+        assert acc.ln_agent.weight is None
+        assert acc.ln_lm.weight is None
 
-    def test_param_count_at_default_under_70k(self):
-        # PLAN §3.4 박제: ACC ~ 65k params. 256·256 + 2·256·2 = 65536 + 1024.
+    def test_param_count_default_is_W_only(self):
+        # POST-HOC-6: affine=False → only W is a parameter.
+        acc = ACC(ACCConfig(d_agent=128, d_lm=64))
+        assert sum(p.numel() for p in acc.parameters()) == 64 * 128
+
+    def test_param_count_at_default_is_W(self):
+        # default ACC: 256×256 W, no LN affine (POST-HOC-6).
         acc = ACC()
         n = sum(p.numel() for p in acc.parameters())
-        assert n == 256 * 256 + 4 * 256
+        assert n == 256 * 256
         assert n < 70_000
+
+    def test_affine_true_adds_layernorm_params(self):
+        # The learnable-affine path is still available for ablation.
+        acc = ACC(ACCConfig(d_agent=128, d_lm=64, layernorm_affine=True))
+        expected = 64 * 128 + 2 * 128 + 2 * 64
+        assert sum(p.numel() for p in acc.parameters()) == expected
+
+
+# ---- 2b. untied W (POST-HOC-7) ------------------------------------------
+
+
+class TestUntiedW:
+    def test_tied_is_default(self):
+        assert ACCConfig().tied is True
+        acc = ACC()
+        assert acc.W_l2a is None
+
+    def test_untied_has_separate_w_l2a(self):
+        acc = ACC(ACCConfig(d_agent=16, d_lm=8, tied=False))
+        assert isinstance(acc.W_l2a, nn.Parameter)
+        assert acc.W.shape == (8, 16)        # a→l
+        assert acc.W_l2a.shape == (16, 8)    # l→a
+        # two matrices now (LN affine=False).
+        assert sum(p.numel() for p in acc.parameters()) == 8 * 16 + 16 * 8
+
+    def test_untied_predict_uses_w_l2a(self):
+        acc = ACC(ACCConfig(d_agent=4, d_lm=4, tied=False))
+        with torch.no_grad():
+            acc.W.copy_(torch.zeros(4, 4))           # tied path would give 0
+            acc.W_l2a.copy_(torch.eye(4))            # untied path → identity
+        x = torch.randn(2, 4)
+        out = acc.predict_agent_from_lm(x)
+        assert torch.allclose(out, x, atol=1e-5)     # used W_l2a, not W.t()
+
+    def test_untied_both_matrices_get_grad(self):
+        torch.manual_seed(0)
+        acc = ACC(ACCConfig(d_agent=16, d_lm=8, tied=False))
+        h_a = torch.randn(4, 16)
+        h_l = torch.randn(4, 8)
+        acc.recon_loss(h_a, h_l)["loss"].backward()
+        assert acc.W.grad is not None and acc.W.grad.abs().sum() > 0
+        assert acc.W_l2a.grad is not None and acc.W_l2a.grad.abs().sum() > 0
 
 
 # ---- 3. W initialisation -------------------------------------------------
@@ -274,21 +320,13 @@ class TestCThinGradBoundary:
         assert acc.W.grad is not None
         assert acc.W.grad.abs().sum().item() > 0.0
 
-    def test_ln_agent_receives_grad(self):
-        # ln_agent is on the "agent side" but its affine params are
-        # ACC-side — they should be updated.
-        acc, h_a, h_l = self._setup()
-        out = acc.recon_loss(h_a, h_l)
-        out["loss"].backward()
-        assert acc.ln_agent.weight.grad is not None
-        assert acc.ln_agent.weight.grad.abs().sum().item() > 0.0
-
-    def test_ln_lm_receives_grad(self):
-        acc, h_a, h_l = self._setup()
-        out = acc.recon_loss(h_a, h_l)
-        out["loss"].backward()
-        assert acc.ln_lm.weight.grad is not None
-        assert acc.ln_lm.weight.grad.abs().sum().item() > 0.0
+    def test_W_is_only_trainable_param(self):
+        # POST-HOC-6: with affine=False LN, the ACC has exactly one
+        # parameter — W. (LN collapse path removed.)
+        acc, _, _ = self._setup()
+        params = list(acc.parameters())
+        assert len(params) == 1
+        assert params[0] is acc.W
 
     def test_h_lm_grad_includes_both_directions(self):
         """Sanity: ñ_lm appears as A2L *target* and as L2A *prediction*
@@ -420,9 +458,37 @@ class TestIntegrationSmoke:
 
         assert loss1 < loss0
 
+    def test_no_collapse_after_optim(self):
+        """POST-HOC-6 guard: with affine=False LN + fixed varied targets,
+        optimising W must NOT drive ĥ_lm to a constant (the degenerate
+        recon=0 collapse that sank Phase-3 V2). After training, ĥ_lm should
+        stay varied across samples and track the (varied) target ñ_lm."""
+        torch.manual_seed(0)
+        acc = ACC(ACCConfig(d_agent=16, d_lm=8))   # affine=False default
+        h_a = torch.randn(64, 16)
+        h_l = torch.randn(64, 8)
+        opt = torch.optim.AdamW(acc.parameters(), lr=1e-2)
+        for _ in range(200):
+            opt.zero_grad()
+            acc.recon_loss(h_a, h_l)["loss"].backward()
+            opt.step()
+        with torch.no_grad():
+            out = acc.recon_loss(h_a, h_l)
+            hat_std = out["hat_lm"].std(dim=0).mean().item()
+            nlm_std = out["n_lm"].std(dim=0).mean().item()
+            cos = F.cosine_similarity(out["hat_lm"], out["n_lm"], dim=-1)
+        # Targets stay varied (affine=False can't collapse them).
+        assert nlm_std > 0.1
+        # Prediction stays varied — NOT collapsed to a constant.
+        assert hat_std > 0.05
+        # And alignment is real (not the constant-vector cosine=1 artefact):
+        # mean cosine should be meaningfully positive across varied samples.
+        assert cos.mean().item() > 0.3
+
     def test_default_p3_hyperparams_match_session_handoff(self):
         # Catch accidental drift between PLAN §10.2 P3-3-A 박제값 and code.
         cfg = ACCConfig()
         assert cfg.d_agent == 256
         assert cfg.d_lm == 256
         assert cfg.init == "orthogonal"
+        assert cfg.layernorm_affine is False   # POST-HOC-6

@@ -29,7 +29,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .adapter import AgentResampler, GatedCrossAttentionBlock
+from .adapter import AgentResampler, GatedCrossAttentionBlock, PerceiverBlock
 from .language import (
     CHEESE_DIR_VALUES,
     HEADING_VALUES,
@@ -334,9 +334,161 @@ class B4Adapter(Build):
         loss = F.cross_entropy(pred, target, ignore_index=self.pad_id)
         return {"loss": loss}
 
+    @torch.no_grad()
+    def generate(self, h_agent: torch.Tensor, max_len: int = 16) -> torch.Tensor:
+        """Greedy autoregressive generation with adapter injection (Phase 4).
+
+        Starts from ``<BOS>`` and decodes token-by-token; the adapter tokens
+        (from ``h_agent``) are injected at every LM block on every step. The
+        agent→language path for the B4 build (mirrors :meth:`forward`).
+
+        Returns (B, T_gen) ids beginning with <BOS>.
+        """
+        was_training = self.training
+        self.eval()
+        try:
+            B = h_agent.shape[0]
+            device = h_agent.device
+            cfg = self.lm.config
+            adapter = self.resampler(h_agent)            # (B, N, d_model)
+            seq = torch.full((B, 1), cfg.bos_id, dtype=torch.long, device=device)
+            finished = torch.zeros(B, dtype=torch.bool, device=device)
+            for _ in range(max_len - 1):
+                T = seq.shape[1]
+                x = self.lm.tok_embed(seq) + self.lm.pos_embed[:, :T]
+                for block, xblock in zip(self.lm.blocks, self.xattn):
+                    x = block(x)
+                    x = xblock(x, adapter)
+                x = self.lm.ln_f(x)
+                logits = self.lm.lm_head(x[:, -1])       # (B, vocab)
+                nxt = logits.argmax(dim=-1)
+                nxt = torch.where(finished, torch.full_like(nxt, cfg.pad_id), nxt)
+                seq = torch.cat([seq, nxt.unsqueeze(1)], dim=1)
+                finished = finished | (nxt == cfg.eos_id)
+                if bool(finished.all()):
+                    break
+            return seq
+        finally:
+            if was_training:
+                self.train()
+
     def interpreter_parameters(self) -> Iterator[nn.Parameter]:
         yield from self.resampler.parameters()
         yield from self.xattn.parameters()
+
+
+# ---- B4-thin: thin-interface next-token (CTRL-2x2) ----------------------
+
+
+class B4Thin(Build):
+    """Thin-interface next-token build — (thin × next-token) cell of CTRL-2x2.
+
+    Holds V2's *single-vector* interface fixed but trains it with **next-token
+    CE** (B4's loss) instead of reconstruction. The controlled twin that
+    disentangles the Phase-4.2 confound (PLAN §10.1 CTRL-2x2):
+
+      * vs **V2** (thin × reconstruction): identical interface AND identical
+        generation path (``lm.generate(ĥ_lm)``); only the *loss* differs →
+        isolates the *learning-signal* effect.
+      * vs **B4** (rich × next-token): identical loss; only the *interface*
+        differs (single bridged vector vs K-latent distributed xattn) →
+        isolates the *interface* effect.
+
+    Mirrors V2's interface exactly: ``ñ_agent = LN(h_agent)``;
+    ``ĥ_lm = W · ñ_agent`` with ``W`` shape ``(d_lm, d_a)`` (interface_proj
+    space, same role as ``ACC.W``). Training conditions the frozen LM decoder
+    on ``ĥ_lm`` and applies next-token CE over the describer sentence — i.e.
+    the handle-B decode path of :meth:`MazeLM.decode_logits`, the same path the
+    LM's autoencoding objective used.
+
+    Pipeline (update):
+        ñ_agent = LN(h_agent.detach())            # (B, d_a)  (C-thin boundary 1)
+        ĥ_lm    = W · ñ_agent                      # (B, d_lm) single bridged vec
+        logits  = lm.decode_logits(ĥ_lm, ids[:, :-1])   # (B, T, vocab)
+        loss    = CE(logits, ids)                  # next-token, pad-ignored
+
+    Generation: ``lm.generate(W · LN(h_agent))`` — byte-for-byte the decode
+    path V2 uses, so the eval harness scores both thin builds uniformly.
+
+    (C-thin): agent detached; the entire LM is frozen + eval — only ``W`` (and
+    ``ln_agent`` if affine) learn the bridge.
+
+    Args:
+        lm:               a Phase-2 :class:`MazeLM`.
+        d_agent:          IMPALA-CNN embedding width (256).
+        layernorm_affine: LN affine on the agent side. Default False to match
+                          the ACC (POST-HOC-6) so the thin interface has the
+                          *same shape* as V2's.
+        init:             ``"orthogonal"`` (default, matches ACC) or ``"xavier"``.
+    """
+
+    def __init__(
+        self,
+        lm: MazeLM,
+        *,
+        d_agent: int = 256,
+        layernorm_affine: bool = False,
+        init: str = "orthogonal",
+    ):
+        super().__init__()
+        self.lm = lm
+        d_model = lm.config.d_model
+
+        # Freeze the LM core ((C-thin) LM 코어 보호; matches V2/B4).
+        for p in self.lm.parameters():
+            p.requires_grad_(False)
+        self.lm.eval()
+
+        self.ln_agent = nn.LayerNorm(d_agent, elementwise_affine=layernorm_affine)
+        # Agent→lm bridge, same shape/role as ACC.W (generation direction).
+        self.W = nn.Parameter(torch.empty(d_model, d_agent))
+        if init == "orthogonal":
+            nn.init.orthogonal_(self.W)
+        elif init == "xavier":
+            nn.init.xavier_uniform_(self.W)
+        else:
+            raise ValueError(f"unknown W init: {init!r}")
+        self.pad_id = lm.config.pad_id
+
+    def train(self, mode: bool = True) -> "B4Thin":
+        """Keep the frozen base LM in eval (deterministic decode path)."""
+        super().train(mode)
+        self.lm.eval()
+        return self
+
+    def bridge(self, h_agent: torch.Tensor) -> torch.Tensor:
+        """ĥ_lm = W · LN(h_agent). (B, d_a) → (B, d_lm)."""
+        return F.linear(self.ln_agent(h_agent), self.W)
+
+    def update(
+        self,
+        h_agent: torch.Tensor,
+        ids: torch.Tensor,
+        lengths: torch.Tensor,
+    ) -> dict:
+        # Boundary 1 — agent insulated.
+        h_lm = self.bridge(h_agent.detach())                  # (B, d_lm)
+        # Next-token CE through the handle-B decode path (mirrors
+        # MazeLM.autoencode_loss but conditions on the bridged ĥ_lm instead of
+        # encode(ids)). logits[:, i] predicts ids[:, i].
+        prefix = ids[:, :-1]
+        logits = self.lm.decode_logits(h_lm, prefix)          # (B, T, vocab)
+        loss = F.cross_entropy(
+            logits.reshape(-1, logits.size(-1)),
+            ids.reshape(-1),
+            ignore_index=self.pad_id,
+        )
+        return {"loss": loss}
+
+    @torch.no_grad()
+    def generate(self, h_agent: torch.Tensor, max_len: int = 16) -> torch.Tensor:
+        """Greedy decode from the bridged vector — identical path to V2."""
+        return self.lm.generate(self.bridge(h_agent), max_len=max_len)
+
+    def interpreter_parameters(self) -> Iterator[nn.Parameter]:
+        yield self.W
+        if self.ln_agent.elementwise_affine:
+            yield from self.ln_agent.parameters()
 
 
 # ---- V2: ACC (the main model) -------------------------------------------
@@ -374,9 +526,13 @@ class V2ACC(Build):
         self.lm = lm
         self.acc = acc
 
-        # Freeze the LM core; leave only interface_proj trainable (P3-2-A).
-        for name, p in self.lm.named_parameters():
-            p.requires_grad_(name.startswith("interface_proj"))
+        # POST-HOC-6 (2026-05-21): freeze the *entire* LM, interface_proj
+        # included. Training interface_proj (P3-2-A) was the collapse path —
+        # the ACC recon loss drove it to a constant (diagnose_v2). Now the LM
+        # is a fixed, informative feature extractor and only ACC W learns the
+        # bridge (= SPLIT-MNIST V2 본형). See PLAN §10.1 POST-HOC-6.
+        for p in self.lm.parameters():
+            p.requires_grad_(False)
         self.lm.eval()
 
     def train(self, mode: bool = True) -> "V2ACC":
@@ -398,15 +554,192 @@ class V2ACC(Build):
         return self.acc.recon_loss(h_agent, h_lm)
 
     def interpreter_parameters(self) -> Iterator[nn.Parameter]:
+        # POST-HOC-6: only the ACC learns (W; LN is non-affine so has no
+        # params). The LM — interface_proj included — is frozen.
         yield from self.acc.parameters()
-        yield from self.lm.interface_parameters()
+
+
+# ---- V2-rich: rich-interface reconstruction (CTRL-2x2) ------------------
+
+
+class V2Rich(Build):
+    """Rich-interface reconstruction build — (rich × reconstruction) cell of
+    CTRL-2x2 (PLAN §10.1 CTRL-2x2).
+
+    The 'reconstruction with a distributed interface' analog of V2. Where V2
+    reconstructs the LM's single ``<SUM>`` summary vector (thin target), V2Rich
+    reconstructs the LM's *per-position hidden sequence* — the rich,
+    multi-vector target — from a distributed K-latent agent bridge, and is
+    trained by **MSE on the frozen LM's hidden states** (reconstruction), NOT
+    next-token CE.
+
+    Pairs against **B4** (rich × next-token): the interface is rich (K latents,
+    multi-position) in both; only the *loss* differs (MSE-on-hiddens vs
+    next-token-CE).
+
+    ARCHITECTURAL CAVEAT (박제): V2Rich uses a *separate* Perceiver
+    reconstructor (learned position queries cross-attending to the agent
+    latents), not B4's in-LM gated-xattn injection. So the rich pair is
+    'spiritually matched' (both distributed/K-latent) rather than
+    byte-identical. The **thin pair (V2 vs B4Thin) is the identical-interface
+    gold standard**; the rich pair adds the 2×2 interaction term.
+
+    Why no sentence tokens reach the student: if the student saw the true
+    tokens, the bridge could be ignored (the LM would reconstruct its own
+    hiddens trivially). Feeding only learned position queries forces the agent
+    latents to carry the whole sentence — the reconstruction is *necessary*,
+    mirroring V2's "agent must predict the sentence's LM-representation".
+
+    Pipeline (update):
+        Z       = frozen_lm hidden states reading the true sentence  (target, detached)
+                  = lm._transform(tok_embed(append_sum(ids)))         (B, T+1, d_model)
+        latents = resampler(h_agent.detach())                          (B, K, d_model)
+        Ẑ       = recon_blocks(pos_queries[:T+1], latents)             (B, T+1, d_model)
+        loss    = MSE(Ẑ, Z) over real-token positions [0, length)
+
+    Generation (parallel, non-autoregressive): the LM's next-token convention
+    means ``lm_head(Z[:, t])`` predicts token ``t+1``; so
+    ``argmax(lm_head(Ẑ[:, t]))`` over positions reconstructs the sentence. We
+    prepend ``<BOS>`` and pad-fill after the first ``<EOS>``.
+
+    (C-thin): agent detached; the entire LM is frozen + eval — only the
+    resampler + position queries + reconstructor blocks learn.
+
+    Args:
+        lm:               a Phase-2 :class:`MazeLM`.
+        d_agent:          IMPALA-CNN embedding width (256).
+        n_latents:        agent latents emitted by the resampler (16, = B4).
+        n_kv:             resampler pseudo-token KV slots (≥2).
+        n_heads:          attention heads (resampler + reconstructor).
+        resampler_blocks: PerceiverBlock depth inside the resampler.
+        recon_blocks:     PerceiverBlock depth inside the reconstructor.
+    """
+
+    def __init__(
+        self,
+        lm: MazeLM,
+        *,
+        d_agent: int = 256,
+        n_latents: int = 16,
+        n_kv: int = 8,
+        n_heads: int = 4,
+        resampler_blocks: int = 2,
+        recon_blocks: int = 2,
+    ):
+        super().__init__()
+        self.lm = lm
+        d_model = lm.config.d_model
+
+        for p in self.lm.parameters():
+            p.requires_grad_(False)
+        self.lm.eval()
+
+        self.resampler = AgentResampler(
+            d_agent=d_agent,
+            d_model=d_model,
+            n_latents=n_latents,
+            n_kv=n_kv,
+            n_heads=n_heads,
+            n_blocks=resampler_blocks,
+        )
+        # Learned position queries — one per LM position (covers the appended
+        # <SUM>, since _transform caps T at config.max_len ⇒ T+1 ≤ max_len).
+        self.pos_queries = nn.Parameter(
+            torch.randn(lm.config.max_len, d_model) * 0.02
+        )
+        self.recon_blocks = nn.ModuleList(
+            [PerceiverBlock(d_model, n_heads) for _ in range(recon_blocks)]
+        )
+        self.pad_id = lm.config.pad_id
+        self.bos_id = lm.config.bos_id
+        self.eos_id = lm.config.eos_id
+
+    def train(self, mode: bool = True) -> "V2Rich":
+        super().train(mode)
+        self.lm.eval()
+        return self
+
+    # ---- frozen-LM teacher hidden states ----
+
+    @torch.no_grad()
+    def _teacher_hidden(self, ids: torch.Tensor) -> torch.Tensor:
+        """Frozen LM per-position hidden states (ln_f output) reading the true
+        sentence with ``<SUM>`` appended. (B, T+1, d_model). Detached target."""
+        ids_full = self.lm._append_sum(ids)
+        emb = self.lm.tok_embed(ids_full)
+        return self.lm._transform(emb)
+
+    # ---- distributed reconstructor (student) ----
+
+    def _student(self, h_agent: torch.Tensor, length: int) -> torch.Tensor:
+        """Reconstruct (B, length, d_model) hiddens from the agent latents."""
+        latents = self.resampler(h_agent)                      # (B, K, d_model)
+        B = h_agent.shape[0]
+        q = self.pos_queries[:length].unsqueeze(0).expand(B, -1, -1).contiguous()
+        for blk in self.recon_blocks:
+            q = blk(q, latents)
+        return q                                               # (B, length, d_model)
+
+    def update(
+        self,
+        h_agent: torch.Tensor,
+        ids: torch.Tensor,
+        lengths: torch.Tensor,
+    ) -> dict:
+        # Frozen target (no grad to LM).
+        Z = self._teacher_hidden(ids)                          # (B, T1, d_model)
+        T1 = Z.size(1)
+        # Boundary 1 — agent insulated.
+        Z_hat = self._student(h_agent.detach(), T1)            # (B, T1, d_model)
+
+        # MSE over real-token positions [0, length): those are the hiddens that
+        # (via lm_head) regenerate the content tokens. <SUM>/pad excluded.
+        pos = torch.arange(T1, device=Z.device).unsqueeze(0)   # (1, T1)
+        mask = (pos < lengths.to(Z.device).unsqueeze(1)).float()  # (B, T1)
+        per_pos = ((Z_hat - Z) ** 2).mean(dim=-1)              # (B, T1)
+        denom = mask.sum().clamp(min=1.0)
+        loss = (per_pos * mask).sum() / denom
+        return {"loss": loss}
+
+    @torch.no_grad()
+    def generate(self, h_agent: torch.Tensor, max_len: int = 16) -> torch.Tensor:
+        """Parallel (non-autoregressive) decode via lm_head over reconstructed
+        hiddens. Returns (B, L+1) ids beginning with <BOS>, pad-filled after
+        the first <EOS>."""
+        was_training = self.training
+        self.eval()
+        try:
+            L = max(1, min(max_len, self.lm.config.max_len))
+            Z_hat = self._student(h_agent, L)                  # (B, L, d_model)
+            logits = self.lm.lm_head(Z_hat)                    # (B, L, vocab)
+            pred = logits.argmax(dim=-1)                       # (B, L) = ids[1..L]
+            B = h_agent.shape[0]
+            bos = torch.full((B, 1), self.bos_id, dtype=torch.long,
+                             device=h_agent.device)
+            seq = torch.cat([bos, pred], dim=1)                # (B, L+1)
+            # Pad-fill strictly after each row's first <EOS>.
+            is_eos = (seq == self.eos_id)
+            after_first_eos = (is_eos.cumsum(dim=1) - is_eos.long()) > 0
+            seq = torch.where(after_first_eos,
+                              torch.full_like(seq, self.pad_id), seq)
+            return seq
+        finally:
+            if was_training:
+                self.train()
+
+    def interpreter_parameters(self) -> Iterator[nn.Parameter]:
+        yield from self.resampler.parameters()
+        yield self.pos_queries
+        yield from self.recon_blocks.parameters()
 
 
 __all__ = [
     "Build",
     "B3Probe",
     "B4Adapter",
+    "B4Thin",
     "V2ACC",
+    "V2Rich",
     "N_ROW",
     "N_COL",
     "N_HEADING",

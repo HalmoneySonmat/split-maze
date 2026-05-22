@@ -1058,6 +1058,270 @@ git tag 계획 (사용자 환경에서 실행):
 
 ---
 
+#### CTRL-2x2 (2026-05-22) — V2 vs B4 confound 해소: 인터페이스×loss 2×2 통제 실험 (사전등록)
+
+> Phase 4.2 Scenario C("V2 < B4 충실도")의 confound를 가르는 *원인 분해 진단*.
+> 결과 보기 *전* AskUserQuestion으로 박제. 사전등록 임계치 변경 금지.
+
+- **배경 (confound)**: Phase 4.1/4.2의 V2 vs B4 비교는 *두 손잡이*가 동시에
+  다름 — V2(thin: 단일 요약벡터 ñ_lm + 선형 W) vs B4(rich: K=16 latent 분산
+  cross-attn). "V2가 진 게 *loss(분리-재구성)* 탓인지 *인터페이스(요약벡터
+  병목)* 탓인지" 미분리. 천장 진단(POST-HOC-7)이 "요약-벡터 인터페이스가
+  병목, 선형성 아님"을 시사했으나 *통제 비교*로 확정 필요.
+
+- **설계 = 인터페이스 × loss 2×2**. 손잡이 둘:
+  인터페이스 {thin=요약벡터1, rich=K분산주입} × loss {recon, next-token}.
+  현재 보유: V2 = thin×recon, B4 = rich×next-token (대각선 2칸).
+  빠진 2칸 채움 → **B4-thin**(thin×next-token), **V2-rich**(rich×recon).
+  → loss 주효과·인터페이스 주효과·교호작용 분리.
+
+- **사용자 결정 (AskUserQuestion 2026-05-22)**:
+  | # | 항목 | 결정 | 이유 |
+  |---|---|---|---|
+  | **CTRL-1** | 범위 | **풀 2×2** (B4-thin + V2-rich 둘 다) | 네 칸 다 채워야 "가로(인터페이스)·세로(loss)" 효과 각각 분리. 작은 단위: 쉬운 B4-thin 먼저 → 검증 → V2-rich. |
+  | **CTRL-2** | 학습 regime | **얼린 Phase3 agent+LM, 통역사 4셀만 post-hoc 동일-페어 재적합** | POST-HOC-6/7과 동일(고정 두 backbone 사이 다리 측정). RL 재학습 없음(수십분~한두시간). 동시학습 동역학 confound까지 제거된 *깨끗한 인터페이스/loss 분리*. 헤드라인 동시학습 V2 vs B4(Phase 4.1/4.2)는 그대로 유지 — CTRL는 *진단*. post-hoc 적합은 *고정 backbone 다리*라 SPLIT-9 실패양식(적응 해석자) 아님. |
+  | **CTRL-3** | 원가설 부활 기준 (사전등록) | **같은 인터페이스 굵기에서 (recon − next-token)이 swap-following ≥ +0.10 *AND* per-slot 충실도(in-dist 평균) ≥ +0.05 — 둘 다** | 인과(swap)+표상(per-slot) 양쪽 같은 방향이어야 인정(상관≠인과 방어). 하나만이면 부분, 둘 다 음수면 "loss 자체가 열세" 확정. |
+
+- **측정 (Phase 4.1/4.2 동일 하니스)**: 4셀 × {per-slot 충실도 in/OOD,
+  swap-following}. 분해: **loss 주효과** = mean_interface(recon − nexttoken);
+  **인터페이스 주효과** = mean_loss(rich − thin); 교호작용. 사전등록 임계치(§5.6)
+  는 그대로, CTRL-3는 *추가* 사전등록(2×2 분해용).
+
+- **예측 (사전, 천장 진단 기반)**: 인터페이스 주효과(rich−thin) > 0 클 것
+  (B4 우위 대부분이 분산 주입 덕). loss 주효과(recon−nexttoken)는 작거나
+  ~0 예상 → CTRL-3 미충족 시 "원가설(재구성이 핵심)" 기각 확정, 충족 시 부활.
+
+- **산출물**: `builds.py` `B4Thin`/`V2Rich` + 단위테스트, `scripts/fit_2x2.py`
+  (4셀 post-hoc 적합), `results/phase4_ctrl2x2.json`. 코드+단위검증 본 세션, run WSL.
+
+- **★ 결과 (2026-05-22, WSL) ★**: 신규 단위테스트 27 PASS. fit_2x2 (327,680 페어/조건,
+  fit 3000 step). per-slot 평균(region·heading·cheese 평균) + swap-following:
+
+  | cell | iface×loss | in-dist mean | OOD mean | swap (n_readA) |
+  |---|---|---|---|---|
+  | V2 | thin×recon | 0.367 | 0.305 | 0.379 (430) |
+  | B4Thin | thin×next | 0.672 | 0.344 | 0.778 (794) |
+  | B4 | rich×next | 0.865 | 0.458 | 0.991 (989) |
+  | V2Rich | rich×recon | **0.001** | **0.001** | **0.000 (9)** ← degenerate |
+
+  - **CTRL-3 판정: REVIVE=False** (사전등록 swap≥+0.10 AND slot≥+0.05 둘 다 미충족,
+    오히려 강하게 반대).
+  - **★ 결정적(clean) 결과 = 얇은 쌍**: *동일* 단일벡터 인터페이스에서 next-token(B4Thin)이
+    재구성(V2)을 압도 — slot **+0.305**, swap **+0.399**. → **confound 해소: V2가 진 건
+    얇은 인터페이스 탓만이 아니라 *재구성 학습신호 자체*가 next-token보다 약하기 때문.**
+    Phase 4.2 Scenario C *강화*(핵심 가설 더 단단히 기각).
+  - **인터페이스 효과(clean, next-token 고정)**: B4 ≫ B4Thin — slot **+0.193**, swap
+    **+0.213**. 굵은 분산 인터페이스도 크게 기여. → **두 손잡이 다 B4 쪽 우세.**
+  - **V2Rich degenerate (loss↓≠success 재발)**: recon MSE 1.70→0.73 하강했으나 생성
+    붕괴(per-slot ~0, n_readA 9). 원인: *full per-position LM 히든 재구성 타깃이
+    ill-posed* — 그 히든은 표면형까지 인코딩하는데 h_agent는 표면형은커녕 heading도 부분만
+    표상 → reconstructor가 평균으로 회귀(collapse) → lm_head 디코드 상수화. 따라서
+    **rich×recon 칸은 이번 run 무정보** (2×2 분해의 'rich' loss효과·평균 iface효과는 V2Rich
+    오염으로 *해석 금지*; clean 셀만 사용). richer-recon은 *타깃 재설계* 필요(Deferred).
+  - **sanity**: post-hoc V2(0.367) ≈ co-trained V2(Phase4.1 0.375) ✓. B4Thin
+    cheese 0.845 ≈ co-trained B4 cheese 0.85 ✓. 부수 관찰: post-hoc 굵은 B4(0.865)가
+    co-trained B4(Phase4.1 0.664)보다 *강함* — 고정 에이전트 stationary 재적합이
+    co-train보다 쉬움.
+  - **종합**: 재구성 신호는 (인터페이스 통제 후에도) next-token보다 약한 학습신호다. "큰
+    모델 1주"가 이 결론을 못 바꿨을 것(사전 예측 적중 — 병목은 신호·인터페이스 설계지 크기 아님).
+
+---
+
+#### WRITE-UP (2026-05-22) — docs/RESULTS.html (워크숍 short-paper 골격) 작성 완료
+
+- **박제 결정 (AskUserQuestion 2026-05-22, 작성 전)**:
+  1. **형식 = 워크숍 short-paper 절 구조 + POST-HOC saga 1절** (옵션 A 추천).
+     Abstract/Intro/Setup/Results/Discussion/Limitations + "Process &
+     Methodology Honesty" 1절(POST-HOC-5/6/7 saga). 대안: 순수 short-paper
+     (saga 부록) / 내부 기술보고서(연대기) 기각.
+  2. **분량 = 중간 ~4-6p 상당** (옵션 A 추천). 세 발견 + 핵심 표 + saga 요약.
+  3. **그림/표 = 표 + 실제 그림 생성, 단 문서를 HTML로** (사용자 추가 지정).
+     → 산출물을 `docs/RESULTS.md`가 아니라 **`docs/RESULTS.html`** (자기완결,
+     base64 임베드 PNG 3장 + 표 3개)로 확정.
+- **산출물**: `docs/RESULTS.html` (~381KB, 자기완결 HTML). 그림 = matplotlib
+  생성 후 base64 임베드: ① per-slot 충실도 grouped bar(in-dist vs OOD,
+  cheese_dir 0.85→0.07 붕괴), ② 활성 스왑 α-보간 곡선(V2 평탄 0.16→0.47 vs
+  B4/B3 급상승 0.08→0.83), ③ OOD 합리화율(B4 0.50/B3 0.40/V2 0.09). 표 =
+  per-slot 충실도 / 인과+천장 / 사전등록 임계치 vs 결과.
+- **담은 세 발견**: ① 목표 오일반화 표상수준 확정, ② "충실≠합리화" 재프레임
+  (핵심 기여, 활성 스왑이 B4 합리화=오일반화 에이전트 충실 reading임을 인과
+  증명), ③ ACC 요약-벡터 병목 < 어댑터 분산 cross-attn(Scenario C). + saga 1절.
+- **정직성**: 문서 상단에 "1 RL seed · descriptive" caveat 박스 명시(통계 확정은
+  §5.7 multi-seed). 사전등록 임계치(§5.6)는 결과 본 뒤 변경 없이 결과만 기록.
+  모든 인용 수치를 `phase4_builds.json`/`phase4_swap.json`과 round-trip 대조 검증.
+- **다음 후보(불변)**: (a) multi-seed 3~5 (§5.7 통계 확정), (b) #4 Procrustes,
+  (c) richer(분산) ACC ablation(③ 진단 인과 확정).
+
+---
+
+#### Phase 4.1 결과 (2026-05-22) — 결정적 테스트 1차 (1 seed, descriptive)
+
+`eval_builds.py`, n=327,680 states/조건. **per-slot 충실도** (region/heading/cheese):
+- in-dist: B3 0.80/0.35/0.85, B4 0.79/0.35/0.85, **V2 0.58/0.23/0.32**.
+- OOD: B3 0.78/0.37/**0.07**, B4 0.78/0.33/**0.07**, V2 0.55/0.37/**0.05**.
+**OOD 합리화율** (eligible 실제≠prior 93%): faithful/rationalize —
+B4 0.01/**0.50**, B3 0.01/**0.40**, **V2 0.03/0.09**.
+
+**발견 3**:
+1. **목표 오일반화 표상수준 확정** — 모든 빌드 cheese_dir in-dist 0.85→OOD 0.07
+   붕괴. 에이전트가 실제 치즈방향 미표상(prior "우상단" 표상). 단단한 결과.
+2. **B4/B3가 prior 합리화** (rationalize 0.50/0.40) — SPLIT-9 둘러대기 패턴 확정.
+3. **V2는 합리화 안 함** (0.09). B4−V2 = **0.41 ≥ 0.2** (§5.6 충족, 방향 가설대로).
+
+**confound (정직)**: V2가 전반 약함(in-dist cheese 0.32≪0.85) → 비합리화가
+*원칙*인지 *약해서 산만*인지 불분명. 단서: B3(강한 reader)도 합리화 0.40 →
+강도 아닌 *discriminative(B3/B4) vs 재구성(V2)* 차이 가능. V2 실패모드 = prior
+아닌 흩어진 출력.
+
+**판정: Scenario B (부분, §5.8)** — 충실도 V2≤B4(불리) + 합리화 V2≪B4(지지),
+섞임 + 1 seed(통계 X) + confound. heading은 전 빌드 낮음(피드포워드 단일프레임).
+
+**다음 (사용자 결정 2026-05-22): 측정 #3 활성 스왑** — confound를 절대충실도와
+*독립*으로 가르는 인과 테스트. in-dist 페어 h_agent(A)→(B) α보간, 생성 슬롯이
+A→B 따라가나(swap-following). V2가 따라가면 비합리화=인과추적(원칙), 안 따라가면
+약함. §5.4/§5.6 (V2−B4 swap ≥0.15). 산출물 `swap_test.py`.
+
+---
+
+#### Phase 4.2 결과 (2026-05-22) — 활성 스왑 (#3): confound 해소 + Scenario C
+
+`swap_test.py`, in-dist cheese_dir 페어 1000, α보간 swap-following:
+- **B4 0.830, B3 0.828, V2 0.419** (match-B 곡선: B4/B3 0.08→0.83 매끄럽게,
+  V2 0.16→0.47 평탄). n_readA(α=0 정독): B4 853 / B3 839 / **V2 484**.
+- 사전등록 §5.6 "#3 V2−B4 ≥ +0.15" → 실제 **−0.41** (반대).
+
+**confound 해소 (V2 약함 쪽)**: V2의 낮은 합리화(0.09)는 *원칙*이 아니라
+*약함* — V2가 h_agent를 인과 추적 못 함(swap 0.42 ≪ B4 0.83).
+
+**★ 재해석 (핵심 기여)**: B4/B3는 h_agent를 *강하게 충실 추적*(swap 0.83).
+에이전트는 OOD에서 prior 표상(목표 오일반화). → **B4의 OOD "합리화"(0.50)는
+둘러대기가 아니라 *목표 오일반화한 에이전트를 충실히 읽은 것*.** swap이 인과
+추적을 증명. → **"충실 vs 합리화" 구분이 SPLIT-9 가정보다 미묘**: 오일반화
+에이전트를 충실히 읽으면 오일반화 목표를 보고하게 됨(통역사 잘못 아님).
+
+**판정: Scenario C (§5.8, 핵심 가설 기각)** — "분리-재구성 V2 > next-token
+어댑터 B4 충실도" *기각*. V2가 덜 충실(충실도 0.375<0.66, swap 0.42<0.83).
+원인: ACC *단일 요약벡터(ñ_lm) 병목* < 어댑터 *분산 cross-attn 주입*. 단
+풍부한 negative: ① goal-misgen 표상수준 읽힘, ② 충실≠합리화 재프레임,
+③ ACC 요약병목 아키텍처 통찰. ※ 1 seed descriptive (§5.7 multi-seed로
+통계 확정 권장 — gap 큼).
+
+**다음 후보**: (a) multi-seed 3~5 (§5.7 paired bootstrap 통계 확정),
+(b) write-up (Scenario C + 재프레임), (c) #4 Procrustes(W 위치무관, multi-seed).
+
+---
+
+#### POST-HOC-7 (2026-05-22) — ACC W untie (asymmetric) + 에이전트-한계 천장 박제
+
+- **상황**: POST-HOC-6로 collapse는 고쳤으나 tied-W GD가 cosine 0.27에 머묾.
+  천장 진단(`ceiling_v2.py`, held-out 24.6k): **closed-form 선형(한 방향
+  agent→lm) cosine=0.467 / slot=0.388**, **비선형 MLP cosine=0.498 /
+  slot=0.541** (MLP는 test cosine 하락=overfit). → 두 진단:
+  1. **선형이 cosine 병목 아님** (MLP≈선형 closed-form). PLAN §4.2 선형 W
+     설계 정당. richer ACC는 cosine 거의 안 올림(0.47→0.50) → Deferred.
+  2. **우리 tied-W GD(0.27) ≪ 선형 천장(0.467)** → tied 양방향 제약이
+     *생성 방향(A2L)*을 깎음 (생성엔 A2L만 필요한데 tied가 L2A와 타협).
+
+- **★ 에이전트-한계 천장 박제 (PLAN §5.1 미지수 해소)**: cosine 1.0은
+  *원리적으로 불가*. oracle 3슬롯 중 (a) **heading**은 최근 4스텝 궤적인데
+  에이전트가 *피드포워드 단일 프레임*(메모리 없음)이라 부분만 표상,
+  (b) **cheese_dir**은 목표 오일반화 시 "우상단" prior라 OOD에서 실제
+  치즈방향 미표상 가능, (c) **agent_region**(위치)만 신뢰성 있게 표상.
+  → 천장 ~0.47~0.50 cosine / ~0.39~0.54 slot은 *에이전트의 실제 표상량*을
+  반영 (다리 한계 아님). 측정은 **per-slot**(agent_region/heading/cheese_dir)
+  으로 분해해야 진짜 신호 — 특히 **cheese_dir OOD**가 목표 오일반화의 핵심.
+
+- **변경 (사용자 결정 2026-05-22, 옵션 A)**:
+  1. `ACCConfig.tied: bool` 추가. `tied=False`면 W를 비대칭 분리
+     (`W_a2l` d_lm×d_a 생성용 + `W_l2a` d_a×d_lm). PLAN §9 Deferred의
+     "비대칭 W" ablation을 천장 데이터 근거로 채택. **V2/retrain은 tied=False.**
+  2. V2 A2L W를 untied로 refit → 생성 cosine 0.27→~0.47 (에이전트-한계).
+     PLAN §4.2 "선형" 유지 (tied만 푼 것).
+  3. (C-thin) detach 경계·LN affine=False(POST-HOC-6)는 그대로.
+
+- **다음**: untie refit 검증(~0.47) → **Phase 4.1 per-slot 측정 harness**
+  (B3/B4/V2 × {agent_region,heading,cheese_dir} × {in-dist,OOD} + 합리화율).
+  V2 절대치 약해도 *B4 대비 + cheese_dir OOD*가 결정적 (§5.1/§5.8).
+
+- **★ 실측 (2026-05-22, untied V2_postfix2)**: untie **성공**. recon
+  1.6→~0.92, ĥ_lm std 0.34 안정(평균수렴 사라짐), cosine **in-dist
+  0.27→0.435 / OOD 0.31→0.396** (선형천장 0.467 근접). gen_acc가 oracle
+  추적 시작 — **agent_region 다수 정확, cheese_dir in-dist 자주 정확,
+  heading 대부분 틀림**(피드포워드 단일프레임 예측 적중). ★ **OOD에서 V2가
+  cheese_dir="up-right"(학습 prior) 자주 출력** — 에이전트의 목표 오일반화
+  내부표상을 V2가 충실히 읽는 것으로 보임(합리화 아님; oracle=실제방향
+  vs V2=에이전트가 믿는 방향). 전체 단위 PASS. → **Phase 4.1로** (B4 비교 +
+  합리화율 정량화가 §5.1 결정적 테스트).
+
+---
+
+#### POST-HOC-6 (2026-05-21) — V2 ACC degenerate collapse fix: interface_proj 동결 + LN affine=False
+
+- **상황**: Phase 4.0 진단(`diagnose_v2.py`) 결과 — Phase 3 V2의 recon=0은
+  *정렬이 아니라 degenerate collapse*. 실측 (in-dist·OOD 512 states 각):
+  `ĥ_lm std=0.0000`, `ñ_lm std=0.0004` (둘 다 상수), `cosine=1.0` (상수
+  두 개라 *함정 신호*), 모든 생성이 상수(`('top','left'),'down','left'`),
+  `gen_raw(h_lm)`(Phase 2 autoencoding)조차 깨짐. `h_agent std=0.65`
+  (에이전트는 정상 varied). → 정보 전달 0.
+
+- **근본 원인**: P3-2-A 박제("interface_proj만 ACC grad 통과")가 붕괴
+  통로였음. recon loss의 trivial 최소해 = interface_proj가 입력 무시·상수
+  출력 + W→0 → recon=0. (C-thin) LM core 동결은 했지만 interface_proj +
+  ACC LayerNorm affine을 recon에 노출 → 붕괴 무방비. **BYOL/SimSiam
+  collapse** (예측·타깃 둘 다 movable + target stop-grad 없음 → 상수해)
+  / dimensional collapse 패턴. Phase 2 LM(slot 0.994)은 무사 — Phase 3
+  co-training이 interface_proj를 망가뜨림.
+
+- **G3 재해석**: Phase 3 게이트 G3("V2 loss 감소")는 *붕괴*였지 학습 아님.
+  → **러닝: loss→0 ≠ 성공, trivial 해 여부 반드시 체크**. (Phase 2 mode
+  collapse와 같은 가족; warmup은 *이* 붕괴 mode는 못 막음.) POST-HOC-5의
+  "V2 recon=0 → degenerate 위험" 플래그가 적중. "작은 단위·검증부터" +
+  4.0 진단 먼저가 full Phase 4 harness 낭비를 막음.
+
+- **변경 (사용자 결정 2026-05-21, 옵션 A 정밀화)**:
+  1. `ACCConfig.layernorm_affine=False` (default) — ACC LayerNorm을
+     non-learnable로. ñ가 항상 zero-mean·unit-var 고정 → 상수 붕괴 불가
+     (γ→0 통로 제거). "스케일 정렬" 목적은 정규화로 유지.
+  2. **V2ACC: interface_proj 포함 LM 전체 동결**, `interpreter_parameters`
+     = ACC W만 (interface_proj 제외). → SPLIT-MNIST V2 본형("고정 hidden
+     양쪽, W만 학습")과 정확히 일치 + SimSiam stop-grad 정신.
+  3. P3-2 박제 정정: "interface_proj 적응"(PLAN §4.3) **철회** — LM
+     인터페이스는 동결, ACC W만 정렬 학습. (P3-2-B "+상위 1층" fallback도
+     무효 — 적응 자체가 붕괴 위험.)
+
+- **재학습 (cheap, RL 재실행 X)**: agent(checkpoints/phase3)·LM(lm.pt) 다
+  고정 → (h_agent, h_lm) 페어 수집 후 W만 gradient fit (수 분). 산출물
+  `checkpoints/phase3/V2_postfix.pt` (또는 W만). post-hoc W 적합은 *고정
+  두 backbone 사이 선형 다리*라 SPLIT-9 실패 양식(적응 해석자) 아님.
+
+- **검증**: 재학습 후 `diagnose_v2.py` 재실행 → ĥ_lm std≫0, cosine 진짜
+  varied, 생성이 oracle 슬롯 추적. 그 다음 Phase 4.1.
+
+- **★ 실측 (2026-05-22) — collapse 고침 확정, 단 선형 W는 *약함***:
+  단위 전체 PASS. 재학습(W만, 3000 step, warmup 200): recon 4.0→**~1.6
+  step ~300에 평탄**(이후 2700 step 무변화=수렴). 재진단: ĥ_lm std
+  0.12~0.14 (붕괴 아님 ✓), ñ_lm std 0.93 (informative ✓), **gen_raw·gen_ln
+  oracle 전부 복원 ✓** (LM autoencoding + LN-space decode 정상). **그러나
+  cosine = 0.27(in)/0.31(OOD) = 약함**, ĥ_lm std가 학습 중 0.40→0.12로
+  *감소*(선형 회귀의 평균 수렴 시그니처), gen_acc 거의 상수(`middle/right/
+  left`). → **선형 ACC W가 IMPALA-CNN rep → LM 문장임베딩 다양체를 정확히
+  못 얹음**. undertraining 아님(수렴 확인). 슬롯 정보는 h_agent에 *있음*
+  (B3 probe loss 0.18). 사전등록 §5.8: in-dist cosine 0.266 < 0.3 = "복원
+  실패" 구간(경계).
+
+- **다음 (사용자 결정 2026-05-22, 옵션 A): 천장 진단** `ceiling_v2.py` —
+  같은 122k 페어 held-out으로 (1) closed-form 선형 W 상한(GD 배제),
+  (2) 비선형 MLP bridge 상한, 각각 cosine + decode→슬롯일치. MLP≫선형이면
+  "선형이 병목"→richer ACC 정당, MLP≈선형(~0.3)이면 "임베딩 다양체가
+  agent rep에서 멀다"는 깊은 발견. 그 후 Phase 4.1(B4 비교) vs richer
+  ACC(POST-HOC-7?) vs Scenario C 판단.
+
+- **사전 등록 영향**: V2 빌드 정의 변경(POST-HOC-6)이므로 §5/§5.8 측정·
+  시나리오 임계치는 *그대로* 유지 (변경 없음). Phase 3 G1·G2는 영향 없음
+  (에이전트·게이트 동일); G3는 V2 한정 재학습으로 재충족 필요.
+
+---
+
 #### POST-HOC-5 (2026-05-21) — Phase 3 게이트 G2: 절대 0.80 → 노이즈 floor 인정
 
 - **상황**: Phase 3.4 full 25M 공동학습 완료 (1525 update, ~4.9h). 게이트
