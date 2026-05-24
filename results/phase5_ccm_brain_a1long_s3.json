@@ -1,0 +1,183 @@
+{
+  "n_fit": 245760,
+  "d_model": 256,
+  "d_agent": 256,
+  "cheese_dir_dist": {
+    "right": 24490,
+    "up": 43560,
+    "up-right": 177710
+  },
+  "ridge_lambda": null,
+  "per_slot": {
+    "in_dist": {
+      "rung1_hebbian": {
+        "agent_region": 0.11175,
+        "heading": 0.164325,
+        "cheese_dir": 0.101225,
+        "mean": 0.12576666666666667
+      },
+      "rung2_ridge": {
+        "agent_region": 0.64025,
+        "heading": 0.181025,
+        "cheese_dir": 0.302425,
+        "mean": 0.37456666666666666
+      },
+      "rung3_procrustes": {
+        "agent_region": 0.269725,
+        "heading": 0.1616,
+        "cheese_dir": 0.036275,
+        "mean": 0.15586666666666665
+      },
+      "random": {
+        "agent_region": 0.082,
+        "heading": 0.1393,
+        "cheese_dir": 0.043275,
+        "mean": 0.08819166666666667
+      },
+      "identity": {
+        "agent_region": 0.09945,
+        "heading": 0.173775,
+        "cheese_dir": 0.027425,
+        "mean": 0.10021666666666666
+      },
+      "trained_bridge": {
+        "agent_region": 0.67595,
+        "heading": 0.32115,
+        "cheese_dir": 0.7516,
+        "mean": 0.5829000000000001
+      }
+    },
+    "ood": {
+      "rung1_hebbian": {
+        "agent_region": 0.05955,
+        "heading": 0.1263,
+        "cheese_dir": 0.06375,
+        "mean": 0.0832
+      },
+      "rung2_ridge": {
+        "agent_region": 0.4477,
+        "heading": 0.150175,
+        "cheese_dir": 0.10175,
+        "mean": 0.23320833333333332
+      },
+      "rung3_procrustes": {
+        "agent_region": 0.22245,
+        "heading": 0.1476,
+        "cheese_dir": 0.153025,
+        "mean": 0.1743583333333333
+      },
+      "random": {
+        "agent_region": 0.1357,
+        "heading": 0.09695,
+        "cheese_dir": 0.125825,
+        "mean": 0.11949166666666666
+      },
+      "identity": {
+        "agent_region": 0.347675,
+        "heading": 0.12425,
+        "cheese_dir": 0.20795,
+        "mean": 0.226625
+      },
+      "trained_bridge": {
+        "agent_region": 0.5315,
+        "heading": 0.4354,
+        "cheese_dir": 0.084975,
+        "mean": 0.35062499999999996
+      }
+    }
+  },
+  "swap_following": {
+    "rung1_hebbian": {
+      "rate": 0.0,
+      "n_readA": 328,
+      "curve": [
+        0.329,
+        0.329,
+        0.329,
+        0.329,
+        0.329
+      ]
+    },
+    "rung2_ridge": {
+      "rate": 0.38190954773869346,
+      "n_readA": 398,
+      "curve": [
+        0.135,
+        0.16,
+        0.194,
+        0.296,
+        0.384
+      ]
+    },
+    "rung3_procrustes": {
+      "rate": 0.009433962264150943,
+      "n_readA": 106,
+      "curve": [
+        0.097,
+        0.078,
+        0.089,
+        0.099,
+        0.11
+      ]
+    },
+    "random": {
+      "rate": 0.0,
+      "n_readA": 137,
+      "curve": [
+        0.146,
+        0.159,
+        0.171,
+        0.174,
+        0.147
+      ]
+    },
+    "identity": {
+      "rate": 0.0,
+      "n_readA": 83,
+      "curve": [
+        0.096,
+        0.083,
+        0.065,
+        0.064,
+        0.087
+      ]
+    },
+    "trained_bridge": {
+      "rate": 0.5728155339805825,
+      "n_readA": 618,
+      "curve": [
+        0.164,
+        0.237,
+        0.335,
+        0.458,
+        0.585
+      ]
+    }
+  },
+  "verdicts": {
+    "step1_memory_transfer": {
+      "rung1_slot_in": 0.12576666666666667,
+      "random_slot_in": 0.08819166666666667,
+      "delta_slot": 0.037575,
+      "rung1_swap": 0.0,
+      "random_swap": 0.0,
+      "delta_swap": 0.0,
+      "pass": false
+    },
+    "normalization_key": {
+      "best_norm": "rung2_ridge",
+      "delta_swap": 0.38190954773869346,
+      "delta_slot": 0.2488,
+      "pass": true
+    },
+    "ceiling": {
+      "best_rung": "rung2_ridge",
+      "best_rung_swap": 0.38190954773869346,
+      "b4_swap": null,
+      "swap_pct_of_b4": null,
+      "best_rung_slot_in": 0.37456666666666666,
+      "b4_slot_in": null,
+      "slot_pct_of_b4": null
+    }
+  }
+}

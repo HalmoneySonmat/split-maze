@@ -1,0 +1,183 @@
+{
+  "n_fit": 245760,
+  "d_model": 256,
+  "d_agent": 256,
+  "cheese_dir_dist": {
+    "right": 20575,
+    "up": 42014,
+    "up-right": 183171
+  },
+  "ridge_lambda": null,
+  "per_slot": {
+    "in_dist": {
+      "rung1_hebbian": {
+        "agent_region": 0.1228,
+        "heading": 0.170725,
+        "cheese_dir": 0.08575,
+        "mean": 0.12642499999999998
+      },
+      "rung2_ridge": {
+        "agent_region": 0.643575,
+        "heading": 0.162525,
+        "cheese_dir": 0.324575,
+        "mean": 0.3768916666666667
+      },
+      "rung3_procrustes": {
+        "agent_region": 0.240975,
+        "heading": 0.1598,
+        "cheese_dir": 0.024025,
+        "mean": 0.1416
+      },
+      "random": {
+        "agent_region": 0.121,
+        "heading": 0.166475,
+        "cheese_dir": 0.01265,
+        "mean": 0.10004166666666668
+      },
+      "identity": {
+        "agent_region": 0.1185,
+        "heading": 0.153675,
+        "cheese_dir": 0.04425,
+        "mean": 0.105475
+      },
+      "B4_ceiling": {
+        "agent_region": 0.702,
+        "heading": 0.2765,
+        "cheese_dir": 0.866475,
+        "mean": 0.6149916666666666
+      }
+    },
+    "ood": {
+      "rung1_hebbian": {
+        "agent_region": 0.04625,
+        "heading": 0.140725,
+        "cheese_dir": 0.052,
+        "mean": 0.07965833333333333
+      },
+      "rung2_ridge": {
+        "agent_region": 0.54315,
+        "heading": 0.16475,
+        "cheese_dir": 0.081,
+        "mean": 0.2629666666666666
+      },
+      "rung3_procrustes": {
+        "agent_region": 0.260125,
+        "heading": 0.138225,
+        "cheese_dir": 0.17565,
+        "mean": 0.19133333333333333
+      },
+      "random": {
+        "agent_region": 0.051725,
+        "heading": 0.14225,
+        "cheese_dir": 0.22605,
+        "mean": 0.14000833333333332
+      },
+      "identity": {
+        "agent_region": 0.127425,
+        "heading": 0.1346,
+        "cheese_dir": 0.1592,
+        "mean": 0.14040833333333333
+      },
+      "B4_ceiling": {
+        "agent_region": 0.602025,
+        "heading": 0.20705,
+        "cheese_dir": 0.09115,
+        "mean": 0.300075
+      }
+    }
+  },
+  "swap_following": {
+    "rung1_hebbian": {
+      "rate": 0.0,
+      "n_readA": 322,
+      "curve": [
+        0.367,
+        0.367,
+        0.367,
+        0.367,
+        0.367
+      ]
+    },
+    "rung2_ridge": {
+      "rate": 0.39408866995073893,
+      "n_readA": 406,
+      "curve": [
+        0.138,
+        0.161,
+        0.241,
+        0.339,
+        0.457
+      ]
+    },
+    "rung3_procrustes": {
+      "rate": 0.0,
+      "n_readA": 81,
+      "curve": [
+        0.129,
+        0.09,
+        0.093,
+        0.091,
+        0.107
+      ]
+    },
+    "random": {
+      "rate": 0.0,
+      "n_readA": 36,
+      "curve": [
+        0.041,
+        0.038,
+        0.029,
+        0.031,
+        0.052
+      ]
+    },
+    "identity": {
+      "rate": 0.012903225806451613,
+      "n_readA": 155,
+      "curve": [
+        0.181,
+        0.201,
+        0.21,
+        0.191,
+        0.173
+      ]
+    },
+    "B4_ceiling": {
+      "rate": 0.6537890044576523,
+      "n_readA": 673,
+      "curve": [
+        0.158,
+        0.228,
+        0.402,
+        0.599,
+        0.689
+      ]
+    }
+  },
+  "verdicts": {
+    "step1_memory_transfer": {
+      "rung1_slot_in": 0.12642499999999998,
+      "random_slot_in": 0.10004166666666668,
+      "delta_slot": 0.0263833333333333,
+      "rung1_swap": 0.0,
+      "random_swap": 0.0,
+      "delta_swap": 0.0,
+      "pass": false
+    },
+    "normalization_key": {
+      "best_norm": "rung2_ridge",
+      "delta_swap": 0.39408866995073893,
+      "delta_slot": 0.2504666666666667,
+      "pass": true
+    },
+    "ceiling": {
+      "best_rung": "rung2_ridge",
+      "best_rung_swap": 0.39408866995073893,
+      "b4_swap": 0.6537890044576523,
+      "swap_pct_of_b4": 0.6027765338110166,
+      "best_rung_slot_in": 0.3768916666666667,
+      "b4_slot_in": 0.6149916666666666,
+      "slot_pct_of_b4": 0.6128402823886503
+    }
+  }
+}

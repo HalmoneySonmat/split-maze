@@ -1,0 +1,206 @@
+{
+  "n_fit": 245760,
+  "d_model": 256,
+  "d_agent": 256,
+  "cheese_dir_dist": {
+    "right": 26441,
+    "up": 61848,
+    "up-right": 157471
+  },
+  "ridge_lambda": null,
+  "per_slot": {
+    "in_dist": {
+      "rung1_hebbian": {
+        "agent_region": 0.198925,
+        "heading": 0.184625,
+        "cheese_dir": 0.04915,
+        "mean": 0.14423333333333332
+      },
+      "rung2_ridge": {
+        "agent_region": 0.6188,
+        "heading": 0.218275,
+        "cheese_dir": 0.41125,
+        "mean": 0.4161083333333333
+      },
+      "rung3_procrustes": {
+        "agent_region": 0.224125,
+        "heading": 0.195925,
+        "cheese_dir": 0.06195,
+        "mean": 0.16066666666666665
+      },
+      "random": {
+        "agent_region": 0.1302,
+        "heading": 0.145025,
+        "cheese_dir": 0.0442,
+        "mean": 0.106475
+      },
+      "identity": {
+        "agent_region": 0.1393,
+        "heading": 0.183825,
+        "cheese_dir": 0.086825,
+        "mean": 0.13665
+      },
+      "trained_bridge": {
+        "agent_region": 0.6383,
+        "heading": 0.3804,
+        "cheese_dir": 0.789375,
+        "mean": 0.6026916666666667
+      },
+      "B4_ceiling": {
+        "agent_region": 0.786025,
+        "heading": 0.346975,
+        "cheese_dir": 0.8549,
+        "mean": 0.6626333333333333
+      }
+    },
+    "ood": {
+      "rung1_hebbian": {
+        "agent_region": 0.076725,
+        "heading": 0.14125,
+        "cheese_dir": 0.147825,
+        "mean": 0.12193333333333334
+      },
+      "rung2_ridge": {
+        "agent_region": 0.52265,
+        "heading": 0.29925,
+        "cheese_dir": 0.086225,
+        "mean": 0.3027083333333333
+      },
+      "rung3_procrustes": {
+        "agent_region": 0.276975,
+        "heading": 0.160175,
+        "cheese_dir": 0.133875,
+        "mean": 0.19034166666666666
+      },
+      "random": {
+        "agent_region": 0.293675,
+        "heading": 0.11305,
+        "cheese_dir": 0.203525,
+        "mean": 0.20341666666666666
+      },
+      "identity": {
+        "agent_region": 0.05215,
+        "heading": 0.142775,
+        "cheese_dir": 0.059925,
+        "mean": 0.08495000000000001
+      },
+      "trained_bridge": {
+        "agent_region": 0.546375,
+        "heading": 0.4381,
+        "cheese_dir": 0.072375,
+        "mean": 0.35228333333333334
+      },
+      "B4_ceiling": {
+        "agent_region": 0.765425,
+        "heading": 0.347725,
+        "cheese_dir": 0.0787,
+        "mean": 0.3972833333333334
+      }
+    }
+  },
+  "swap_following": {
+    "rung1_hebbian": {
+      "rate": 0.0,
+      "n_readA": 150,
+      "curve": [
+        0.157,
+        0.163,
+        0.169,
+        0.149,
+        0.135
+      ]
+    },
+    "rung2_ridge": {
+      "rate": 0.5,
+      "n_readA": 500,
+      "curve": [
+        0.123,
+        0.172,
+        0.266,
+        0.386,
+        0.515
+      ]
+    },
+    "rung3_procrustes": {
+      "rate": 0.0375,
+      "n_readA": 160,
+      "curve": [
+        0.195,
+        0.174,
+        0.149,
+        0.145,
+        0.164
+      ]
+    },
+    "random": {
+      "rate": 0.014598540145985401,
+      "n_readA": 137,
+      "curve": [
+        0.136,
+        0.106,
+        0.112,
+        0.115,
+        0.12
+      ]
+    },
+    "identity": {
+      "rate": 0.0,
+      "n_readA": 272,
+      "curve": [
+        0.207,
+        0.232,
+        0.262,
+        0.267,
+        0.262
+      ]
+    },
+    "trained_bridge": {
+      "rate": 0.7668463611859838,
+      "n_readA": 742,
+      "curve": [
+        0.103,
+        0.22,
+        0.415,
+        0.624,
+        0.767
+      ]
+    },
+    "B4_ceiling": {
+      "rate": 0.864367816091954,
+      "n_readA": 870,
+      "curve": [
+        0.063,
+        0.209,
+        0.457,
+        0.737,
+        0.865
+      ]
+    }
+  },
+  "verdicts": {
+    "step1_memory_transfer": {
+      "rung1_slot_in": 0.14423333333333332,
+      "random_slot_in": 0.106475,
+      "delta_slot": 0.037758333333333324,
+      "rung1_swap": 0.0,
+      "random_swap": 0.014598540145985401,
+      "delta_swap": -0.014598540145985401,
+      "pass": false
+    },
+    "normalization_key": {
+      "best_norm": "rung2_ridge",
+      "delta_swap": 0.5,
+      "delta_slot": 0.271875,
+      "pass": true
+    },
+    "ceiling": {
+      "best_rung": "rung2_ridge",
+      "best_rung_swap": 0.5,
+      "b4_swap": 0.864367816091954,
+      "swap_pct_of_b4": 0.5784574468085106,
+      "best_rung_slot_in": 0.4161083333333333,
+      "b4_slot_in": 0.6626333333333333,
+      "slot_pct_of_b4": 0.6279616680919563
+    }
+  }
+}

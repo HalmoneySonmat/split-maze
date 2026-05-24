@@ -19,6 +19,18 @@
 > (활성 스왑이 B4의 OOD "합리화"가 *오일반화 에이전트를 충실히 읽은 것*임을 인과
 > 증명), ③ ACC의 *단일 요약-벡터 병목* < 어댑터의 분산 cross-attn. **단일 RL seed의
 > descriptive 결과** — 통계 확정은 multi-seed 과제.
+>
+> **후속 (Phase 5 — CCM): 다리가 자란다.** V2 기각 뒤, 학습된 번역기도 얇은 재구성도
+> 아닌 — 두 망이 같은 장면에서 *함께 켜진 노드의 대응을 기록(기억)*만 해 에이전트→LM을
+> 구동하는 **CCM(공동활성 기억 뇌량)** 을 시험했다. ① *기록만으로*(backprop 0) 활성 스왑
+> **0.445 = B4의 52%**, 비결은 **"공통모드(평균) 제거"**(중심화·화이트닝 중 *하나면 충분*,
+> 날것 Hebbian은 붕괴). ② 닫힌고리로 다리를 키우려다(step2) 실패(세게=task 붕괴, 살살=정체,
+> `loss↓≠성공`). ③ 그러나 다리를 *가소성*으로 풀고(기억→씨앗) 두 뇌가 마중하면(**step3**:
+> agent gentle + LM 한 블록 + W) 얇은 다리가 *학습 번역기 천장(~0.80)* 까지 자란다 — 공동적응
+> 순수 이득 **+0.064±0.020 (5-seed 확정, 5/5 양성)**, task·언어 보존. 사용자 원래 비전("두 뇌가
+> 동시에 적응하며 다리가 자란다")의 지지 증거 — **다른 결정자 뇌 3개로도 일반화**(GENERALIZES,
+> 평균 +0.081, 3/3 양성). 단 해석자 LM은 공유라 결정자 뇌 한정이고, 효과는 뇌-의존(과제가 붕괴한
+> 1개 뇌에선 사라짐 = "흔들면 일부는 안 버틴다").
 
 ---
 
@@ -183,6 +195,61 @@ degenerate collapse, CTRL-2x2의 V2Rich. trivial 해는 늘 의심할 것.)
 
 ---
 
+## Phase 5 — CCM (공동활성 기억 뇌량): 다리가 자란다
+
+V2가 기각된 뒤, *전혀 다른* 다리를 시험했다. 번역기를 *학습*하지 않고 — 두 망이 같은
+장면을 받을 때 **함께 켜진 노드의 대응을 기록(기억)** 만 해서 그 기록으로 에이전트→LM을
+구동한다. **CCM(Co-activation Callosal Memory).** 인터페이스·생성 경로는 B4Thin과
+byte-identical하되, 다리 `W`는 gradient가 아니라 *닫힌형 통계*(또는 그것을 씨앗으로 한
+가소성 학습)로 채운다. "학습이 아니라 기억"이 정체성. 생물 뇌량의 *활동의존 가소성*과
+*억제 정규화* 문헌에서 출발했다.
+
+**step1 — 기록만으로 절반.** frozen 에이전트+LM 위에서 245,760 페어로 `W`를 닫힌형 적합.
+backprop 0회인데 **활성 스왑 0.445 = 학습 어댑터 B4의 52%.** 단 *날것* 공동활성(Hebbian
+외적)은 degenerate(평균항 지배 → 상수 붕괴). 작동의 비결은 **"공통모드(평균) 제거"** —
+깨끗한 2×2 ablation 결과, 중심화 *또는* 화이트닝 중 **하나만으로** 거의 완전 복원(둘은
+중복 경로). → **"다리는 *무엇이 같이 켜졌나*가 아니라 *무엇이 다른가*를 기억해야 한다."**
+(초기엔 "화이트닝이 결정적"이라 봤으나 ablation이 confound로 교정 — 정직 기록.)
+
+**step2 — 닫힌고리(기록 W·에이전트만): 음성.** 두 뇌가 다리에 적응하며 *다리가 자라나*
+봤다. 세게 밀면 task 붕괴(return 10→3.75), 안 깨질 만큼 살살 하면 다리 정체(swap −0.05).
+양쪽 모두 미지지 — `loss↓ ≠ 성공`의 교과서 사례(학습 loss는 떨어져도 held-out 충실도는 안 오름).
+
+**step3 — 다리를 *살아있게* 만들고 두 뇌가 마중: 해피엔드.** 둘을 바꿨다 — (i) `W`를
+*가소성*(학습 파라미터)으로 풀되 기록값에서 warm-start("기억이 씨앗"), (ii) LM도 마중:
+생성 경로 디코더 블록 `blocks[0]`만 작은 lr로 + **언어 KL 앵커**(frozen 참조)로 언어 보존.
+단계적 — A1(두 뇌 고정·W만 = 번역기 천장 control) → A2(공동적응).
+
+| 다리 | 활성 스왑 | 비고 |
+|---|---:|---|
+| 기록 기억 (step1) | 0.445 | 씨앗 |
+| A1 plastic W (고정 뇌) | 0.683 | 기억→번역기 성장 (B4의 80%) |
+| A1-long (W-budget control) | 0.725 | W를 더 줘도 plateau (< A2) |
+| **A2 공동적응** | **0.784** | 수렴 번역기 천장(~0.78) 도달 |
+
+A2는 **task(return 10→8.3)·언어(KL≈0) 보존**. **5-seed 절차 multi-seed로 확정**: 공동적응
+순수 이득(A2 − W-budget control) = **+0.064 ± 0.020, 5/5 양성**(SEM≈0.009 → 노이즈 아님).
+결정적으로, gradient가 0인 *기록* ridge조차 적응된 시스템에서 0.445→0.508로 올랐다 — W
+학습으로 설명 불가한, **두 뇌의 표상이 서로 정렬되며 자랐다는 증거**. 사용자 원래 비전 —
+"두 뇌가 동시에 다르게 학습하면서 자극을 기억하고, 다리가 자란다" — 의 *증거 기반 지지*.
+
+**그리고 다른 결정자 뇌로도 일반화한다 (GENERALIZES).** *다른* RL 에이전트 3개(각 독립 25M
+PPO; 해석자 LM 공유)에서 per-brain 효과 = swap(A2)−swap(A1-long) = **+0.137 / +0.004 /
++0.102, 평균 +0.081 ± 0.069, 3/3 양성**. 동결 기준(≥2/3 양성 AND mean≥+0.03) 둘 다 충족 →
+"이 뇌에서 진짜"를 넘어 **결정자 뇌를 가로질러 재현**. 뇌-간 기록 ridge 평균 0.500>0.445(W-무관
+정렬 유지). 단 **정직하게**: 효과는 *뇌-의존*이다 — brain 1·3은 control 위 분명한 잔차(+0.10~+0.14)지만
+**brain 2는 사실상 null(+0.004)이며 동시에 과제가 붕괴**(return 10→7.66). brain 2의 raw A2(0.804)≈
+A1-long(0.801)이라 그 "이득"은 거의 전부 W 추가학습 — **W-budget control이 가짜 양성을 정확히 흡수**했다.
+(판정은 brain 2를 null로 봐도 2/3≥N−1로 유지되어 그 부호에 의존하지 않는다.) → "마중하면 다리가
+자란다"는 *방향*은 뇌 간 재현되나, 크기는 뇌마다 다르고 **결정자 과제를 깨면 사라진다**. 해석자 LM은
+공유라 일반화는 *결정자 뇌*까지 — 해석자 뇌 변동은 미시도(큐의 큐).
+
+> Phase 5 한 줄: **다리는 자란다 — 두 뇌가 마중할 때. 효과는 modest(+0.06)하지만 5-seed 절차 +
+> 3-뇌 일반화로 실재 확정.** step2의 음성(기록·한 방향)을 step3(가소성·양방향)가 정직하게 뒤집었고,
+> 다른 결정자 뇌로도 재현된다 — 단 과제를 깨면 사라지므로 "흔들어봐도 버틴다"는 뇌-의존이다.
+
+---
+
 ## 한계 (1 seed descriptive)
 
 1. **단일 RL seed · descriptive.** paired-bootstrap·Holm–Bonferroni 통계 확정은
@@ -192,6 +259,11 @@ degenerate collapse, CTRL-2x2의 V2Rich. trivial 해는 늘 의심할 것.)
    궤적을 부분만 표상. recurrent 에이전트면 천장이 오를 여지.
 4. **richer-reconstruction은 well-posed 재설계 필요** — V2Rich는 ill-posed 타깃으로
    붕괴. rich×재구성 칸의 공정한 측정은 Deferred.
+5. **CCM(Phase 5).** step1 양성(B4의 52%)·공통모드 제거는 1-seed descriptive. step3 공동적응
+   (+0.064±0.020, 5/5)은 *5-seed 절차* multi-seed로 확정, **다른 RL 뇌 3개로의 일반화도
+   GENERALIZES**(평균 +0.081, 3/3 양성). 단 **해석자 LM은 공유** → 일반화는 *결정자 뇌*까지이고
+   *해석자 뇌 변동*은 미시도(큐의 큐). 효과는 뇌-의존(brain 2는 null+과제붕괴; control이 흡수).
+   *완전 양방향*(처음부터 동시)도 미시도. 절차 seed 4 & brain 2에서 return이 가드(−20%)를 초과(−23%).
 
 ---
 
@@ -206,6 +278,11 @@ degenerate collapse, CTRL-2x2의 V2Rich. trivial 해는 늘 의심할 것.)
 3. **recurrent 에이전트** — heading 천장 ↑, 행동 안 하는 지각의 보존 여부.
 4. **well-posed richer-reconstruction** — V2Rich ill-posed 타깃 수선.
 5. **마무리 트랙** — 얇은 쌍 multi-seed 통계 + #4 Procrustes → 워크숍 short-paper.
+6. **CCM 완전 양방향(큐)** — step3는 단계적(A1→A2)·LM 한 블록 한정. 처음부터 agent+LM+W
+   동시 학습(붕괴 위험 ↑, 단계적 성공이 비교 기준).
+7. **CCM RL-seed 일반화 ✅ 완료** — step3 공동적응 효과를 다른 RL 뇌 3개에서 확인(GENERALIZES,
+   평균 +0.081, 3/3). *다음 큐의 큐*: **해석자(LM) 뇌 변동** — 지금까지 결정자 뇌만 바꿨고
+   해석자는 공유했다. "두 뇌가 둘 다 달라도 자라나"가 진짜 완성판.
 
 ---
 
@@ -252,10 +329,12 @@ split_maze/
 │   ├── acc.py               ← ACC (tied→untied W, (C-thin), 양방향 MSE)
 │   ├── adapter.py           ← Resampler + Gated cross-attn (Flamingo)
 │   ├── builds.py            ← Build ABC + B3/B4/V2 + B4Thin/V2Rich
-│   └── paired_collect.py    ← (h_agent, 문장) 페어 수집 + replay buffer
-├── scripts/                 ← train_agent/lm/phase3, evaluate, eval_builds,
-│                              swap_test, diagnose_v2, ceiling_v2, fit_2x2 …
-├── tests/                   ← 300+ 단위 테스트 (13 파일)
+│   ├── paired_collect.py    ← (h_agent, 문장) 페어 수집 + replay buffer
+│   └── ccm.py               ← Phase 5 CCM (CoActAccumulator + W 사다리/ablation + plastic CCMBridge)
+├── scripts/                 ← train_agent/lm/phase3, evaluate, eval_builds, swap_test,
+│                              fit_2x2 · (Phase 5) ccm_sanity, fit_ccm, train_ccm_step2,
+│                              train_ccm_step3, run_step3_multiseed.sh, agg_step3_seeds …
+├── tests/                   ← 330+ 단위 테스트 (14 파일, test_ccm 포함)
 ├── checkpoints/             ← 학습 산출물 (gitignored, *.pt)
 └── results/                 ← phase4_{builds,swap,ctrl2x2}.json 등
 ```
@@ -285,10 +364,12 @@ matplotlib · pytest · 8 GB 소비자용 GPU 1대 (RTX 3070 Ti) / WSL2 Ubuntu.
 
 ## 상태
 
-Phase 4 완료. **Scenario C** (핵심 가설 기각) + 워크숍 short-paper 작성([`docs/RESULTS.html`](docs/RESULTS.html))
-+ 통제 2×2(CTRL-2x2)로 confound 해소. 권장 git tag `v1.4-phase4`. 단일 RL seed
-descriptive — 다음 자연스러운 단계는 multi-seed 통계 확정 또는 인과-직접 최적화/지각-의도
-readout(향후 연구 참조).
+Phase 4 (Scenario C) + **Phase 5 (CCM)** 완료. Phase 4: 핵심 가설(V2) 기각 + CTRL-2x2
+confound 해소 + 워크숍 short-paper. **Phase 5 CCM**: 기록 다리 = B4의 52%(step1) · 공통모드
+제거 메커니즘(ablation, step1 해석 교정) · 닫힌고리 음성(step2) · **다리가 자란다(step3):
+공동적응 +0.064±0.020, 5-seed 절차 확정 + 다른 결정자 뇌 3개로 일반화(GENERALIZES, 평균
++0.081, 3/3)**. 모두 [`docs/RESULTS.html`](docs/RESULTS.html) §3.5에 반영. 결정자 뇌
+일반화까지 확정 — 다음 자연스러운 단계는 **해석자(LM) 뇌 변동** 또는 CCM 완전 양방향(향후 연구 참조).
 
 ---
 
@@ -308,8 +389,10 @@ You may obtain a copy of the License at
 
 ---
 
-*"목표가 어긋난 친구를 충실히 통역하면, 어긋난 목표가 그대로 나온다. 통역사를 탓하기
-전에, 무엇을 '충실'이라 부를지부터 다시 물어라."* — 본 프로젝트의 결론을 한 문장으로.
+이 실험을 구축하고 실행하는 데 Claude를 사용했다. 정말 많은 도움이 되었다. 내 1%의 망상으로 Claude는 정말 멋진 일을 가능하게 했다.
+
+*"다리는 학습이 아니라 기억에서 시작될 수 있고, 두 뇌가 마중하면 자란다 — 단, '자랐다'는
+부풀린 승리가 아니라 흔들어봐도 버티는 것이어야 한다."* — Phase 5의 결론을 한 문장으로.
 
 ---
 

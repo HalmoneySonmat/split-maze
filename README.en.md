@@ -24,6 +24,24 @@
 > goal-misgeneralized agent*), ③ the ACC's *single summary-vector bottleneck* <
 > the adapter's distributed cross-attention. **Single-RL-seed, descriptive** —
 > statistical confirmation is a multi-seed task.
+>
+> **Follow-up (Phase 5 — CCM): the bridge grows.** After V2 was rejected, we tried
+> a bridge that is neither a *trained translator* nor thin reconstruction —
+> **CCM (Co-activation Callosal Memory)**, which merely *records (remembers) which
+> nodes co-fire* when both nets see the same scene, and drives agent→LM from that
+> record. ① *Recording alone* (zero backprop) gives active swap **0.445 = 52% of
+> B4**; the key ingredient is **common-mode (mean) removal** (centering *or*
+> whitening alone suffices; raw Hebbian collapses). ② Trying to *grow* the bridge
+> in a closed loop (step2) failed (push hard → task collapse, gently → it stalls;
+> `loss↓ ≠ success`). ③ But make the bridge *plastic* (memory → seed) and let both
+> brains meet it halfway (**step3**: agent gentle + one LM block + W) and the thin
+> bridge grows to the *trained-translator ceiling (~0.80)* — pure co-adaptation
+> gain **+0.064±0.020 (5-seed confirmed, 5/5 positive)**, task & language preserved.
+> Evidence for the original vision ("two brains co-adapt and the bridge grows") —
+> and it **also generalizes to 3 other decider brains** (GENERALIZES, mean +0.081,
+> 3/3 positive). The interpreter LM is shared, so generalization is established only
+> for the *decider* brain; and the effect is brain-dependent — it vanishes in the one
+> brain whose task collapsed ("it doesn't all hold when you shake it").
 
 ---
 
@@ -215,6 +233,94 @@ solutions.)
 
 ---
 
+## Phase 5 — CCM (Co-activation Callosal Memory): the bridge grows
+
+After V2 was rejected, we tried a *completely different* bridge. Instead of
+*training* a translator, we merely **record (remember) the correspondence of
+nodes that co-fire** when both nets see the same scene, and drive agent→LM from
+that record. **CCM (Co-activation Callosal Memory).** The interface and
+generation path are byte-identical to B4Thin, but the bridge `W` is filled by a
+*closed-form statistic* (or a plastic refinement seeded by it) rather than by
+gradient. "Memory, not learning" is the identity. It starts from the biology of
+the corpus callosum — *activity-dependent plasticity* and *inhibitory
+normalization*.
+
+**step1 — half the skill, from recording alone.** On the frozen agent + LM, fit
+`W` in closed form over 245,760 pairs. With *zero* backprop, **active swap 0.445 =
+52% of the trained adapter B4.** But *raw* co-activation (the Hebbian outer
+product) is degenerate (the mean term dominates → constant collapse). The key
+ingredient is **common-mode (mean) removal** — a clean 2×2 ablation shows
+centering *or* whitening **alone** recovers almost all of it (the two are
+redundant routes). → **"The bridge must remember *what is different*, not *what
+co-fires*."** (We first thought "whitening is decisive"; the ablation corrected
+that as a confound — recorded honestly.)
+
+**step2 — closed loop (recorded W, agent only): negative.** We let the two brains
+adapt to the bridge so it would *grow*. Push hard → task collapses (return
+10→3.75); gently enough to survive → the bridge stalls (swap −0.05). Both
+unsupported — a textbook `loss↓ ≠ success` (training loss falls, held-out
+fidelity does not rise).
+
+**step3 — make the bridge *live* and let both brains meet it: the happy ending.**
+Two changes — (i) make `W` *plastic* (a trainable parameter) but warm-start it
+from the recorded value ("memory is the seed"); (ii) let the LM meet halfway too:
+unfreeze just one decoder block `blocks[0]` (on the bridge generate path) at a
+small lr, with a **language KL anchor** (to a frozen reference) preserving
+language. Staged — A1 (both brains frozen, W only = the trained-translator
+ceiling / control) → A2 (co-adaptation).
+
+| bridge | active swap | note |
+|---|---:|---|
+| recorded memory (step1) | 0.445 | the seed |
+| A1 plastic W (frozen brains) | 0.683 | memory → translator (80% of B4) |
+| A1-long (W-budget control) | 0.725 | plateaus even with more W (< A2) |
+| **A2 co-adaptation** | **0.784** | reaches the converged translator ceiling (~0.78) |
+
+A2 **preserves the task (return 10→8.3) and language (KL≈0)**. **Confirmed by a
+5-seed procedure multi-seed**: the pure co-adaptation gain (A2 − W-budget control)
+= **+0.064 ± 0.020, positive in 5/5 seeds** (SEM≈0.009 → not noise). Decisively,
+even the *recorded* ridge (zero W-training) rose 0.445→0.508 on the adapted
+system — a gain unexplainable by W-training, i.e. **evidence that the two brains'
+representations genuinely grew more aligned**. This is *evidence-grounded support*
+for the original vision — "two brains adapt simultaneously, remember the stimulus,
+and the bridge grows." (Confirmed on the *same* frozen RL agent = "real for this
+brain".)
+
+**And it generalizes across decider brains (GENERALIZES).** We re-ran the step3
+co-adaptation pipeline on **3 *different* decider brains** (each an independently
+trained 25M-PPO RL agent; the interpreter LM is *shared* across them because it is
+neutral). Per-brain effect = swap(A2) − swap(A1-long) = **+0.137 / +0.004 / +0.102,
+mean +0.081 ± 0.069, positive in 3/3 brains**. The pre-registered *frozen* criterion
+— GENERALIZES iff (≥ N−1 brains positive) AND (mean ≥ +0.03), i.e. for N=3: ≥2/3
+positive AND mean≥+0.03 — is met on **both** counts → **verdict = GENERALIZES**. The
+W-independent corroboration also holds across brains: the adapted *recorded* ridge
+swap (mean 0.500) > the frozen baseline (0.445). But **honestly, the effect is
+heterogeneous.** Brains 1 and 3 show a clear residual above the W-budget control
+(+0.10 to +0.14), but **brain 2 is essentially null (+0.004) and its task collapsed**
+(return 10 → 7.66, −23%). For brain 2 the raw A2 swap (0.804) ≈ the A1-long control
+(0.801), so its apparent "gain" is almost entirely just extra W-training — **the
+W-budget control correctly absorbed that false positive** (without the control it
+would have looked like a confound). The verdict does *not* hinge on brain 2's
+hairline-positive sign: even treating brain 2 as null, positives = 2/3 ≥ N−1, so it
+still passes. → "the bridge grows when both brains meet halfway" replicates as a
+*direction* across decider brains, but the *magnitude* is brain-dependent and the
+effect *vanishes if the decider's task is broken*. This is the first empirical
+evidence on the "does it hold when you shake it?" question — it holds in 2/3, not in
+the brain whose task we (inadvertently) broke. **Scope:** N=3 is a probe (5 would be
+sturdier); only the *decider* (RL-seed) was varied while the interpreter LM was
+shared, so generalization is established only for the decider brain — varying the
+*interpreter* brain (LM-seed) is the next queued item ("queue of the queue").
+Artifacts: `results/phase5_ccm_brain_{a2,a1long}_s{1..3}.json`.
+
+> Phase 5 in one line: **the bridge grows — when both brains meet it. The effect is
+> modest (+0.06) but confirmed real by a 5-seed procedure *and* generalization to 3
+> decider brains.** step3 (plastic, bidirectional) honestly reversed step2's negative
+> (recorded, one-directional), and the effect replicates across decider brains — but
+> it's brain-dependent, so "it holds when you shake it" is brain-dependent (it
+> vanishes in the brain whose task collapsed).
+
+---
+
 ## Limits (1 seed, descriptive)
 
 1. **Single RL seed, descriptive.** Paired-bootstrap / Holm–Bonferroni
@@ -227,6 +333,16 @@ solutions.)
 4. **richer-reconstruction needs a well-posed redesign** — V2Rich collapsed on
    an ill-posed target; a fair measurement of the rich × reconstruction cell is
    deferred.
+5. **CCM (Phase 5).** step1's positive (52% of B4) and the common-mode finding are
+   1-seed descriptive. step3's co-adaptation (+0.064±0.020, 5/5) is confirmed by a
+   *5-seed procedure* multi-seed, and **RL-seed generalization is now done**:
+   re-running step3 on 3 *different* RL brains **GENERALIZES** (mean +0.081, 3/3
+   positive, pre-registered frozen criterion met). But the interpreter LM is *shared*
+   across those brains → generalization is established only for the *decider* brain;
+   *interpreter-brain variation* (LM-seed) is still to do ("queue of the queue"). The
+   effect is also brain-dependent (brain 2 is null + its task collapsed; the W-budget
+   control absorbed that false positive). *Full bidirectional* (all-at-once) is not
+   done. In step-seed 4 and brain 2 the A2 return breached the guard (−23% vs −20%).
 
 ---
 
@@ -245,6 +361,14 @@ Details in [`docs/NEXT_RESEARCH_PROMPT.md`](docs/NEXT_RESEARCH_PROMPT.md):
 4. **Well-posed richer-reconstruction** — fix V2Rich's ill-posed target.
 5. **Finishing track** — multi-seed statistics on the thin pair + #4 Procrustes
    → a workshop short paper.
+6. **CCM full bidirectional (queued)** — step3 is staged (A1→A2) and limited to
+   one LM block; train agent+LM+W all at once from the start (higher collapse
+   risk; the staged success is the baseline).
+7. **CCM RL-seed generalization ✅ DONE** — the step3 co-adaptation gain was
+   confirmed across 3 *different RL brains* (GENERALIZES, mean +0.081, 3/3 positive).
+   *Next, queue of the queue*: **interpreter (LM-seed) brain variation** — so far only
+   the decider was varied while the interpreter LM was shared; "both brains differ and
+   the bridge still grows" is the real complete version.
 
 ---
 
@@ -295,11 +419,15 @@ matplotlib · pytest · single 8 GB consumer GPU (RTX 3070 Ti) / WSL2 Ubuntu.
 
 ## Status
 
-Phase 4 complete. **Scenario C** (core hypothesis rejected) + workshop short
-paper ([`docs/RESULTS.html`](docs/RESULTS.html)) + confound resolved via the
-controlled 2×2 (CTRL-2x2). Suggested git tag `v1.4-phase4`. Single-RL-seed
-descriptive — the natural next step is multi-seed statistical confirmation, or
-causal-direct optimization / perception-intention readout (see Future work).
+Phase 4 (Scenario C) + **Phase 5 (CCM)** complete. Phase 4: core hypothesis (V2)
+rejected + confound resolved via the controlled 2×2 + workshop short paper.
+**Phase 5 CCM**: recorded bridge = 52% of B4 (step1) · common-mode-removal
+mechanism (ablation, correcting step1's interpretation) · closed-loop negative
+(step2) · **the bridge grows (step3): co-adaptation +0.064±0.020, confirmed by a
+5-seed procedure + generalization to 3 decider brains (GENERALIZES, mean +0.081,
+3/3)**. All reflected in [`docs/RESULTS.html`](docs/RESULTS.html) §3.5.
+Decider-brain generalization is confirmed — the natural next step is
+interpreter-brain (LM-seed) variation or CCM full bidirectional (see Future work).
 
 ---
 
@@ -319,10 +447,4 @@ You may obtain a copy of the License at
 
 ---
 
-*"Faithfully interpret a friend whose goal has drifted, and the drifted goal
-comes out unchanged. Before blaming the interpreter, ask again what 'faithful'
-should mean."* — the conclusion of this project, in one line.
-
----
-
-*This was a fun project.*
+Claude was used to build and run this experiment. It was a great help. Starting from my 1% far-fetched idea, Claude made something genuinely impressive possible.

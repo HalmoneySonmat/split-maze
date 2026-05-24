@@ -1,0 +1,26 @@
+{
+  "d_model": 256,
+  "d_agent": 256,
+  "n_states": 81920,
+  "configs": {
+    "random": {
+      "label": "random",
+      "n": 81920,
+      "n_distinct_sentences": 1018,
+      "n_cheese_correct": 1862,
+      "varied": true,
+      "n_readA_gt0": true,
+      "pass": true
+    },
+    "identity": {
+      "label": "identity",
+      "n": 81920,
+      "n_distinct_sentences": 743,
+      "n_cheese_correct": 39460,
+      "varied": true,
+      "n_readA_gt0": true,
+      "pass": true
+    }
+  },
+  "step0_pass": true
+}

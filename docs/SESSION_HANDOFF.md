@@ -55,6 +55,141 @@ stride=4 페어 6.25M + 1 RL run 동시 3 해석자.
   **다음 후보**: (a) RESULTS.html에 CTRL-2x2 절 추가, (b) V2Rich 타깃 재설계(완전 2×2),
   (c) 얇은 쌍 multi-seed 통계 확정.
 
+- **★ 새 방향 확정 — Phase 5 CCM (공동활성 기억 뇌량) 사전등록 (2026-05-22) ★**
+  V2 기각 이후, 사용자 발안으로 새 방향 박제(AskUserQuestion 5문 + 뇌량 문헌 조사).
+  **착상**: 학습된 번역기(B4)도 얇은 재구성(V2)도 아닌 — 두 망이 같은 장면에서 *함께 켜진
+  노드의 대응을 기록(기억)*하고 그 기록만으로 agent→LM 구동. **CCM = B4Thin 인터페이스에서
+  W를 gradient 대신 공동활성 통계로 채운 것**(생성=`lm.generate(W·LN(h_agent))`, byte-identical
+  → eval/swap 하니스 재사용). 결정: CCM-1 사다리 전체(rung1 raw Hebbian=무정규화 헤드라인 /
+  rung2 ridge / rung3 Procrustes, B4 천장) · CCM-2 연속 활성 · CCM-3 동시(EMA 모멘트, 시간축
+  ≠ridge 공간축) · CCM-4 닫힌 고리가 목적지·검증 계단(step0 frozen sanity → step1 frozen 수동
+  기록 → step2 닫힌 고리·망 적응). 생물 근거(조사): 뇌량=억제 정규화(PV→SNR)+활동의존 Hebbian
+  정련+닫힌 고리·가소. 사전등록 임계치 PLAN §10.1 Phase 5 CCM.
+
+- **★ Phase 5 CCM step0/step1 결과 (2026-05-22, WSL, 1 seed) ★**
+  step0(ccm_sanity) PASS. step1(fit_ccm, in-dist 245,760 페어): **순수 공동활성 기억(rung1
+  무정규화)은 degenerate — 전이 실패**(in slot 0.097≈random, cheese 0.00, n_readA=0; 무중심
+  외적이 평균항 지배→상수 붕괴). **화이트닝 정규화(rung2 ridge)가 결정적 — backprop 없이 기록만으로
+  swap 0.445/in slot 0.393 = B4 천장의 52%/59%.** rung3 Procrustes(중심화+직교, 화이트닝 없음)는
+  swap 0.000 실패 → **결정 성분은 *화이트닝*이지 중심화·직교 아님**(생물 억제 정규화와 정합).
+  identity step0 48% cheese=다수클래스 아티팩트(swap 0.000). CTRL-2x2 연결: 기록(0.445)=학습
+  (B4Thin 0.778)의 ~57%. 사전등록 step1 "기억 전이" 미충족(기각); "정규화 핵심"은 slot Δ+0.296
+  충족·swap Δ는 rung1 degenerate라 nan(임계치 불변, 사유만 기록). 박제 PLAN §10.1 Phase 5 CCM
+  step0/step1 결과. 산출물 results/phase5_ccm{,_sanity}.json.
+
+- **★ Phase 5 CCM step2(닫힌 고리) 결과 (2026-05-22, WSL, 1 seed) — 음성 + task collapse ★**
+  frozen Phase-3에서 에이전트만 닫힌 고리(100 upd, bridge_lr 1e-4): **bridge_loss 3.40→2.25
+  하강하나 rolling return 10.0→3.75 폭락(가드 발동)**. adapted agent로 fit_ccm 재실행: ridge swap
+  0.445→0.479(+0.034, 임계 +0.10 미달)·slot +0.013·cheese 0.36→0.13 붕괴(region 0.59→0.92는
+  stereotyped 탓), rung1 raw 여전히 degenerate. **B4 천장도 0.855→0.520 급락**(B4.pt 동일, 열화
+  에이전트를 읽어서 — *에이전트 바꾸면 고정 천장 비교 불가* 방법론 함정 박제). **판정: "다리가
+  자란다" 미지지 + task 파괴형 collapse = loss↓≠success 교과서 사례.** step1 양성(화이트닝 기록
+  다리=B4의 ~half)이 헤드라인 유지. 박제 PLAN §10.1 Phase 5 CCM step2 결과. **다음 후보**: (a)
+  step2 재시도(task 보존: lr↓·conv 동결·앵커 + adapted agent에 B4 재학습 천장), (b) 음성 수용
+  →화이트닝 ablation + write-up, (c) multi-seed.
+
+- **★ Phase 5 CCM step2-v2(task-preserving) 결과 (2026-05-23, WSL, 1 seed) — task 유지 + 다리 미성장 ★**
+  v1 collapse 교훈으로 **conv 동결 + bridge_lr 1e-5 + 앵커 λ=1.0**(100 upd). **task 유지 성공:
+  return 10.0→8.12(−19%, 가드 미발동) — v1의 10→3.75 붕괴와 결정적 대비.** 그러나 adapted agent로
+  fit_ccm 재실행: ridge swap 0.445→**0.394(−0.051)** / in-slot 0.393→**0.377(−0.016)** — **둘 다
+  후퇴**, 사전등록 임계(swap≥+0.10 AND slot≥+0.05) 미충족. **판정: "task 안 깨고 다리 자란다" 미지지.**
+  학습 bridge_loss 3.56→2.93 하강했으나 held-out 충실도 후퇴 = **loss↓≠success 2번째 박제**(h·EMA-W
+  공동적응이 학습 CE만 낮춤). B4 천장 0.855→0.654(v1 0.520보다 회복, h 덜 드리프트). **v1+v2 종합:
+  세게 밀면 task 붕괴(v1)/살살 하면 다리 후퇴(v2) — 닫힌-고리 next-token-CE→agent 메커니즘은 둘 다
+  미지지.** 사전등록대로 결론: **기록 화이트닝 다리(step1, B4의 ~half)가 사실상 recorded-bridge 천장.**
+  **step1 양성이 Phase 5 헤드라인 유지**, step2(v1·v2)는 cautionary negative. 박제 PLAN §10.1 step2-v2
+  결과. 산출물 results/phase5_ccm_step2_v2.json, logs/phase5_ccm_step2_v2.jsonl, checkpoints/phase5/
+  agent_ccm_v2.pt. **다음 후보**: (a) 음성 수용→화이트닝 ablation(중심화만 vs 화이트닝만)+write-up,
+  (b) multi-seed로 step1 양성 통계화, (c) 다른 닫힌-고리 메커니즘(W도 grad / 양방향 / 다리폭 신호).
+
+- **★ Phase 5 CCM 화이트닝 ablation 결과 (2026-05-23, WSL, 1 seed) — 가설 기각 + step1 해석 교정 ★**
+  깨끗한 2×2(hebbian/centering_only/whitening_only/ridge, 같은 frozen 모멘트)로 step1 양성의 결정
+  성분 분리. **사전등록 "화이트닝 결정" 기각**(swap Δ whiten−center = −0.005, slot Δ +0.027, 둘 다
+  임계 미달). 실제: **centering_only swap 0.440(ridge의 99%)·whitening_only 0.435(98%) — 둘이 각자
+  단독으로 ridge 거의 완전 복원**(degenerate는 hebbian 하나뿐). **교정된 진짜 발견: 핵심은 화이트닝/
+  중심화가 아니라 "공통모드(평균) 제거"** — 날것 W=E[y·xᵀ]는 rank-1 평균항 지배로 상수 붕괴, 중심화는
+  직접 빼고 화이트닝은 역공분산이 그 고분산 방향을 눌러 *서로 다른 경로로 같은 공통모드 제거*(중복,
+  하나면 충분). **step1 #2 "화이트닝 결정" 해석은 confound로 교정**(Procrustes 실패는 화이트닝 부재가
+  아니라 강제 직교화의 특이값-스케일 폐기 탓; centering_only가 직교화 없이 작동). 임계·원문 보존, 사유만
+  기록. 생물: 뺄셈·나눗셈 정규화 둘 다 존재→기능(공통모드 억제)이 핵심, 구현 무관. pytest 17/17 PASS.
+  박제 PLAN §10.1 화이트닝 ablation 결과 + step1 #2 마커. 산출물 results/phase5_ccm_ablation.json.
+  **다음**: write-up(RESULTS.html CCM 절: step1 양성+공통모드 메커니즘+step2 cautionary) / multi-seed.
+
+- **★ Write-up: RESULTS.html에 §3.5 CCM 절 통합 (2026-05-23) ★** 초록 후속 문단 + §3.5(표4 기록=B4의
+  52% / 표5 2×2 ablation / 콜아웃 3개: 기억=학습의 절반·"차이를 기록하라"+자기교정·닫힌고리 음성) +
+  §5 한계 CCM 항목. 수치 JSON round-trip, 1 seed caveat. (Read=Windows-truth로 6/6 div 균형·</body>
+  확인; bash mount은 stale 잘림 표시였음.)
+
+- **★ Phase 5 CCM step3(자라는 다리·공동적응) 사전등록 (2026-05-23) — 결과 보기 전 동결 ★**
+  사용자 결정: 원래 비전 최전선으로. ①단계적(W데우기→양방향) 지금, ②완전양방향 ①후 큐. **전환**: W를
+  기록버퍼→학습Parameter(기록서 warm-start), "양방향"=LM도 마중. lm.py 확인: 다리 생성경로 decode_logits는
+  ĥ를 위치-0 히든 주입→디코더 코어가 읽음(interface_proj 무관=step2 무력 원인). LM 마중=**blocks[0]만
+  소lr+언어앵커**. **A1**(두뇌 frozen·W만 학습=번역기 천장 control~0.778, 보장된 "기억→번역기 성장")
+  **→ A2**(agent[conv동결+소lr+PPO+repr앵커]+LM blocks[0][소lr+언어앵커 KL]+W 공동학습). 판정(불변):
+  **Claim1** A1 swap ≥ 기록0.445+0.20; **Claim2(happy end)** A2 swap ≥ A1+0.05 AND slot ≥ A1+0.03 AND
+  return유지 AND LM언어보존(진짜문장 CE ≤ ref+10%) AND n_readA≥0.3·쌍 — 다섯 다. **loss↓≠success 가드
+  최우선**(셋이 짜고 loss만↓ 위험 최대→판정은 held-out swap only). 박제 PLAN §10.1 step3 사전등록.
+  산출(예정): ccm.set_plastic+테스트, train_ccm_step3.py(A1/A2), fit_ccm --bridge_checkpoint,
+  checkpoints/phase5/{bridge_a1,bridge_a2,agent_ccm_a2}.pt, results/phase5_ccm_step3_{a1,a2}.json.
+
+- **★★ Phase 5 CCM step3(자라는 다리·공동적응) 결과 (2026-05-23, WSL, 1 seed) — Claim 1·2 모두 충족 = happy ending ★★**
+  pytest 20/20. **A1**(두 뇌 frozen·plastic W만 학습, 기록서 warm-start): `trained_bridge` swap **0.683**/
+  slot 0.498 → **Claim1 충족**(기록 0.445 → 0.683, +0.238 ≥ +0.20; B4의 80%). "기억이 씨앗→번역기로 성장."
+  **A2**(공동적응: agent conv동결+lr1e-5+PPO+repr앵커 / LM blocks[0] lr1e-5+언어KL앵커 / W lr1e-4): 학습 중
+  **return 10→8.28 유지, lm_kl≈0(언어 보존)**. after(adapted lm_a2+agent_ccm_a2+bridge_a2): `trained_bridge`
+  swap **0.784**/slot **0.645**(n_readA 781). **Claim2 5조건 전부 충족**: swap ≥A1+0.05(Δ+0.101)·slot
+  ≥A1+0.03(Δ+0.147)·return유지·LM언어보존·n_readA≥300. 게다가 swap 0.784 = *수렴* B4Thin 천장(0.778)
+  **도달**(얇은 다리로 고정-뇌 번역기 한계까지). **W-confound 방어**: 기록 ridge(W학습0)가 adapted서
+  0.445→0.510 상승 = 표상 자체가 더 정렬됨(뇌 마중 실재, gradient 무관). **종합: step2 음성을 step3가
+  뒤집음 — plastic W(기억→성장) + 두 뇌 마중이면 task·언어 안 깨고 다리가 번역기 천장까지 자란다 = 사용자
+  원래 비전 지지.** 박제 PLAN §10.1 step3 결과. 산출 checkpoints/phase5/{bridge_a1,bridge_a2,agent_ccm_a2,
+  lm_a2}.pt, results/phase5_ccm_step3_{a1,a2}.json. **다음**: (a) A1=A2 W-budget control(confound 완전차단),
+  (b) RESULTS.html §3.5 step3 추가, (c) multi-seed, (d) 큐: 옵션② 완전 양방향(처음부터 동시).
+
+- **★ Phase 5 CCM step3 W-budget control 결과 (2026-05-23, WSL, 1 seed) — 통과+효과 정직 보정 ★**
+  사용자 선택(①)으로 confound 차단: A1을 A2 이상 W-budget(120upd=960 step > A2 800)까지 frozen 학습
+  → `trained_bridge` swap **0.725**(loss 1.05→1.00 plateau). **판정 < 0.734 충족 = 통과**(A2보다 W-step
+  더 많은데도 0.725 < A2 0.784 → 우위는 W 아닌 뇌 마중). **효과크기 정직 보정**: A1@60 0.683→A2 0.784
+  +0.101 중 ~+0.042는 단지 더 긴 W학습, **순수 뇌-마중 ~+0.06**(modest). **W-독립 핵심 증거**: 기록
+  ridge(W학습0)가 adapted서 0.445→0.510. **1 seed 주의**: 여유 0.009·효과 +0.06 → multi-seed로 확정
+  필요(다음 1순위). **보정 헤드라인**: Claim1(기억→성장) 견고; Claim2(공동적응이 천장↑) 지지하되 효과
+  modest — "두 뇌 마중으로 얇은 다리가 수렴 번역기 천장(0.78) 도달, task·언어 보존". 박제 PLAN §10.1.
+  산출 bridge_a1_long.pt, results/phase5_ccm_step3_a1_long.json.
+
+- **★★ Phase 5 CCM step3 multi-seed 결과 (2026-05-23, WSL, 5 seed 절차·같은 frozen agent+LM) — CONFIRMED ★★**
+  사용자 선택(①, 절차 multi-seed). 자동화: `scripts/run_step3_multiseed.sh`(seed별 A1/A2/A1long+평가) +
+  `scripts/agg_step3_seeds.py`(effect=A2−A1long 집계·동결 판정). **5/5 seed effect 양성, mean +0.064±0.020**
+  (A2 0.796±0.015 / A1long 0.732±0.021). 동결 기준(≥4/5 양성 AND mean≥+0.03) → **CONFIRMED**. SEM≈0.009라
+  0에서 ~7σ = 노이즈 아님. **W-독립 corroboration 확정**: adapted 기록-ridge swap 평균 0.508 > frozen 0.445
+  (전 seed↑, gradient 0). **정직 메모**: seed4 return 7.66(−23%, 가드 살짝 초과; 나머지 8.1~8.6 견고),
+  effect는 seed4도 +0.031 양성. lm_kl≈0 전 seed. **범위**: 같은 backbone → "이 뇌에서 +0.06 진짜" 확정;
+  RL-seed 일반화는 ②(큐). **Claim2 격상**: 1-seed modest → 5-seed 절차 확정. 박제 PLAN §10.1 step3 multi-seed.
+  **다음**: RESULTS.html §3.5 multi-seed 갱신 / 큐: 옵션② 완전 양방향 · RL-seed 일반화.
+
+- **★ Phase 5 CCM RL-seed 일반화 사전등록 + 셋업 (2026-05-23) — 결과 보기 전 동결, 학습 대기 ★**
+  사용자 선택(셋업+3뇌). "이 뇌에서 진짜"(절차 multi-seed)를 넘어 *다른 결정자 뇌* 일반화 검증. 변수=RL
+  agent seed(LM 중립이라 공유). (C-thin) detach → 새 뇌 = train_agent.py agent-only 25M PPO(새 seed)면
+  동등. 코드 준비 완료: **fit_ccm `--b4_checkpoint ""`로 B4 천장 skip 가능**(새 뇌엔 B4 없음) +
+  `scripts/run_brains_step3.sh`(뇌별 A1/A2/A1long+평가) + `scripts/agg_brains.py`(뇌별 effect 집계·판정).
+  **동결 판정: ≥(N−1) 뇌 effect>0 AND mean≥+0.03 → GENERALIZES**(N=3 probe). 미충족 시 "이 뇌 특유,
+  동일 backbone 한정 확정 유지(격하 아님)". 박제 PLAN §10.1 RL-seed 사전등록. **남은 작업(사용자)**:
+  ① 새 뇌 3개 학습(train_agent.py --seed 1/2/3 → checkpoints/brains/agent_sK.pt, 각 ~5-8h) ② 
+  run_brains_step3.sh "1 2 3" ③ agg_brains.py. 산출 results/phase5_ccm_brain_{a2,a1long}_s{1..3}.json.
+
+- **★★ Phase 5 CCM RL-seed 일반화 결과 (2026-05-24) — 동결 판정 = GENERALIZES ★★**
+  N=3 뇌(독립 25M PPO agent, LM 공유). effect_k=swap(A2)−swap(A1long): **brain1 +0.137 / brain2 +0.004 /
+  brain3 +0.102, mean +0.081±0.069, 양성 3/3.** 동결 기준(≥2/3 양성 AND mean≥+0.03) **둘 다 충족 →
+  결정자 뇌 일반화 확인**(임계 불변). **W-독립 보강**: adapted 기록-ridge swap 평균 0.500>frozen 0.445(뇌-간
+  유지). **정직한 결**: 효과 *이질적* — brain1·3는 W-budget control 위 분명한 잔차(+0.10~+0.14)지만 **brain2는
+  사실상 null(+0.004)+과제붕괴(ret 10.0→7.66,>20%)**. brain2가 *control의 가치를 역으로 입증*: raw A2(0.804)≈
+  A1long(0.801) → brain2 "이득"은 거의 전부 W 추가학습(control 없으면 confound). 과제붕괴↔null이 일관 = 공동적응이
+  결정자 과제를 깨면 보너스 정렬 안 생기고 drift만 남음. → **"마중하면 다리가 자란다"는 *방향*은 뇌 간 재현되나
+  크기는 뇌-의존이고 과제 안정성 깨지면 사라짐(흔들면 일부는 안 버팀의 첫 증거).** **범위**: N=3 probe, 결정자만,
+  LM 공유 → **해석자 뇌 변동 미검증(큐의 큐)**. 버그픽스 박제: fit_ccm `--b4_checkpoint ""`가 argparse type=Path로
+  Path(".")가 돼 B4 오탐→수정(`has_b4 = b4p not in ("","." ,"none","None") and Path(b4p).is_file()`), 드라이버는
+  `--b4_checkpoint none` 명시. 박제 PLAN §10.1 step3 RL-seed 일반화 결과. **다음**: 큐 옵션② 완전 양방향 ·
+  LM-seed(해석자) 변동 · RESULTS.html/README 일반화 확정 반영.
+
 - **★ CTRL-2x2 사전등록 (2026-05-22) — V2 vs B4 confound 해소 진단 ★**
   인터페이스{thin 요약벡터 / rich K분산} × loss{recon / next-token} 2×2.
   현재 V2=thin×recon, B4=rich×next-token(대각선) → 빠진 B4-thin·V2-rich 채워

@@ -1,0 +1,183 @@
+{
+  "n_fit": 245760,
+  "d_model": 256,
+  "d_agent": 256,
+  "cheese_dir_dist": {
+    "right": 30711,
+    "up": 49481,
+    "up-right": 165568
+  },
+  "ridge_lambda": null,
+  "per_slot": {
+    "in_dist": {
+      "rung1_hebbian": {
+        "agent_region": 0.1143,
+        "heading": 0.1767,
+        "cheese_dir": 0.0,
+        "mean": 0.09699999999999999
+      },
+      "rung2_ridge": {
+        "agent_region": 0.592925,
+        "heading": 0.226825,
+        "cheese_dir": 0.358525,
+        "mean": 0.3927583333333333
+      },
+      "rung3_procrustes": {
+        "agent_region": 0.2402,
+        "heading": 0.178175,
+        "cheese_dir": 0.041825,
+        "mean": 0.1534
+      },
+      "random": {
+        "agent_region": 0.072725,
+        "heading": 0.1758,
+        "cheese_dir": 0.01445,
+        "mean": 0.08765833333333334
+      },
+      "identity": {
+        "agent_region": 0.1293,
+        "heading": 0.17465,
+        "cheese_dir": 0.103275,
+        "mean": 0.13574166666666668
+      },
+      "B4_ceiling": {
+        "agent_region": 0.8023,
+        "heading": 0.3462,
+        "cheese_dir": 0.860175,
+        "mean": 0.6695583333333334
+      }
+    },
+    "ood": {
+      "rung1_hebbian": {
+        "agent_region": 0.0507,
+        "heading": 0.136225,
+        "cheese_dir": 0.236375,
+        "mean": 0.1411
+      },
+      "rung2_ridge": {
+        "agent_region": 0.5344,
+        "heading": 0.3453,
+        "cheese_dir": 0.0731,
+        "mean": 0.31759999999999994
+      },
+      "rung3_procrustes": {
+        "agent_region": 0.215825,
+        "heading": 0.1506,
+        "cheese_dir": 0.15655,
+        "mean": 0.17432499999999998
+      },
+      "random": {
+        "agent_region": 0.036975,
+        "heading": 0.13605,
+        "cheese_dir": 0.22635,
+        "mean": 0.13312500000000002
+      },
+      "identity": {
+        "agent_region": 0.057325,
+        "heading": 0.1356,
+        "cheese_dir": 0.06235,
+        "mean": 0.08509166666666668
+      },
+      "B4_ceiling": {
+        "agent_region": 0.7783,
+        "heading": 0.33605,
+        "cheese_dir": 0.075475,
+        "mean": 0.3966083333333333
+      }
+    }
+  },
+  "swap_following": {
+    "rung1_hebbian": {
+      "rate": NaN,
+      "n_readA": 0,
+      "curve": [
+        0.001,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "rung2_ridge": {
+      "rate": 0.44488977955911824,
+      "n_readA": 499,
+      "curve": [
+        0.124,
+        0.168,
+        0.227,
+        0.348,
+        0.481
+      ]
+    },
+    "rung3_procrustes": {
+      "rate": 0.0,
+      "n_readA": 104,
+      "curve": [
+        0.141,
+        0.112,
+        0.084,
+        0.082,
+        0.086
+      ]
+    },
+    "random": {
+      "rate": 0.0,
+      "n_readA": 34,
+      "curve": [
+        0.017,
+        0.01,
+        0.015,
+        0.023,
+        0.033
+      ]
+    },
+    "identity": {
+      "rate": 0.0,
+      "n_readA": 269,
+      "curve": [
+        0.226,
+        0.259,
+        0.289,
+        0.295,
+        0.278
+      ]
+    },
+    "B4_ceiling": {
+      "rate": 0.8549707602339182,
+      "n_readA": 855,
+      "curve": [
+        0.071,
+        0.179,
+        0.465,
+        0.73,
+        0.854
+      ]
+    }
+  },
+  "verdicts": {
+    "step1_memory_transfer": {
+      "rung1_slot_in": 0.09699999999999999,
+      "random_slot_in": 0.08765833333333334,
+      "delta_slot": 0.009341666666666651,
+      "rung1_swap": NaN,
+      "random_swap": 0.0,
+      "delta_swap": NaN,
+      "pass": false
+    },
+    "normalization_key": {
+      "best_norm": "rung2_ridge",
+      "delta_swap": NaN,
+      "delta_slot": 0.29575833333333335,
+      "pass": false
+    },
+    "ceiling": {
+      "best_rung": "rung2_ridge",
+      "best_rung_swap": 0.44488977955911824,
+      "b4_swap": 0.8549707602339182,
+      "swap_pct_of_b4": 0.5203567189097758,
+      "best_rung_slot_in": 0.3927583333333333,
+      "b4_slot_in": 0.6695583333333334,
+      "slot_pct_of_b4": 0.5865931522023223
+    }
+  }
+}

@@ -1,0 +1,183 @@
+{
+  "n_fit": 245760,
+  "d_model": 256,
+  "d_agent": 256,
+  "cheese_dir_dist": {
+    "right": 49395,
+    "up": 36368,
+    "up-right": 159997
+  },
+  "ridge_lambda": null,
+  "per_slot": {
+    "in_dist": {
+      "rung1_hebbian": {
+        "agent_region": 0.09205,
+        "heading": 0.146275,
+        "cheese_dir": 0.0329,
+        "mean": 0.09040833333333333
+      },
+      "rung2_ridge": {
+        "agent_region": 0.603325,
+        "heading": 0.254825,
+        "cheese_dir": 0.404,
+        "mean": 0.4207166666666667
+      },
+      "rung3_procrustes": {
+        "agent_region": 0.259125,
+        "heading": 0.15595,
+        "cheese_dir": 0.061125,
+        "mean": 0.1587333333333333
+      },
+      "random": {
+        "agent_region": 0.14295,
+        "heading": 0.114875,
+        "cheese_dir": 0.04195,
+        "mean": 0.09992499999999999
+      },
+      "identity": {
+        "agent_region": 0.074025,
+        "heading": 0.145575,
+        "cheese_dir": 0.178275,
+        "mean": 0.132625
+      },
+      "trained_bridge": {
+        "agent_region": 0.6646,
+        "heading": 0.368925,
+        "cheese_dir": 0.845925,
+        "mean": 0.6264833333333334
+      }
+    },
+    "ood": {
+      "rung1_hebbian": {
+        "agent_region": 0.03155,
+        "heading": 0.09125,
+        "cheese_dir": 0.16135,
+        "mean": 0.09471666666666667
+      },
+      "rung2_ridge": {
+        "agent_region": 0.4945,
+        "heading": 0.285875,
+        "cheese_dir": 0.09175,
+        "mean": 0.29070833333333335
+      },
+      "rung3_procrustes": {
+        "agent_region": 0.29945,
+        "heading": 0.0917,
+        "cheese_dir": 0.202875,
+        "mean": 0.19800833333333334
+      },
+      "random": {
+        "agent_region": 0.05495,
+        "heading": 0.0628,
+        "cheese_dir": 0.2271,
+        "mean": 0.11495
+      },
+      "identity": {
+        "agent_region": 0.04035,
+        "heading": 0.091175,
+        "cheese_dir": 0.087975,
+        "mean": 0.07316666666666667
+      },
+      "trained_bridge": {
+        "agent_region": 0.553625,
+        "heading": 0.505375,
+        "cheese_dir": 0.08415,
+        "mean": 0.38105000000000006
+      }
+    }
+  },
+  "swap_following": {
+    "rung1_hebbian": {
+      "rate": 0.0,
+      "n_readA": 53,
+      "curve": [
+        0.054,
+        0.046,
+        0.039,
+        0.033,
+        0.06
+      ]
+    },
+    "rung2_ridge": {
+      "rate": 0.4945054945054945,
+      "n_readA": 546,
+      "curve": [
+        0.102,
+        0.144,
+        0.233,
+        0.426,
+        0.524
+      ]
+    },
+    "rung3_procrustes": {
+      "rate": 0.02247191011235955,
+      "n_readA": 89,
+      "curve": [
+        0.208,
+        0.172,
+        0.1,
+        0.073,
+        0.097
+      ]
+    },
+    "random": {
+      "rate": 0.0,
+      "n_readA": 75,
+      "curve": [
+        0.079,
+        0.072,
+        0.07,
+        0.07,
+        0.062
+      ]
+    },
+    "identity": {
+      "rate": 0.0,
+      "n_readA": 293,
+      "curve": [
+        0.229,
+        0.253,
+        0.271,
+        0.286,
+        0.289
+      ]
+    },
+    "trained_bridge": {
+      "rate": 0.800771208226221,
+      "n_readA": 778,
+      "curve": [
+        0.109,
+        0.197,
+        0.388,
+        0.651,
+        0.796
+      ]
+    }
+  },
+  "verdicts": {
+    "step1_memory_transfer": {
+      "rung1_slot_in": 0.09040833333333333,
+      "random_slot_in": 0.09992499999999999,
+      "delta_slot": -0.00951666666666666,
+      "rung1_swap": 0.0,
+      "random_swap": 0.0,
+      "delta_swap": 0.0,
+      "pass": false
+    },
+    "normalization_key": {
+      "best_norm": "rung2_ridge",
+      "delta_swap": 0.4945054945054945,
+      "delta_slot": 0.33030833333333337,
+      "pass": true
+    },
+    "ceiling": {
+      "best_rung": "rung2_ridge",
+      "best_rung_swap": 0.4945054945054945,
+      "b4_swap": null,
+      "swap_pct_of_b4": null,
+      "best_rung_slot_in": 0.4207166666666667,
+      "b4_slot_in": null,
+      "slot_pct_of_b4": null
+    }
+  }
+}

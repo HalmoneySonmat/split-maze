@@ -1,0 +1,183 @@
+{
+  "n_fit": 245760,
+  "d_model": 256,
+  "d_agent": 256,
+  "cheese_dir_dist": {
+    "right": 32838,
+    "up": 44156,
+    "up-right": 168766
+  },
+  "ridge_lambda": null,
+  "per_slot": {
+    "in_dist": {
+      "rung1_hebbian": {
+        "agent_region": 0.077375,
+        "heading": 0.199375,
+        "cheese_dir": 0.0,
+        "mean": 0.09225
+      },
+      "rung2_ridge": {
+        "agent_region": 0.64245,
+        "heading": 0.210475,
+        "cheese_dir": 0.3797,
+        "mean": 0.41087499999999993
+      },
+      "rung3_procrustes": {
+        "agent_region": 0.098375,
+        "heading": 0.187775,
+        "cheese_dir": 0.0794,
+        "mean": 0.12185000000000001
+      },
+      "random": {
+        "agent_region": 0.126275,
+        "heading": 0.197175,
+        "cheese_dir": 0.00755,
+        "mean": 0.11033333333333334
+      },
+      "identity": {
+        "agent_region": 0.096175,
+        "heading": 0.171075,
+        "cheese_dir": 0.087325,
+        "mean": 0.11819166666666665
+      },
+      "trained_bridge": {
+        "agent_region": 0.645675,
+        "heading": 0.335525,
+        "cheese_dir": 0.862975,
+        "mean": 0.6147250000000001
+      }
+    },
+    "ood": {
+      "rung1_hebbian": {
+        "agent_region": 0.0288,
+        "heading": 0.12095,
+        "cheese_dir": 0.25255,
+        "mean": 0.1341
+      },
+      "rung2_ridge": {
+        "agent_region": 0.464625,
+        "heading": 0.149725,
+        "cheese_dir": 0.10145,
+        "mean": 0.2386
+      },
+      "rung3_procrustes": {
+        "agent_region": 0.03655,
+        "heading": 0.12565,
+        "cheese_dir": 0.098775,
+        "mean": 0.08699166666666668
+      },
+      "random": {
+        "agent_region": 0.047175,
+        "heading": 0.120075,
+        "cheese_dir": 0.2531,
+        "mean": 0.14011666666666667
+      },
+      "identity": {
+        "agent_region": 0.03315,
+        "heading": 0.102,
+        "cheese_dir": 0.1109,
+        "mean": 0.08201666666666667
+      },
+      "trained_bridge": {
+        "agent_region": 0.552925,
+        "heading": 0.492475,
+        "cheese_dir": 0.0965,
+        "mean": 0.3806333333333333
+      }
+    }
+  },
+  "swap_following": {
+    "rung1_hebbian": {
+      "rate": NaN,
+      "n_readA": 0,
+      "curve": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "rung2_ridge": {
+      "rate": 0.4758364312267658,
+      "n_readA": 538,
+      "curve": [
+        0.11,
+        0.157,
+        0.259,
+        0.385,
+        0.517
+      ]
+    },
+    "rung3_procrustes": {
+      "rate": 0.0,
+      "n_readA": 178,
+      "curve": [
+        0.196,
+        0.155,
+        0.139,
+        0.133,
+        0.197
+      ]
+    },
+    "random": {
+      "rate": 0.0,
+      "n_readA": 13,
+      "curve": [
+        0.016,
+        0.008,
+        0.004,
+        0.005,
+        0.014
+      ]
+    },
+    "identity": {
+      "rate": 0.0,
+      "n_readA": 207,
+      "curve": [
+        0.188,
+        0.181,
+        0.188,
+        0.197,
+        0.205
+      ]
+    },
+    "trained_bridge": {
+      "rate": 0.8213851761846902,
+      "n_readA": 823,
+      "curve": [
+        0.092,
+        0.215,
+        0.453,
+        0.699,
+        0.814
+      ]
+    }
+  },
+  "verdicts": {
+    "step1_memory_transfer": {
+      "rung1_slot_in": 0.09225,
+      "random_slot_in": 0.11033333333333334,
+      "delta_slot": -0.01808333333333334,
+      "rung1_swap": NaN,
+      "random_swap": 0.0,
+      "delta_swap": NaN,
+      "pass": false
+    },
+    "normalization_key": {
+      "best_norm": "rung2_ridge",
+      "delta_swap": NaN,
+      "delta_slot": 0.31862499999999994,
+      "pass": false
+    },
+    "ceiling": {
+      "best_rung": "rung2_ridge",
+      "best_rung_swap": 0.4758364312267658,
+      "b4_swap": null,
+      "swap_pct_of_b4": null,
+      "best_rung_slot_in": 0.41087499999999993,
+      "b4_slot_in": null,
+      "slot_pct_of_b4": null
+    }
+  }
+}

@@ -1,0 +1,183 @@
+{
+  "n_fit": 245760,
+  "d_model": 256,
+  "d_agent": 256,
+  "cheese_dir_dist": {
+    "right": 2551,
+    "up": 26988,
+    "up-right": 216221
+  },
+  "ridge_lambda": null,
+  "per_slot": {
+    "in_dist": {
+      "rung1_hebbian": {
+        "agent_region": 0.020975,
+        "heading": 0.09915,
+        "cheese_dir": 0.0,
+        "mean": 0.04004166666666667
+      },
+      "rung2_ridge": {
+        "agent_region": 0.921975,
+        "heading": 0.164025,
+        "cheese_dir": 0.13175,
+        "mean": 0.4059166666666667
+      },
+      "rung3_procrustes": {
+        "agent_region": 0.555875,
+        "heading": 0.162625,
+        "cheese_dir": 0.02875,
+        "mean": 0.24908333333333335
+      },
+      "random": {
+        "agent_region": 0.40565,
+        "heading": 0.057375,
+        "cheese_dir": 0.00205,
+        "mean": 0.155025
+      },
+      "identity": {
+        "agent_region": 0.341575,
+        "heading": 0.06755,
+        "cheese_dir": 0.00065,
+        "mean": 0.13659166666666667
+      },
+      "B4_ceiling": {
+        "agent_region": 0.88365,
+        "heading": 0.354375,
+        "cheese_dir": 0.932175,
+        "mean": 0.7233999999999999
+      }
+    },
+    "ood": {
+      "rung1_hebbian": {
+        "agent_region": 0.02025,
+        "heading": 0.0924,
+        "cheese_dir": 0.060025,
+        "mean": 0.05755833333333333
+      },
+      "rung2_ridge": {
+        "agent_region": 0.8725,
+        "heading": 0.161225,
+        "cheese_dir": 0.0621,
+        "mean": 0.365275
+      },
+      "rung3_procrustes": {
+        "agent_region": 0.463925,
+        "heading": 0.135475,
+        "cheese_dir": 0.0817,
+        "mean": 0.2270333333333333
+      },
+      "random": {
+        "agent_region": 0.349625,
+        "heading": 0.060625,
+        "cheese_dir": 0.081525,
+        "mean": 0.16392500000000002
+      },
+      "identity": {
+        "agent_region": 0.30755,
+        "heading": 0.06115,
+        "cheese_dir": 0.083775,
+        "mean": 0.150825
+      },
+      "B4_ceiling": {
+        "agent_region": 0.86475,
+        "heading": 0.31245,
+        "cheese_dir": 0.315775,
+        "mean": 0.4976583333333333
+      }
+    }
+  },
+  "swap_following": {
+    "rung1_hebbian": {
+      "rate": NaN,
+      "n_readA": 0,
+      "curve": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "rung2_ridge": {
+      "rate": 0.4794069192751236,
+      "n_readA": 607,
+      "curve": [
+        0.026,
+        0.054,
+        0.257,
+        0.524,
+        0.624
+      ]
+    },
+    "rung3_procrustes": {
+      "rate": 0.12658227848101267,
+      "n_readA": 237,
+      "curve": [
+        0.026,
+        0.042,
+        0.066,
+        0.088,
+        0.239
+      ]
+    },
+    "random": {
+      "rate": 0.0,
+      "n_readA": 72,
+      "curve": [
+        0.05,
+        0.064,
+        0.099,
+        0.11,
+        0.056
+      ]
+    },
+    "identity": {
+      "rate": 0.0,
+      "n_readA": 16,
+      "curve": [
+        0.009,
+        0.02,
+        0.02,
+        0.013,
+        0.024
+      ]
+    },
+    "B4_ceiling": {
+      "rate": 0.5195439739413681,
+      "n_readA": 614,
+      "curve": [
+        0.19,
+        0.246,
+        0.369,
+        0.515,
+        0.591
+      ]
+    }
+  },
+  "verdicts": {
+    "step1_memory_transfer": {
+      "rung1_slot_in": 0.04004166666666667,
+      "random_slot_in": 0.155025,
+      "delta_slot": -0.11498333333333333,
+      "rung1_swap": NaN,
+      "random_swap": 0.0,
+      "delta_swap": NaN,
+      "pass": false
+    },
+    "normalization_key": {
+      "best_norm": "rung2_ridge",
+      "delta_swap": NaN,
+      "delta_slot": 0.36587500000000006,
+      "pass": false
+    },
+    "ceiling": {
+      "best_rung": "rung2_ridge",
+      "best_rung_swap": 0.4794069192751236,
+      "b4_swap": 0.5195439739413681,
+      "swap_pct_of_b4": 0.922745606379078,
+      "best_rung_slot_in": 0.4059166666666667,
+      "b4_slot_in": 0.7233999999999999,
+      "slot_pct_of_b4": 0.5611233987650909
+    }
+  }
+}
