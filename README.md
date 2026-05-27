@@ -1,7 +1,5 @@
 # SPLIT-MAZE
 
-🇰🇷 한국어 · [🇬🇧 English](README.en.md) · [🇨🇳 中文](README.zh.md) · [🇯🇵 日本語](README.ja.md)
-
 *procgen 미로 RL 에이전트와 from-scratch 미로언어 LM을 인공 뇌량으로 잇고, 목표 오일반화한 에이전트의 실제 내부 목표를 LM이 합리화가 아니라 충실하게 말하는지 — 둘 다 from scratch로 — 검증한 프로젝트.*
 
 라인업의 세 번째다: SPLIT-9(사후 어댑터, 음성) → SPLIT-MNIST(공동학습 분리-재구성 V2, 동질 toy 양성) → 본 프로젝트. V2 패턴을 *이질적인 진짜 환경*(미로 RL 에이전트 + 미로언어 LM, 양쪽 from scratch)에서, *목표 오일반화*(치즈가 늘 우상단이던 미로에서 자란 에이전트가 OOD에선 치즈를 두고도 우상단으로 감)를 충실 vs 합리화 판별기로 재검증했다.
