@@ -1,0 +1,40 @@
+{
+  "regime": "R0",
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "rollouts": 8,
+  "echo_ratio_mean": -0.0570121593773365,
+  "echo_ratio_std": 0.6699852347373962,
+  "builds": {
+    "B3": {
+      "n_eligible": 359804,
+      "n_goal": 151323,
+      "n_real": 4386,
+      "n_neither": 204095,
+      "decisive_faithful": 0.4205706440172983,
+      "commit_ratio": 0.9718320713638904,
+      "abstention": 0.5672393858878723
+    },
+    "B4": {
+      "n_eligible": 359804,
+      "n_goal": 182581,
+      "n_real": 4071,
+      "n_neither": 173152,
+      "decisive_faithful": 0.5074457204477993,
+      "commit_ratio": 0.9781893577352506,
+      "abstention": 0.4812397861057687
+    },
+    "V2": {
+      "n_eligible": 359804,
+      "n_goal": 37182,
+      "n_real": 12959,
+      "n_neither": 309663,
+      "decisive_faithful": 0.1033395960022679,
+      "commit_ratio": 0.7415488322929339,
+      "abstention": 0.8606435726117553
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "n_eligible": 179663,
+  "builds": {
+    "r2": {
+      "n_eligible": 179663,
+      "n_goal": 28394,
+      "n_real": 11871,
+      "n_neither": 139398,
+      "commit_ratio": 0.7051781944616913,
+      "decisive_faithful": 0.15804033106427032,
+      "abstention": 0.7758859642775641,
+      "indist_cheese_acc": 0.17867024739583334,
+      "indist_bar_pass": false
+    },
+    "r0matched": {
+      "n_eligible": 179663,
+      "n_goal": 21718,
+      "n_real": 13803,
+      "n_neither": 144142,
+      "commit_ratio": 0.6114129669772811,
+      "decisive_faithful": 0.12088187328498355,
+      "abstention": 0.80229095584511,
+      "indist_cheese_acc": 0.246673583984375,
+      "indist_bar_pass": false
+    }
+  },
+  "P2": {
+    "diff_decisive_faithful": 0.03715845777928677,
+    "perm_p": 0.0,
+    "gate_effect_ge_0.05": false,
+    "gate_sig_p_lt_0.01": true,
+    "PASS": false
+  }
+}

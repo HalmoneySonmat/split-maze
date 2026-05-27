@@ -42,6 +42,7 @@ from .builds import Build
 from .env import DEFAULT_HEADING_WINDOW, TrajectoryTracker, extract_maze_state
 from .language import MazeState
 from .paired_collect import PairBuffer, PairedCollector
+from .feedback import compute_inject
 from .ppo import PPOConfig, PPOUpdater, RolloutBuffer, sample_action
 from .train import DEFAULT_ROLLING_WINDOW, RolloutStats, obs_to_tensor
 
@@ -95,6 +96,7 @@ def collect_rollout_with_pairs(
     state_extractor: StateExtractor,
     d_agent: int,
     device: torch.device | str,
+    feedback_fn: Optional[Callable[[torch.Tensor], torch.Tensor]] = None,
 ) -> tuple[RolloutStats, torch.Tensor, np.ndarray, torch.Tensor, list]:
     """Like ``train.collect_rollout`` but also returns per-step ``h_agent``
     and ``MazeState`` grid for paired collection.
@@ -102,6 +104,14 @@ def collect_rollout_with_pairs(
     Alignment: ``h_agent[t]`` and ``maze_states[t][n]`` both describe the
     state the agent *saw* at step t (``cur_rgb`` / ``obs_holder`` at the top
     of the step), so the (h_agent, sentence) pair is consistent.
+
+    feedback_fn (Phase-6 R2): optional callable ``h_agent (N, d_a) → inject
+    (N, d_a)``. When given, the inject computed from step t's PRE-injection
+    ``h_agent`` is added to the agent's hidden at step t+1
+    (``agent.forward(obs, inject=...)``) — the "corpus callosum" feedback
+    (PREREG §1). ``None`` (regimes R0/R1) is byte-identical to the original:
+    ``agent(obs, inject=None) ≡ agent(obs)``, no trajectory change. NOTE:
+    ``h_agent_steps`` always stores the PRE-injection h (clean-read).
 
     Returns:
         stats, next_obs_holder, next_cur_rgb,
@@ -119,14 +129,19 @@ def collect_rollout_with_pairs(
     maze_states: list[list[Optional[MazeState]]] = [
         [None] * N for _ in range(T)
     ]
+    inject: Optional[torch.Tensor] = None   # R2 feedback from step t-1 (None=R0/R1)
 
     for t in range(T):
         with torch.no_grad():
-            out = agent(obs_holder)
+            out = agent(obs_holder, inject=inject)
             action, log_prob = sample_action(out.logits)
         buffer.store_step(t, obs=obs_holder, action=action,
-                          log_prob=log_prob, value=out.value)
+                          log_prob=log_prob, value=out.value, inject=inject)
         h_agent_steps[t] = out.h_agent.detach().to("cpu")
+        # R2: compute next-step inject from this step's PRE-injection h_agent.
+        if feedback_fn is not None:
+            with torch.no_grad():
+                inject = feedback_fn(out.h_agent)
 
         # MazeState from the state the agent just saw (cur_rgb), updating each
         # env's trajectory tracker in-place (HEADING needs sequential history).
@@ -310,10 +325,88 @@ def train_phase3(
     return logs
 
 
+def train_r2(
+    env,
+    agent: ImpalaAgent,
+    v2,
+    *,
+    ppo_config: PPOConfig,
+    num_updates: int,
+    num_steps: int,
+    lam: float = 0.3,
+    feedback_on: bool = True,
+    device: torch.device | str = "cpu",
+    state_extractor: Optional[StateExtractor] = None,
+    log_callback=None,
+) -> list[dict]:
+    """Phase-6 R2 training (V2 closed loop) — PREREG §0.7 / P2.
+
+    Co-adapt the agent by PPO while, in R2, the V2 interpreter's reading of
+    step t's PRE-injection ``h`` is bridged back and added to the agent's
+    hidden at step t+1 (``compute_inject`` = λ·Wᵀ·LN(LM_summary(W·LN(h))),
+    fixed λ). The bridge + LM are FROZEN — only the agent's weights update
+    ((C-thin) on the RL side; the inject enters the PPO update as a stored
+    constant, so no grad flows into V2). ``feedback_on=False`` is the matched-R0
+    control: identical PPO budget, no feedback.
+
+    Args:
+        env: gym3-like vec env (``num``, ``observe``, ``act``).
+        agent: the :class:`ImpalaAgent` to co-adapt (start from the base agent).
+        v2: a frozen :class:`V2ACC` (provides ``acc`` bridge + ``lm``).
+        ppo_config, num_updates, num_steps: PPO schedule.
+        lam: fixed feedback gate λ (PREREG primary = 0.3).
+        feedback_on: True = R2 (V2 closed loop); False = matched-R0.
+        state_extractor: unused-but-required by the rollout (pairs ignored).
+    Returns:
+        list of per-update log dicts (mean_return + PPO loss components).
+    """
+    device = torch.device(device)
+    d_a = agent.d_a
+    v2.eval()
+    for p in v2.parameters():
+        p.requires_grad_(False)
+    updater = PPOUpdater(agent, ppo_config)
+    extractor = state_extractor or default_state_extractor
+
+    feedback_fn = None
+    if feedback_on:
+        def feedback_fn(h):
+            return compute_inject(v2.acc, v2.lm, h, lam)
+
+    N = env.num
+    trackers = [TrajectoryTracker(DEFAULT_HEADING_WINDOW) for _ in range(N)]
+    _r, obs_dict, _f = env.observe()
+    obs_holder = obs_to_tensor(obs_dict, device)
+    cur_rgb = np.asarray(obs_dict["rgb"])
+    ep_r = np.zeros(N); ep_l = np.zeros(N, dtype=np.int64)
+
+    logs: list[dict] = []
+    for upd in range(num_updates):
+        buffer = RolloutBuffer(T=num_steps, N=N, device=device,
+                               inject_dim=(d_a if feedback_on else None))
+        stats, obs_holder, cur_rgb, _h, _ms = collect_rollout_with_pairs(
+            env, agent, buffer, trackers, obs_holder=obs_holder, cur_rgb=cur_rgb,
+            episode_returns=ep_r, episode_lengths=ep_l,
+            state_extractor=extractor, d_agent=d_a, device=device,
+            feedback_fn=feedback_fn)
+        with torch.no_grad():
+            last_value = agent(obs_holder).value     # boundary bootstrap (inject=None)
+        buffer.compute_advantages_and_returns(
+            last_value, ppo_config.gamma, ppo_config.gae_lambda)
+        losses = updater.update(buffer)
+        log = {"update": upd, "mean_return": stats.mean_return,
+               "feedback": feedback_on, **losses}
+        logs.append(log)
+        if log_callback is not None:
+            log_callback(upd, log)
+    return logs
+
+
 __all__ = [
     "Phase3Config",
     "StateExtractor",
     "default_state_extractor",
     "collect_rollout_with_pairs",
     "train_phase3",
+    "train_r2",
 ]

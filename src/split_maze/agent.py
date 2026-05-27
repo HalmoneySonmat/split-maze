@@ -121,12 +121,22 @@ class ImpalaAgent(nn.Module):
         nn.init.orthogonal_(self.value.weight, gain=1.0)
         nn.init.zeros_(self.value.bias)
 
-    def forward(self, obs: torch.Tensor) -> AgentOutput:
+    def forward(self, obs: torch.Tensor,
+                inject: torch.Tensor | None = None) -> AgentOutput:
         """Forward pass.
 
         Args:
             obs: (B, 3, 64, 64). uint8 in [0,255] is auto-normalized; float
                  is assumed pre-normalized (caller responsibility).
+            inject: optional (B, D_A) additive modulation of the hidden state
+                 applied BEFORE the policy/value heads — the R2 "corpus
+                 callosum" feedback path (PREREG §1: ``h' = h + λ·Wᵀ·ñ_lm``;
+                 the caller pre-scales by the fixed gate λ). ``None`` (regimes
+                 R0/R1) reproduces the original forward byte-for-byte.
+                 NOTE: ``AgentOutput.h_agent`` is ALWAYS the PRE-injection ``h``
+                 (clean-read for eval — PREREG fix #2). The caller controls
+                 grad flow into ``inject`` (detach it for the agent's pure-RL
+                 PPO update to preserve the (C-thin) boundary).
         """
         if obs.dim() != 4 or obs.shape[-3:] != (3, 64, 64):
             raise ValueError(f"expected (B, 3, 64, 64), got {tuple(obs.shape)}")
@@ -138,9 +148,17 @@ class ImpalaAgent(nn.Module):
         x = self.blocks(x)
         x = F.relu(x)
         x = x.flatten(start_dim=1)
-        h = F.relu(self.embed(x))   # (B, D_A) — h_agent
-        logits = self.policy(h)
-        value = self.value(h).squeeze(-1)
+        h = F.relu(self.embed(x))   # (B, D_A) — h_agent (pre-injection)
+        if inject is None:
+            h_eff = h
+        else:
+            if inject.shape != h.shape:
+                raise ValueError(
+                    f"inject must match h_agent shape {tuple(h.shape)}, "
+                    f"got {tuple(inject.shape)}")
+            h_eff = h + inject
+        logits = self.policy(h_eff)
+        value = self.value(h_eff).squeeze(-1)
         return AgentOutput(logits=logits, value=value, h_agent=h)
 
     @property

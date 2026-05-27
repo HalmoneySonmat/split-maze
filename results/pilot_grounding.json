@@ -1,0 +1,92 @@
+{
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "rollouts": 8,
+  "n_eligible_total": 360277,
+  "chance_cheese": 0.125,
+  "floor_commit_ratio": 0.5,
+  "builds": {
+    "B3": {
+      "commit_ratio_pooled": 0.9771646736781444,
+      "commit_ratio_ci95": [
+        0.976391926759309,
+        0.9779179382064412
+      ],
+      "commit_ratio_per_seed": [
+        0.958367049684415,
+        0.9889046941678521,
+        0.9836662967073622
+      ],
+      "commit_ratio_seed_std": 0.013333501825931071,
+      "indist_cheese_acc_mean": 0.8696772257486979,
+      "n_goal_total": 149215,
+      "n_commit_total": 152702,
+      "neither_rate_per_seed": [
+        0.5843570533679758,
+        0.5933192291163929,
+        0.5507877418068204
+      ],
+      "binom_p_vs_0.5": 0.0
+    },
+    "B4": {
+      "commit_ratio_pooled": 0.9768440973657305,
+      "commit_ratio_ci95": [
+        0.9761478703965544,
+        0.9775294479128146
+      ],
+      "commit_ratio_per_seed": [
+        0.9611070430035947,
+        0.9907851433944522,
+        0.9777781482345881
+      ],
+      "commit_ratio_seed_std": 0.012146775134538563,
+      "indist_cheese_acc_mean": 0.8523305257161459,
+      "n_goal_total": 179626,
+      "n_commit_total": 183884,
+      "neither_rate_per_seed": [
+        0.4947573762496952,
+        0.472662060758322,
+        0.5015455693678122
+      ],
+      "binom_p_vs_0.5": 0.0
+    },
+    "V2": {
+      "commit_ratio_pooled": 0.70863946347161,
+      "commit_ratio_ci95": [
+        0.7047398364794092,
+        0.7123883802418899
+      ],
+      "commit_ratio_per_seed": [
+        0.6416438036308447,
+        0.7509394692721281,
+        0.7309424252171116
+      ],
+      "commit_ratio_seed_std": 0.04751569111136606,
+      "indist_cheese_acc_mean": 0.32562510172526044,
+      "n_goal_total": 37616,
+      "n_commit_total": 53082,
+      "neither_rate_per_seed": [
+        0.8559560746327641,
+        0.8570543122541403,
+        0.8449943495313434
+      ],
+      "binom_p_vs_0.5": 0.0
+    }
+  },
+  "frozen": {
+    "floor": 0.5,
+    "ceiling_commit_ratio": 0.9771646736781444,
+    "premise_pass": true,
+    "indist_reading_bar": 0.49733861287434894,
+    "indist_bar_pass": {
+      "B3": true,
+      "B4": true,
+      "V2": false
+    },
+    "P1_endpoint_target_commit_ratio": 0.7385823368390723,
+    "note": "gate(ii): g(rich,full) must reach >= P1_endpoint_target; gate(i): permutation p<0.01."
+  }
+}

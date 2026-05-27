@@ -60,7 +60,8 @@ class RolloutBuffer:
 
     def __init__(self, T: int, N: int,
                  obs_shape: tuple[int, ...] = (3, 64, 64),
-                 device: torch.device | str = "cpu"):
+                 device: torch.device | str = "cpu",
+                 inject_dim: int | None = None):
         self.T, self.N = T, N
         self.obs_shape = obs_shape
         self.device = torch.device(device)
@@ -71,6 +72,14 @@ class RolloutBuffer:
         self.value = torch.zeros((T, N), dtype=torch.float32, device=self.device)
         self.reward = torch.zeros((T, N), dtype=torch.float32, device=self.device)
         self.done = torch.zeros((T, N), dtype=torch.float32, device=self.device)
+        # Phase-6 R2: per-step feedback inject applied to the agent at step t.
+        # None (default) => no inject path; the PPO update calls agent(obs)
+        # exactly as before (byte-identical for R0/baselines). When set, step 0
+        # stays zeros (no feedback yet) which is also a no-op (h + 0 = h).
+        self.inject_dim = inject_dim
+        self.inject = (torch.zeros((T, N, inject_dim), dtype=torch.float32,
+                                   device=self.device)
+                       if inject_dim is not None else None)
         # Filled by compute_advantages_and_returns
         self.advantages: torch.Tensor | None = None
         self.returns: torch.Tensor | None = None
@@ -79,12 +88,16 @@ class RolloutBuffer:
                    obs: torch.Tensor,
                    action: torch.Tensor,
                    log_prob: torch.Tensor,
-                   value: torch.Tensor) -> None:
-        """Store pre-action quantities at step t."""
+                   value: torch.Tensor,
+                   inject: torch.Tensor | None = None) -> None:
+        """Store pre-action quantities at step t (``inject`` = the feedback
+        added to the agent at this step; ignored unless ``inject_dim`` was set)."""
         self.obs[t] = obs
         self.action[t] = action
         self.log_prob[t] = log_prob
         self.value[t] = value
+        if self.inject is not None and inject is not None:
+            self.inject[t] = inject
 
     def store_post(self, t: int,
                    reward: torch.Tensor,
@@ -120,7 +133,7 @@ class RolloutBuffer:
         if self.advantages is None or self.returns is None:
             raise RuntimeError("call compute_advantages_and_returns() first")
         T, N = self.T, self.N
-        return {
+        flat = {
             "obs":       self.obs.reshape(T * N, *self.obs_shape),
             "action":    self.action.reshape(T * N),
             "log_prob":  self.log_prob.reshape(T * N),
@@ -128,6 +141,9 @@ class RolloutBuffer:
             "advantage": self.advantages.reshape(T * N),
             "return":    self.returns.reshape(T * N),
         }
+        if self.inject is not None:
+            flat["inject"] = self.inject.reshape(T * N, self.inject_dim)
+        return flat
 
     def iter_minibatches(self, num_minibatches: int,
                          generator: torch.Generator | None = None
@@ -173,7 +189,10 @@ def ppo_loss(agent: ImpalaAgent,
       approx_kl  (scalar, detached)  — diagnostic
       clipfrac   (scalar, detached)  — fraction of ratios outside clip range
     """
-    out = agent(mb["obs"])
+    # Phase-6 R2: recompute the forward UNDER the same feedback inject used at
+    # rollout time, so the policy gradient reflects acting with the feedback.
+    # mb.get("inject") is None for R0/baselines => agent(obs) exactly as before.
+    out = agent(mb["obs"], inject=mb.get("inject"))
     dist = torch.distributions.Categorical(logits=out.logits)
     log_prob_new = dist.log_prob(mb["action"])
     entropy = dist.entropy().mean()

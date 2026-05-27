@@ -117,3 +117,56 @@ def test_value_head_zero_at_zero_input():
 
 def test_d_a_is_256():
     assert D_A == 256  # PLAN §3.4 박제
+
+
+# --- R2 feedback gate (PREREG §1: h' = h + λ·Wᵀ·ñ_lm) ----------------------
+
+def test_inject_none_is_default(agent):
+    """inject=None must reproduce the no-arg forward byte-for-byte (R0/R1)."""
+    obs = torch.rand(4, 3, 64, 64)
+    a = agent(obs)
+    b = agent(obs, inject=None)
+    assert torch.equal(a.logits, b.logits)
+    assert torch.equal(a.value, b.value)
+    assert torch.equal(a.h_agent, b.h_agent)
+
+
+def test_inject_zero_identical(agent):
+    """Zero injection leaves logits/value/h_agent unchanged (h' = h + 0)."""
+    obs = torch.rand(4, 3, 64, 64)
+    base = agent(obs)
+    z = agent(obs, inject=torch.zeros(4, D_A))
+    assert torch.allclose(z.logits, base.logits, atol=1e-6)
+    assert torch.allclose(z.value, base.value, atol=1e-6)
+    assert torch.equal(z.h_agent, base.h_agent)
+
+
+def test_inject_changes_action_not_h_agent(agent):
+    """Nonzero injection modulates logits/value (load-bearing) but h_agent
+    stays PRE-injection (clean-read for eval — PREREG fix #2)."""
+    obs = torch.rand(4, 3, 64, 64)
+    base = agent(obs)
+    inj = torch.randn(4, D_A)
+    out = agent(obs, inject=inj)
+    assert torch.equal(out.h_agent, base.h_agent)        # pre-injection, unchanged
+    assert not torch.allclose(out.logits, base.logits)   # action modulated
+    assert not torch.allclose(out.value, base.value)
+
+
+def test_inject_shape_mismatch_raises(agent):
+    obs = torch.rand(4, 3, 64, 64)
+    with pytest.raises(ValueError):
+        agent(obs, inject=torch.randn(4, D_A + 1))   # wrong feature dim
+    with pytest.raises(ValueError):
+        agent(obs, inject=torch.randn(3, D_A))        # wrong batch
+
+
+def test_inject_grad_flows_into_inject(agent):
+    """Grad must reach inject so the bridge can train via the feedback path;
+    the caller detaches it for the pure-RL PPO update ((C-thin) boundary)."""
+    obs = torch.rand(2, 3, 64, 64)
+    inj = torch.randn(2, D_A, requires_grad=True)
+    out = agent(obs, inject=inj)
+    out.logits.sum().backward()
+    assert inj.grad is not None
+    assert inj.grad.abs().max() > 0

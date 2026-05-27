@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SPLIT-MAZE — procgen RL agent + maze-language LM, coupled by an artificial corpus callosum</title>
+<style>
+  :root{--bg:#0f1115;--fg:#e6e6e6;--mut:#9aa4b2;--acc:#c08aff;--card:#171a21;--bd:#2a2f3a;--neg:#ff7a7a;--pos:#7ee08f;}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.65 -apple-system,Segoe UI,Roboto,"Noto Sans KR",sans-serif}
+  .wrap{max-width:880px;margin:0 auto;padding:24px 18px 80px}
+  header{position:sticky;top:0;background:rgba(15,17,21,.94);backdrop-filter:blur(6px);border-bottom:1px solid var(--bd);z-index:10}
+  .bar{max-width:880px;margin:0 auto;padding:10px 18px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .bar .sp{flex:1}
+  .seg{display:inline-flex;border:1px solid var(--bd);border-radius:8px;overflow:hidden}
+  .seg button{background:transparent;color:var(--mut);border:0;padding:6px 12px;font:inherit;font-size:13px;cursor:pointer}
+  .seg button.on{background:var(--acc);color:#0b0e14;font-weight:600}
+  h1{font-size:28px;margin:.2em 0 .1em}
+  .tag{color:var(--mut);font-style:italic;margin:0 0 8px}
+  h2{font-size:20px;margin:1.7em 0 .5em;border-bottom:1px solid var(--bd);padding-bottom:6px}
+  h2 .ph{font-size:13px;color:var(--mut);font-weight:400}
+  p{margin:.6em 0}
+  a{color:var(--acc)}
+  table{border-collapse:collapse;width:100%;margin:.6em 0;font-size:13.5px}
+  th,td{border:1px solid var(--bd);padding:6px 9px;text-align:left}
+  th{background:var(--card)}
+  td.n,th.n{text-align:right}
+  .neg{color:var(--neg)} .pos{color:var(--pos)}
+  code,pre{font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+  pre{background:#0b0e14;border:1px solid var(--bd);border-radius:8px;padding:12px;overflow:auto;font-size:13px;line-height:1.5}
+  .cap{color:var(--mut);font-size:13px;margin:.1em 0 1em}
+  .btn{display:inline-block;background:var(--card);border:1px solid var(--acc);border-radius:8px;padding:8px 14px;margin:.4em 0;color:var(--acc);text-decoration:none;font-size:14px}
+  .lineage{background:var(--card);border:1px solid var(--bd);border-radius:8px;padding:12px 14px;margin:1.4em 0;font-size:15px}
+  .lineage b{color:var(--acc)}
+  .mut{color:var(--mut)}
+  footer{margin-top:40px;border-top:1px solid var(--bd);padding-top:14px;color:var(--mut);font-size:14px}
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <span class="mut" style="font-weight:700;color:var(--fg)">SPLIT-MAZE</span>
+    <span class="sp"></span>
+    <span class="seg" id="langseg">
+      <button data-lang="ko">한국어</button><button data-lang="en">English</button>
+    </span>
+  </div>
+</header>
+
+<div class="wrap">
+  <h1 data-i18n="title"></h1>
+  <p class="tag" data-i18n="tagline"></p>
+
+  <section id="formal">
+    <h2 data-i18n="h_why"></h2>
+    <div data-i18n="whyHtml"></div>
+
+    <h2 data-i18n="h_setup"></h2>
+    <pre>SPLIT-MAZE
+├── procgen 미로 → IMPALA-CNN RL 에이전트  (결정자 / "우뇌", h_agent 256-d)
+│        │
+│        ▼   ── 인공 뇌량 (ACC): W로 agent ↔ LM 활성 매핑
+│        │
+├── 합성 미로언어 트랜스포머 LM  (해석자 / "좌뇌", d_model 256)
+│        ▼
+└── "에이전트가 어디로 가는가"를 미로언어로 발화
+        판별기 = 목표 오일반화: 학습 땐 치즈가 늘 우상단 → OOD에선
+        치즈를 두고도 우상단으로 감. 충실=우상단(실제 목표) / 합리화=실제 치즈.</pre>
+    <div data-i18n="setupHtml"></div>
+
+    <h2>Phase 4 <span class="ph" data-i18n="ph4"></span></h2>
+    <div data-i18n="p4Html"></div>
+    <table>
+      <tr><th>build</th><th class="n" data-i18n="t_perslot"></th><th class="n" data-i18n="t_swap"></th></tr>
+      <tr><td data-i18n="b_v2"></td><td class="n">0.375</td><td class="n">0.42</td></tr>
+      <tr><td data-i18n="b_b4"></td><td class="n">0.66</td><td class="n">0.83</td></tr>
+    </table>
+    <div class="cap" data-i18n="p4cap"></div>
+
+    <h2>Phase 5 <span class="ph" data-i18n="ph5"></span></h2>
+    <div data-i18n="p5Html"></div>
+    <table>
+      <tr><th data-i18n="t_step"></th><th class="n" data-i18n="t_swapeff"></th><th data-i18n="t_note"></th></tr>
+      <tr><td data-i18n="s_step1"></td><td class="n">0.445</td><td data-i18n="s_step1n"></td></tr>
+      <tr><td data-i18n="s_step2"></td><td class="n neg" data-i18n="s_neg"></td><td data-i18n="s_step2n"></td></tr>
+      <tr><td data-i18n="s_step3"></td><td class="n pos">→ ~0.80</td><td data-i18n="s_step3n"></td></tr>
+      <tr><td data-i18n="s_brain"></td><td class="n pos">+0.081</td><td data-i18n="s_brainn"></td></tr>
+    </table>
+
+    <h2>Phase 6 <span class="ph" data-i18n="ph6"></span></h2>
+    <div data-i18n="p6Html"></div>
+    <table>
+      <tr><th></th><th class="n">decisive-faithful</th><th class="n" data-i18n="t_indist"></th></tr>
+      <tr><td>matched-R0</td><td class="n">0.121</td><td class="n">0.247 ✗</td></tr>
+      <tr><td><b>R2</b></td><td class="n"><b>0.158</b></td><td class="n"><b>0.179 ✗</b></td></tr>
+      <tr><td>Δ (R2 − R0)</td><td class="n">+0.037</td><td class="n">p≈0</td></tr>
+    </table>
+    <div class="cap" data-i18n="p6cap"></div>
+
+    <h2 data-i18n="h_meaning"></h2>
+    <div data-i18n="meaningHtml"></div>
+
+    <p><a class="btn" href="RESULTS.html" data-i18n="resultsBtn"></a> · <a href="https://github.com/HalmoneySonmat/split-maze/blob/master/docs/PREREG_grounded_confab.md" data-i18n="preregLink"></a></p>
+
+    <h2 data-i18n="h_repro"></h2>
+    <pre>PYTHONPATH=src python scripts/train_agent.py ...        # IMPALA-CNN PPO (procgen maze)
+PYTHONPATH=src python scripts/train_lm.py ...           # maze-language LM
+PYTHONPATH=src python scripts/train_phase3.py ...       # ACC co-training (B3/B4/V2)
+PYTHONPATH=src python scripts/fit_ccm.py / eval_builds.py / swap_test.py
+bash scripts/run_pilot.sh ; bash scripts/run_train_r2.sh ; bash scripts/run_eval_r2.sh   # Phase 6
+pytest tests/ -q</pre>
+    <p class="mut">Python · PyTorch CUDA · procgenAISC · IMPALA-CNN + PPO · single 8 GB GPU (RTX 3070 Ti, WSL2).</p>
+  </section>
+
+  <div class="lineage">
+    <span data-i18n="lineageLabel"></span><br>
+    <a href="https://github.com/HalmoneySonmat/split-9">SPLIT-9</a> → <a href="https://github.com/HalmoneySonmat/split-mnist">SPLIT-MNIST</a> → <b>SPLIT-MAZE</b>
+  </div>
+
+  <footer>
+    <span data-i18n="closer"></span> ·
+    <a href="https://github.com/HalmoneySonmat/split-maze">GitHub</a>
+  </footer>
+</div>
+
+<script>
+const T = {
+ko:{
+  title:"SPLIT-MAZE", tagline:"procgen 미로 RL 에이전트와 from-scratch 미로언어 LM을 인공 뇌량으로 잇고, 목표 오일반화한 에이전트의 실제 내부 목표를 LM이 *합리화가 아니라 충실하게* 말하는지 검증한 프로젝트.",
+  h_why:"왜 만들었나",
+  whyHtml:`<p>분리뇌 환자의 좌뇌는 우뇌의 결정을 보지도 못한 채 그럴듯하게 지어낸다(Gazzaniga의 좌뇌 통역사). 현대 AI도 비언어 net 옆에 LLM을 붙여 설명하게 하는데, 그게 진짜 통역인지 작화인지는 대개 미검증이다.</p>
+  <p>라인업: <a href="https://github.com/HalmoneySonmat/split-9">SPLIT-9</a>(사후 어댑터 → <span class="neg">음성</span>) → <a href="https://github.com/HalmoneySonmat/split-mnist">SPLIT-MNIST</a>(공동학습+분리재구성 V2 → 동질 toy <span class="pos">양성</span>). 본 프로젝트는 그 V2 패턴을 <b>이질적인 진짜 환경 + 양쪽 다 from scratch</b>로 재검증한다. 판별기는 <b>목표 오일반화</b> — 충실(우상단=실제 목표) vs 합리화(실제 치즈)를 깨끗이 가른다.</p>`,
+  h_setup:"구성",
+  setupHtml:`<p>결정자(IMPALA-CNN RL)와 해석자(미로언어 트랜스포머 LM)를 ACC(W)로 잇고 둘 다 from scratch. 편향(목표 오일반화)은 오직 에이전트 안에만 살고, LM엔 세상 지식이 없어 prior로 지어낼 수 없다 — 충실/작화를 깨끗이 분리하는 셋업.</p>`,
+  ph4:"핵심 가설 V2 기각 (Scenario C)",
+  p4Html:`<p>핵심 가설(분리-재구성 V2 > next-token 어댑터 B4 충실도)은 <b class="neg">기각</b>됐다 — V2가 오히려 <i>덜</i> 충실. 단 통제 2×2로 confound를 해소하고 풍부한 음성 3개를 얻었다: ① 목표 오일반화가 <b>표상 수준</b>에서 읽힘(cheese_dir 충실도 in-dist 0.85 → OOD 0.07 붕괴), ② <b>"충실 ≠ 합리화" 재프레임</b> — 활성 스왑이 B4의 OOD "합리화"가 사실 <i>오일반화 에이전트를 충실히 읽은 것</i>임을 인과 증명, ③ ACC의 단일 요약-벡터 병목 &lt; 어댑터의 분산 cross-attn. (단일 RL seed의 descriptive 결과.)</p>`,
+  t_perslot:"per-slot 충실도", t_swap:"활성 스왑",
+  b_v2:"V2 (분리-재구성)", b_b4:"B4 (next-token 어댑터)",
+  p4cap:`V2가 per-slot·스왑 모두 B4보다 낮음. 하지만 B4의 높은 스왑은 "잘 읽는 reader"라서지 "충실"이 아니다(OOD에서 prior로 가장 많이 도망 — Phase 6에서 다시 등장).`,
+  ph5:"CCM — 다리가 자란다",
+  p5Html:`<p>V2 기각 뒤, 학습된 번역기도 얇은 재구성도 아닌 — 두 망이 같은 장면에서 *함께 켜진 노드의 대응을 기록(기억)*만 해 구동하는 <b>CCM(공동활성 기억 뇌량)</b>을 시험.</p>`,
+  t_step:"step", t_swapeff:"활성 스왑", t_note:"비고",
+  s_step1:"step1 기록만 (backprop 0)", s_step1n:"= B4의 52%. 비결 = 공통모드(평균) 제거",
+  s_step2:"step2 닫힌고리", s_neg:"음성", s_step2n:"세게=task 붕괴, 살살=정체",
+  s_step3:"step3 가소성+양방향", s_step3n:"학습 번역기 천장까지. 공동적응 순이득 +0.064±0.020 (5-seed, 5/5)",
+  s_brain:"교차-brain", s_brainn:"3/3 GENERALIZES (단 뇌-의존, 1개 붕괴 뇌선 사라짐)",
+  ph6:"양방향 R2 — 음성으로 종결",
+  p6Html:`<p>라이브 양방향 되먹임(V2 닫힌 루프)으로 해석자를 더 grounded하게 만들려 했다. 측정 = decisive-faithful(commit한 출력 중 에이전트 실제 목표 비율).</p>`,
+  t_indist:"in-dist (바 0.497)",
+  p6cap:`Δ +0.037이 사전등록 문턱 +0.05 미달, 게다가 R2의 in-dist 읽기가 더 낮아 앵무새 가드 실패. 되먹임은 에이전트를 목표-prior 쪽으로 *편향(오프로딩)*시켜 OOD 점수만 표면적으로 올릴 뿐 — 자립 표상은 덜 읽힌다. 사전등록 가드가 spurious 효과를 잡아낸 <b>깨끗한 음성</b>.`,
+  h_meaning:"이게 무슨 의미인가",
+  meaningHtml:`<p><b>아크 전체:</b> 사후 어댑터(SPLIT-9)는 천장에 막히고, 공동학습 분리-재구성 ACC는 동질 toy(SPLIT-MNIST)에선 통하지만, 이질적 미로 환경에선 — V2 가설은 기각(Phase 4), 기록 기반 다리는 두 뇌가 마중하면 자라고(Phase 5, +0.064 5-seed·3-뇌 일반화), 그러나 라이브 양방향 되먹임은 해석자를 더 grounded하게 만들지 못했다(Phase 6, 음성).</p><p>특히 Phase 6은 방법론의 승리다 — 큰 표본의 유의성(p≈0)에 속지 않게 박은 효과크기 문턱 + 앵무새 가드가 spurious 양성을 정확히 걸러냈다. 부수 발견: 양방향 결합은 결정자를 더 *목표 중심·덜 지각 충실*로(오프로딩) 만든다.</p>`,
+  resultsBtn:"전체 결과·그래프 (RESULTS.html) →", preregLink:"Phase 6 사전등록 (PREREG §0.8)",
+  h_repro:"재현 / 스택",
+  lineageLabel:"연구 라인업 — SPLIT-9의 음성 → SPLIT-MNIST의 양성 → 이질 환경에서의 재검증(본 프로젝트):",
+  closer:"이 프로젝트를 만드는 데 Claude를 사용했다."
+},
+en:{
+  title:"SPLIT-MAZE", tagline:"A procgen-maze RL agent and a from-scratch maze-language LM, coupled by an artificial corpus callosum — testing whether the LM reports a goal-misgeneralized agent's true internal goal *faithfully, not by rationalizing*.",
+  h_why:"Why this exists",
+  whyHtml:`<p>A split-brain patient's left hemisphere confabulates plausible reasons for decisions it never saw (Gazzaniga's interpreter). Modern AI bolts an LLM onto a non-language net to narrate it — whether that's real translation or confabulation is mostly untested.</p>
+  <p>Lineage: <a href="https://github.com/HalmoneySonmat/split-9">SPLIT-9</a> (post-hoc adapter → <span class="neg">negative</span>) → <a href="https://github.com/HalmoneySonmat/split-mnist">SPLIT-MNIST</a> (co-trained reconstruction ACC, V2 → homogeneous toy <span class="pos">positive</span>). This project re-tests that V2 pattern in a <b>heterogeneous real environment, both sides from scratch</b>. The discriminator is <b>goal misgeneralization</b> — cleanly separating faithful (top-right = the real goal) from rationalization (the real cheese).</p>`,
+  h_setup:"Setup",
+  setupHtml:`<p>The decider (IMPALA-CNN RL) and interpreter (maze-language transformer LM) are coupled by an ACC (W), both from scratch. The bias (goal misgeneralization) lives only inside the agent; the LM has no world knowledge, so it cannot fabricate from a prior — a clean separation of faithful vs confabulated.</p>`,
+  ph4:"core hypothesis V2 rejected (Scenario C)",
+  p4Html:`<p>The core hypothesis (separation-reconstruction V2 &gt; next-token adapter B4 in faithfulness) was <b class="neg">rejected</b> — V2 is in fact <i>less</i> faithful. But a controlled 2×2 resolved the confound and yielded three rich negatives: ① goal misgeneralization is readable at the <b>representation level</b> (cheese_dir faithfulness in-dist 0.85 → OOD 0.07 collapse), ② a <b>"faithful ≠ rationalization" reframe</b> — activation swapping proves B4's OOD "rationalization" is actually <i>faithfully reading the misgeneralized agent</i>, ③ the ACC's single-summary-vector bottleneck &lt; the adapter's distributed cross-attention. (A single-RL-seed descriptive result.)</p>`,
+  t_perslot:"per-slot faithfulness", t_swap:"active swap",
+  b_v2:"V2 (sep.-reconstruction)", b_b4:"B4 (next-token adapter)",
+  p4cap:`V2 trails B4 on both. But B4's high swap means "strong reader," not "faithful" (it rationalizes most under OOD — this returns in Phase 6).`,
+  ph5:"CCM — the bridge grows",
+  p5Html:`<p>After rejecting V2, we tried <b>CCM (Co-activation Callosal Memory)</b> — neither a trained translator nor a thin reconstruction, but a bridge that merely *records (remembers) which nodes co-fire* when both nets see the same scene.</p>`,
+  t_step:"step", t_swapeff:"active swap", t_note:"note",
+  s_step1:"step1 record-only (zero backprop)", s_step1n:"= 52% of B4. Key = common-mode (mean) removal",
+  s_step2:"step2 closed loop", s_neg:"negative", s_step2n:"push hard = task collapse, gently = stalls",
+  s_step3:"step3 plastic + bidirectional", s_step3n:"to the trained-translator ceiling. pure co-adaptation gain +0.064±0.020 (5-seed, 5/5)",
+  s_brain:"cross-brain", s_brainn:"3/3 GENERALIZES (but brain-dependent; vanishes in 1 collapsed brain)",
+  ph6:"bidirectional R2 — closed as a negative",
+  p6Html:`<p>We tried to make the interpreter *more grounded* via live bidirectional feedback (V2 closed loop). Metric = decisive-faithful (of committed outputs, the fraction matching the agent's true goal).</p>`,
+  t_indist:"in-dist (bar 0.497)",
+  p6cap:`Δ +0.037 falls below the pre-registered threshold +0.05, and R2's in-dist reading is *lower*, failing the parrot guard. The feedback only *biases (offloads)* the agent toward the goal-prior — superficially raising the OOD score while the autonomous representation gets less legible. A <b>clean negative</b> the pre-registered guards caught.`,
+  h_meaning:"What this means",
+  meaningHtml:`<p><b>The whole arc:</b> the post-hoc adapter (SPLIT-9) hits a ceiling; a co-trained reconstruction ACC works in a homogeneous toy (SPLIT-MNIST); but in the heterogeneous maze — the V2 hypothesis is rejected (Phase 4), the record-based bridge grows when both brains meet halfway (Phase 5, +0.064 over 5 seeds, generalizing across 3 brains), yet live bidirectional feedback fails to make the interpreter more grounded (Phase 6, negative).</p><p>Phase 6 is a methodological win — an effect-size threshold + a parrot guard, placed so we wouldn't be fooled by large-sample significance (p≈0), correctly filtered out a spurious positive. Side finding: bidirectional coupling makes the decider more *goal-centric, less perception-faithful* (offloading).</p>`,
+  resultsBtn:"Full results & charts (RESULTS.html) →", preregLink:"Phase 6 pre-registration (PREREG §0.8)",
+  h_repro:"Reproduce / stack",
+  lineageLabel:"Research lineage — SPLIT-9's negative → SPLIT-MNIST's positive → re-test in a heterogeneous environment (this project):",
+  closer:"Claude was used to build this project."
+}
+};
+function apply(lang){
+  if(lang!=="ko"&&lang!=="en") lang="ko";
+  const d=T[lang]; document.documentElement.lang=lang;
+  document.querySelectorAll("[data-i18n]").forEach(el=>{
+    const k=el.getAttribute("data-i18n"); if(d[k]!==undefined) el.innerHTML=d[k];
+  });
+  document.querySelectorAll("#langseg button").forEach(b=>b.classList.toggle("on",b.dataset.lang===lang));
+  localStorage.setItem("splitmaze_lang",lang);
+}
+document.querySelectorAll("#langseg button").forEach(b=>b.onclick=()=>apply(b.dataset.lang));
+apply(localStorage.getItem("splitmaze_lang")||"ko");
+</script>
+</body>
+</html>

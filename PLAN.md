@@ -1951,6 +1951,45 @@ A→B 따라가나(swap-following). V2가 따라가면 비합리화=인과추적
 
 ---
 
+### 10.6 Pre-Phase-6 박제 — Grounded Confabulation under Live Shared Cognition (2026-05-25)
+
+> 권위 있는 동결 스펙: **`docs/PREREG_grounded_confab.md`**. 여기는 인덱스/요약. maze 재조준 — "한 AI(통역)가 다른 AI(에이전트)의 *행동/이유*를 가장 근거 있게 설명"을 측정. 충실/작화 이분법 아니라 **근거성을 연속량**으로.
+>
+> **방식 동결 (수치는 파일럿 후):** 임계값 = 2단계 게이트(permutation p<0.01 **AND** headroom ≥50%) · 되먹임 = 고정게이트 hidden 주입 `h'=h+λWᵀñ_lm` (λ 고정, λ=0이면 R0/R1 byte-호환) · primary λ=0.3 · compute = brain-1 전체격자 / brain-2·3 primary만.
+
+| # | 항목 | 결정 (박제) | 이유 |
+|---|---|---|---|
+| **P6-A** | 충실 notion | **goal-faithfulness** (에이전트 실제 목표=우상단 보고 = faithful) | 본 연구 = "행동 설명". 기존 `eval_builds.py`의 "rationalize"(우상단) 열이 *실은* goal-faithful 신호 — 프로젝트 종전 결론 반전·재해석. |
+| **P6-B** | primary metric | **OOD commit-ratio** = agent-goal/(agent-goal+real-cheese) (>0.5 충실/<0.5 작화/0.5 무작위) + 기권율 병기 + **in-dist 읽기 전제조건** | swap-following이 작화꾼(B4: swap 0.83·작화 0.50)을 보상함이 선행 데이터로 드러남 → 검증된 판별자로 교체. OOD 목표가 상수라 "앵무새"를 in-dist 전제로 배제. |
+| **P6-C** | 체제 | **R0**(사후) ≈ **R1**(온라인 단방향, 통제) vs **R2**(온라인 양방향, load-bearing) | R1은 사다리 칸 아닌 통제 — R2 효과가 "온라인이라서"가 아니라 "되먹임"임을 분리. |
+| **P6-D** | R2 구현 | **재훈련 R2 + 훈련량-매칭 R0** = primary, 추론-only R2 = 하한 | 되먹임이 *유일한* 차이가 되도록 매칭 통제(A1-long/W-budget 연장). |
+| **P6-E** | 용량 주축 | **인터페이스 thin↔rich** (rank/통계/λ는 보조) | goal-faith 큰 점프가 rank 아닌 thin(V2 0.76)↔rich(B4 0.98) 축에 삶 — "잘못된 손잡이" 회피. |
+
+**예측 (사전등록, §3):** P1 dose-response(용량↑→g↑, Spearman+엔드포인트 게이트) · P2 되먹임(재훈련 R2 > 매칭 R0) · P3 load-bearing(λ→0이면 행동분포 변화) · P4 순환(report-creates-cause, Δ_report·Δ_cause 유계 보고, pass/fail 아님). floor=0.5, ceiling=oracle probe(B3) commit-ratio.
+
+**리뷰 이력:** 9건 방법론 리뷰 + metric 전면 개정(swap-following→commit-ratio, 파일럿 데이터가 초안 metric 반박) + 2차 리뷰(앵무새 구멍 → in-dist 전제 보강) + 선택 4건(A·B·D·E) 확정.
+
+**파일럿 결과 (2026-05-25, `results/pilot_grounding.json`, seeds 0/1/2):**
+- **(0a) 전제 PASS** — B3 commit-ratio 0.977 CI[0.976,0.978] ≫ 0.5 → h가 OOD 목표를 인코딩.
+- **(0b/0c)** commit-ratio: floor 0.5 / ceiling 0.977(B3) / **rich B4 0.977 ≈ 천장(포화)** / thin V2 in-dist 바(0.497) 탈락(0.326). 기권율 최선(B4)도 ≈49%.
+- **함의 → 이중 지표 확정**: commit-ratio는 rich에서 포화라 P2 자동 null. 진짜 여지는 **기권**. 따라서 **P1 = commit-ratio(충실성, 파일럿이 사실상 확인) / P2 = decisive-faithful = goal/eligible(단호+충실, 여지 큼: B4 0.50·B3 0.41·V2 0.10)**. P2 게이트 = permutation p<0.01 AND 절대 ≥+0.05(step3 +0.064 앵커). 상세 PREREG §0.5–0.6, §3.
+
+**R0 베이스라인 + echo (2026-05-25, `results/regimes_baseline.json`, `scripts/eval_regimes.py`):**
+- R0 decisive-faithful: B4 0.507 / B3 0.421 / **V2 0.103**(기권 0.861). 파일럿 일치 → 평가기 검증.
+- echo-ratio −0.057±0.670 (≈0, 메아리 아님) → 되먹임이 LM 해석 실어 나름 → R2 fail-fast 통과.
+- **★ R2 구조 확정 = V2 양방향 닫힌 루프**(rich 교정): 되먹임 lm→agent는 양방향 다리 필요 → ACC/V2(W·,Wᵀ·)뿐, B4 rich는 단방향. P2 baseline = V2 matched-R0 ≈ 0.103(여지 최대). 추가 조건: R2의 V2가 in-dist 바 0.497 넘어야 유효(앵무새 guard). 상세 PREREG §0.7.
+
+**구현 진행:** hidden 게이트 주입구(`agent.forward(inject=)`, 테스트 5) ✅ · 되먹임 원자(`feedback.compute_inject`/`echo_ratio`, `lm.summarize_vector`, 테스트 6) ✅ · 라이브 루프(`collect_rollout_with_pairs(feedback_fn=)`, 테스트 3) ✅ · decisive 지표(`decisive.score`, 테스트 6) ✅ · R0 베이스라인 러너 ✅.
+**구현 완료:** R2 학습(`train_r2`, 테스트 3) ✅ · PPO inject 통과(`RolloutBuffer.inject_dim`/`ppo_loss`) ✅ · 공유셋 P2 평가(`eval_r2.py` + `paired_permutation_pvalue`) ✅.
+
+**★ P2 최종 결과 — 동결 음성 (2026-05-25, `results/r2_p2.json`):** R2(V2 닫힌 루프, λ=0.3, 300upd) vs matched-R0(300upd), 공유 OOD셋 eligible 179,663.
+- decisive-faithful: R2 **0.158** vs matched-R0 **0.121** (Δ **+0.037**, perm p≈0). in-dist: R2 **0.179** / R0 0.247 (둘 다 바 0.497 미달, **R2가 더 낮음**).
+- **판정: P2 미충족** — (i) Δ+0.037 < 문턱 +0.05, (ii) 앵무새 가드 실패(R2 in-dist 더 낮음).
+- **결론(falsify 발동)**: 라이브 양방향 되먹임은 통역사를 더 grounded하게 못 만든다 — 에이전트를 **목표-prior 쪽으로 편향(오프로딩)**시켜 OOD 점수만 표면적으로 올리고 in-dist 지각 읽기는 떨어뜨림. **깨끗한 음성.** 부수발견: 양방향 결합 = 결정자를 더 목표중심·덜 지각충실로 이동. 병목 = V2 약한 reader(예견됨). 골대 불변. 상세 PREREG §0.8.
+- **종결.** 후속(별개·탐색적): 더 강한 양방향 reader(옵션 C)로 가드 넘긴 뒤 재검 — 본 P2는 음성으로 마감.
+
+---
+
 ## 11. 다음 행동 — Phase 0 진입
 
 v1.0 = 설계 완결. 9개 핵심 결정이 모두 박제됨 (정밀화 로그 / 아래 요약).

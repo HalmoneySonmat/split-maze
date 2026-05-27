@@ -286,6 +286,26 @@ class MazeLM(nn.Module):
         _, h_lm = self.forward(ids)
         return h_lm
 
+    def summarize_vector(self, h_in: torch.Tensor) -> torch.Tensor:
+        """The LM's immediate read of a *bridged vector* injected at position 0.
+
+        Phase-6 R2 feedback (PREREG §1, lm→agent). ``h_in`` is a vector in
+        LM space — e.g. ``ĥ_lm = W·LN(h_agent)`` produced by the ACC — fed at
+        position 0 exactly as :meth:`generate`/:meth:`decode_logits` inject
+        ``h_lm``. We run the transformer over that length-1 sequence and take
+        ``interface_proj`` of the final hidden — the same handle-B summary
+        formula as :meth:`forward`, but conditioned on the bridged vector
+        rather than token embeddings. This is the LM's *interpretation* of what
+        it read (differentiable), as opposed to a bare bridge round-trip.
+
+        Args:
+            h_in: (B, d_model).
+        Returns:
+            (B, d_model) summary vector h_lm.
+        """
+        x = self._transform(h_in.unsqueeze(1))   # (B, 1, d_model)
+        return self.interface_proj(x[:, -1])
+
     # ---- decode -----------------------------------------------------
 
     def decode_logits(self, h_lm: torch.Tensor,
